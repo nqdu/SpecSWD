@@ -51,9 +51,9 @@
 <li class="toctree-l2 current"><a class="reference internal" href="modules.html">specd</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">specd package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#specd-thsolver-module">specd.THSolver module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#specd-specd-module">specd.specd module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-contents">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-specd.THSolver">specd.THSolver module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-specd.specd">specd.specd module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-specd">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -93,14 +93,96 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
-<section id="specd-thsolver-module">
-<h2>specd.THSolver module<a class="headerlink" href="#specd-thsolver-module" title="Link to this heading"></a></h2>
+<section id="module-specd.THSolver">
+<span id="specd-thsolver-module"></span><h2>specd.THSolver module<a class="headerlink" href="#module-specd.THSolver" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="specd.THSolver.THSolver">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">specd.THSolver.</span></span><span class="sig-name descname"><span class="pre">THSolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thick</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spherical</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/specd/THSolver.html#THSolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.THSolver.THSolver" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.THSolver.THSolver.compute_swd">
+<span class="sig-name descname"><span class="pre">compute_swd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavetype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/specd/THSolver.html#THSolver.compute_swd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.THSolver.THSolver.compute_swd" title="Link to this definition"></a></dt>
+<dd><p>compute dispersion (phase/group) for a give wavetype</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wavetype</strong> (<em>str</em>) – wave type, one of [‘Rc’,’Rg’,’Lc’,’Lg’]</p></li>
+<li><p><strong>mode</strong> (<em>int</em>) – which mode it will return, &gt;=0</p></li>
+<li><p><strong>T</strong> (<em>np.ndarray</em>) – period, in s</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>cg</strong> – phase velocity (for Rc,Lc) or group velocity (Rg,Lg)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="specd-specd-module">
-<h2>specd.specd module<a class="headerlink" href="#specd-specd-module" title="Link to this heading"></a></h2>
+<section id="module-specd.specd">
+<span id="specd-specd-module"></span><h2>specd.specd module<a class="headerlink" href="#module-specd.specd" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="specd.specd.SpecWorkSpace">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">specd.specd.</span></span><span class="sig-name descname"><span class="pre">SpecWorkSpace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavetype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vpv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vsh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vsv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qa</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ql</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c21</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nQani</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qani</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/specd/specd.html#SpecWorkSpace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.specd.SpecWorkSpace" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.specd.SpecWorkSpace.compute_egn">
+<span class="sig-name descname"><span class="pre">compute_egn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_qz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/specd/specd.html#SpecWorkSpace.compute_egn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.specd.SpecWorkSpace.compute_egn" title="Link to this definition"></a></dt>
+<dd><p>compute eigenvalues/eigenvectors</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>freq</strong> (<em>float</em>) – current frequency</p></li>
+<li><p><strong>max_order</strong> (<em>int</em>) – no. of orders returns</p></li>
+<li><p><strong>use_qz</strong> (<em>bool</em>) – if False, only compute eigenvalues (phase velocities)
+if True, phase velocities and eigenfunctions will be computed</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>c</strong> – phase velocities</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.specd.SpecWorkSpace.group_velocity">
+<span class="sig-name descname"><span class="pre">group_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/specd/specd.html#SpecWorkSpace.group_velocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.specd.SpecWorkSpace.group_velocity" title="Link to this definition"></a></dt>
+<dd><p>compute group velocites</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>max_order</strong> (<em>int</em>) – no. of orders returns</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>u</strong> – group velocities at current frequency</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>before calling this routine, use_qz should be True in self.compute_egn</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.specd.SpecWorkSpace.print_info">
+<span class="sig-name descname"><span class="pre">print_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/specd/specd.html#SpecWorkSpace.print_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.specd.SpecWorkSpace.print_info" title="Link to this definition"></a></dt>
+<dd><p>print required information</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="module-specd">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-specd" title="Link to this heading"></a></h2>
 </section>
 </section>
 
