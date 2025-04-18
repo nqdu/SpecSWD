@@ -1,0 +1,392 @@
+\doxysection{specswd\+::Mesh Struct Reference}
+\hypertarget{structspecswd_1_1_mesh}{}\label{structspecswd_1_1_mesh}\index{specswd::Mesh@{specswd::Mesh}}
+
+
+SEM mesh class.  
+
+
+
+
+{\ttfamily \#include $<$mesh.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{structspecswd_1_1_mesh_a6f7a9659aa684ed3deec61a052d99210}{read\+\_\+model}} (const char \texorpdfstring{$\ast$}{*}filename)
+\begin{DoxyCompactList}\small\item\em read 1D model \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structspecswd_1_1_mesh_aab9af1030741cbde219c597a01f0d928}{create\+\_\+database}} (float freq, float phi)
+\begin{DoxyCompactList}\small\item\em Create SEM database by using input model info. \end{DoxyCompactList}\item 
+\Hypertarget{structspecswd_1_1_mesh_a54b590b49e2487da305fa14afec5d509}\label{structspecswd_1_1_mesh_a54b590b49e2487da305fa14afec5d509} 
+void {\bfseries print\+\_\+model} () const
+\begin{DoxyCompactList}\small\item\em print 1-\/D model information \end{DoxyCompactList}\item 
+\Hypertarget{structspecswd_1_1_mesh_a91abe0b8e56a77afe754aebc1ca0c330}\label{structspecswd_1_1_mesh_a91abe0b8e56a77afe754aebc1ca0c330} 
+void {\bfseries print\+\_\+database} () const
+\item 
+\Hypertarget{structspecswd_1_1_mesh_aca5b60f599164a5af27ab1a90bff6010}\label{structspecswd_1_1_mesh_aca5b60f599164a5af27ab1a90bff6010} 
+void {\bfseries allocate\+\_\+1\+D\+\_\+model} (int nz0, int swd\+\_\+type, int has\+\_\+att)
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a92b766cce9236fbffb8be0fe08db961f}\label{structspecswd_1_1_mesh_a92b766cce9236fbffb8be0fe08db961f} 
+void {\bfseries create\+\_\+model\+\_\+attributes} ()
+\begin{DoxyCompactList}\small\item\em create attributes for elastic/acoustic regions \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structspecswd_1_1_mesh_aa76f6c4eae327a427804cc0dbaee65a6}{interp\+\_\+model}} (const float \texorpdfstring{$\ast$}{*}param, const std\+::vector$<$ int $>$ \&elmnts, std\+::vector$<$ float $>$ \&md) const
+\begin{DoxyCompactList}\small\item\em interpolate elastic/acoustic model by using coordinates \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structspecswd_1_1_mesh_a6b644e2e2b248f8fb96d16cf50fb9199}{project\+\_\+kl}} (const float \texorpdfstring{$\ast$}{*}frekl, float \texorpdfstring{$\ast$}{*}kl\+\_\+out) const
+\begin{DoxyCompactList}\small\item\em project kernels to original 1-\/D model \end{DoxyCompactList}\item 
+\Hypertarget{structspecswd_1_1_mesh_afef3910ccfed50a0815844872150d9e2}\label{structspecswd_1_1_mesh_afef3910ccfed50a0815844872150d9e2} 
+void {\bfseries create\+\_\+material\+\_\+info\+\_\+} ()
+\item 
+void \mbox{\hyperlink{structspecswd_1_1_mesh_aa98f47ba93310099040171d8ae5ada75}{read\+\_\+model\+\_\+header\+\_\+}} (const char \texorpdfstring{$\ast$}{*}filename)
+\begin{DoxyCompactList}\small\item\em read header of 1D model, including wave type, attenutation flag, attenuation model flag \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structspecswd_1_1_mesh_ad1f5ab06320e557580ee584cb7cdf096}{read\+\_\+model\+\_\+love\+\_\+}} (const char \texorpdfstring{$\ast$}{*}filename)
+\begin{DoxyCompactList}\small\item\em read 1D VTI model for Love wave \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structspecswd_1_1_mesh_a63cd34c44c032adf74f9070db2fb65dc}{read\+\_\+model\+\_\+rayl\+\_\+}} (const char \texorpdfstring{$\ast$}{*}filename)
+\begin{DoxyCompactList}\small\item\em read 1D VTI model for Rayleigh wave \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structspecswd_1_1_mesh_af0e109cbef2e0c7621081ff42f2b77bd}{read\+\_\+model\+\_\+full\+\_\+aniso\+\_\+}} (const char \texorpdfstring{$\ast$}{*}filename)
+\begin{DoxyCompactList}\small\item\em read 1D full anisotropy model model for Rayleigh wave \end{DoxyCompactList}\item 
+\Hypertarget{structspecswd_1_1_mesh_ab92fb42dc4391b3812b9f8056125f1ec}\label{structspecswd_1_1_mesh_ab92fb42dc4391b3812b9f8056125f1ec} 
+void {\bfseries compute\+\_\+minmax\+\_\+veloc\+\_\+} (float phi, std\+::vector$<$ float $>$ \&vmin, std\+::vector$<$ float $>$ \&vmax)
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a4f9fec4bff8d0b96c8a61b24621d1ccf}\label{structspecswd_1_1_mesh_a4f9fec4bff8d0b96c8a61b24621d1ccf} 
+void {\bfseries create\+\_\+db\+\_\+love\+\_\+} ()
+\begin{DoxyCompactList}\small\item\em create database for Love wave \end{DoxyCompactList}\item 
+\Hypertarget{structspecswd_1_1_mesh_adb07ca1f9594c4760df7de82c688100e}\label{structspecswd_1_1_mesh_adb07ca1f9594c4760df7de82c688100e} 
+void {\bfseries create\+\_\+db\+\_\+rayl\+\_\+} ()
+\begin{DoxyCompactList}\small\item\em create database for Love wave \end{DoxyCompactList}\item 
+\Hypertarget{structspecswd_1_1_mesh_ab7fa937fd34b2199c77777234007c408}\label{structspecswd_1_1_mesh_ab7fa937fd34b2199c77777234007c408} 
+void {\bfseries create\+\_\+db\+\_\+aniso\+\_\+} ()
+\begin{DoxyCompactList}\small\item\em create database for Love wave \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_aa9dce71c6b76d5b110a355bd6de53941}\label{structspecswd_1_1_mesh_aa9dce71c6b76d5b110a355bd6de53941} 
+int {\bfseries nspec}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_af3fa1897e6fcf72a6a632aa85983e1be}\label{structspecswd_1_1_mesh_af3fa1897e6fcf72a6a632aa85983e1be} 
+int {\bfseries nspec\+\_\+grl}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_ab5aff842625d193e6eea1a3bc2398b6f}\label{structspecswd_1_1_mesh_ab5aff842625d193e6eea1a3bc2398b6f} 
+int {\bfseries nglob}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a8af7064409f51e6ddc62c7115dcd676e}\label{structspecswd_1_1_mesh_a8af7064409f51e6ddc62c7115dcd676e} 
+std\+::vector$<$ int $>$ {\bfseries ibool}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_abb7234abe717603b79ad8e43a2b9be76}\label{structspecswd_1_1_mesh_abb7234abe717603b79ad8e43a2b9be76} 
+std\+::vector$<$ float $>$ {\bfseries skel}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a576e0f2f722bb99d834abaf34a899089}\label{structspecswd_1_1_mesh_a576e0f2f722bb99d834abaf34a899089} 
+std\+::vector$<$ float $>$ {\bfseries znodes}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a3b8a58087f6129f13eb221d9fb8a4cce}\label{structspecswd_1_1_mesh_a3b8a58087f6129f13eb221d9fb8a4cce} 
+std\+::vector$<$ float $>$ {\bfseries jaco}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a15ea14d6a2030d7a0b3bd85c434c68c4}\label{structspecswd_1_1_mesh_a15ea14d6a2030d7a0b3bd85c434c68c4} 
+std\+::vector$<$ float $>$ {\bfseries zstore}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a98cf532603963f901c2149115757e347}\label{structspecswd_1_1_mesh_a98cf532603963f901c2149115757e347} 
+int {\bfseries nspec\+\_\+ac}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a20b81da408f5dd7ed8acd56260af1508}\label{structspecswd_1_1_mesh_a20b81da408f5dd7ed8acd56260af1508} 
+int {\bfseries nspec\+\_\+el}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a631d9481ec539974a56d78b4f49bc492}\label{structspecswd_1_1_mesh_a631d9481ec539974a56d78b4f49bc492} 
+int {\bfseries nspec\+\_\+ac\+\_\+grl}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a777725557f4b6ec54976cad0bffb18ed}\label{structspecswd_1_1_mesh_a777725557f4b6ec54976cad0bffb18ed} 
+int {\bfseries nspec\+\_\+el\+\_\+grl}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a20259e3c9f8cb086b6f17012005ebff2}\label{structspecswd_1_1_mesh_a20259e3c9f8cb086b6f17012005ebff2} 
+std\+::vector$<$ char $>$ {\bfseries is\+\_\+elastic}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a29d8c89c5643ae606e692b11045ce086}\label{structspecswd_1_1_mesh_a29d8c89c5643ae606e692b11045ce086} 
+std\+::vector$<$ char $>$ {\bfseries is\+\_\+acoustic}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_ac91af3344debd5da5e9a0871309ccc1e}\label{structspecswd_1_1_mesh_ac91af3344debd5da5e9a0871309ccc1e} 
+std\+::vector$<$ int $>$ {\bfseries el\+\_\+elmnts}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_ae5829f6c5ab9c784ae97664ac930deaa}\label{structspecswd_1_1_mesh_ae5829f6c5ab9c784ae97664ac930deaa} 
+std\+::vector$<$ int $>$ {\bfseries ac\+\_\+elmnts}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a49e78d68b7c27bb8a676bba2f6aae134}\label{structspecswd_1_1_mesh_a49e78d68b7c27bb8a676bba2f6aae134} 
+int {\bfseries nglob\+\_\+ac}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a2bc632fbce2b06bbc0874d2358b4ad8e}\label{structspecswd_1_1_mesh_a2bc632fbce2b06bbc0874d2358b4ad8e} 
+int {\bfseries nglob\+\_\+el}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a74d8f51a52a2c9acc60c14cfbef934f1}\label{structspecswd_1_1_mesh_a74d8f51a52a2c9acc60c14cfbef934f1} 
+std\+::vector$<$ int $>$ {\bfseries ibool\+\_\+el}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_ae2957b7c28efb26298caf7aaa2318d02}\label{structspecswd_1_1_mesh_ae2957b7c28efb26298caf7aaa2318d02} 
+std\+::vector$<$ int $>$ {\bfseries ibool\+\_\+ac}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_ad4d305abc513fbaf6b260fff6b1d759e}\label{structspecswd_1_1_mesh_ad4d305abc513fbaf6b260fff6b1d759e} 
+std\+::vector$<$ float $>$ {\bfseries xrho\+\_\+ac}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_add3942f1f37c5e172b60cff9c72cddaf}\label{structspecswd_1_1_mesh_add3942f1f37c5e172b60cff9c72cddaf} 
+std\+::vector$<$ float $>$ {\bfseries xrho\+\_\+el}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_ad5a5a7996b0047781ce8c27758e8024b}\label{structspecswd_1_1_mesh_ad5a5a7996b0047781ce8c27758e8024b} 
+bool {\bfseries HAS\+\_\+\+ATT}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a94575d812154c722c85fd3ad37b1d9d7}\label{structspecswd_1_1_mesh_a94575d812154c722c85fd3ad37b1d9d7} 
+int {\bfseries SWD\+\_\+\+TYPE}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_ad09c52550d6558b257571954fcb841f5}\label{structspecswd_1_1_mesh_ad09c52550d6558b257571954fcb841f5} 
+std\+::vector$<$ float $>$ {\bfseries xA}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_ab4e2c098a89010cfd56b7a326439905c}\label{structspecswd_1_1_mesh_ab4e2c098a89010cfd56b7a326439905c} 
+std\+::vector$<$ float $>$ {\bfseries xC}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_ae171cf66099827308147c66473e2ee7f}\label{structspecswd_1_1_mesh_ae171cf66099827308147c66473e2ee7f} 
+std\+::vector$<$ float $>$ {\bfseries xL}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a08e6c9832003f4769714ea78f23dc685}\label{structspecswd_1_1_mesh_a08e6c9832003f4769714ea78f23dc685} 
+std\+::vector$<$ float $>$ {\bfseries xeta}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a2d0f1caca08447ef7e4be29dd900813c}\label{structspecswd_1_1_mesh_a2d0f1caca08447ef7e4be29dd900813c} 
+std\+::vector$<$ float $>$ {\bfseries xN}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a1592f93007715c692263783efa4d992a}\label{structspecswd_1_1_mesh_a1592f93007715c692263783efa4d992a} 
+std\+::vector$<$ float $>$ {\bfseries x\+QA}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a7ef883b28fd9c8f60ca97d1662f16baf}\label{structspecswd_1_1_mesh_a7ef883b28fd9c8f60ca97d1662f16baf} 
+std\+::vector$<$ float $>$ {\bfseries x\+QC}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a8152acd170e004e9a4f3236ae3666e67}\label{structspecswd_1_1_mesh_a8152acd170e004e9a4f3236ae3666e67} 
+std\+::vector$<$ float $>$ {\bfseries x\+QL}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a99ff66b93a4d8ad57c2eae6d46f5e8c6}\label{structspecswd_1_1_mesh_a99ff66b93a4d8ad57c2eae6d46f5e8c6} 
+std\+::vector$<$ float $>$ {\bfseries x\+QN}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_ac4d331cb4b33b16c057e6f8849f88d52}\label{structspecswd_1_1_mesh_ac4d331cb4b33b16c057e6f8849f88d52} 
+int {\bfseries n\+Qmodel\+\_\+ani}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a7caba40cc00d5f056c3e05aff369cd3f}\label{structspecswd_1_1_mesh_a7caba40cc00d5f056c3e05aff369cd3f} 
+std\+::vector$<$ float $>$ {\bfseries x\+C21}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a6d610f7daa43c789df12ca62876f90e5}\label{structspecswd_1_1_mesh_a6d610f7daa43c789df12ca62876f90e5} 
+std\+::vector$<$ float $>$ {\bfseries x\+Qani}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_aeeebd29a873e0126785536c2ea58eae8}\label{structspecswd_1_1_mesh_aeeebd29a873e0126785536c2ea58eae8} 
+std\+::vector$<$ float $>$ {\bfseries xkappa\+\_\+ac}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a8c63d06cddfe5a3b07d5b8bbd69bd1c3}\label{structspecswd_1_1_mesh_a8c63d06cddfe5a3b07d5b8bbd69bd1c3} 
+std\+::vector$<$ float $>$ {\bfseries x\+Qk\+\_\+ac}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a7a34c6742a33f5d6003ed4b16bc5bfa8}\label{structspecswd_1_1_mesh_a7a34c6742a33f5d6003ed4b16bc5bfa8} 
+int {\bfseries nfaces\+\_\+bdry}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_ac25ad0379d64e3fe167b7ef5108de6b7}\label{structspecswd_1_1_mesh_ac25ad0379d64e3fe167b7ef5108de6b7} 
+std\+::vector$<$ int $>$ {\bfseries ispec\+\_\+bdry}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a83b145cb5491dcc4fa3bb6d67bccd243}\label{structspecswd_1_1_mesh_a83b145cb5491dcc4fa3bb6d67bccd243} 
+std\+::vector$<$ char $>$ {\bfseries bdry\+\_\+norm\+\_\+direc}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a7a9c860e1f9cd9035260b3c927005dde}\label{structspecswd_1_1_mesh_a7a9c860e1f9cd9035260b3c927005dde} 
+int {\bfseries nz\+\_\+tomo}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_ab2a3a17e00ee2f22ec6928c56e860de6}\label{structspecswd_1_1_mesh_ab2a3a17e00ee2f22ec6928c56e860de6} 
+int {\bfseries nregions}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a9f14a22d8f6f1c908673549a1cf07750}\label{structspecswd_1_1_mesh_a9f14a22d8f6f1c908673549a1cf07750} 
+std\+::vector$<$ float $>$ {\bfseries rho\+\_\+tomo}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a1828425b3f55767026a4651679d5d574}\label{structspecswd_1_1_mesh_a1828425b3f55767026a4651679d5d574} 
+std\+::vector$<$ float $>$ {\bfseries vpv\+\_\+tomo}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_aa1cc2bacd76263a1f5582cd2b6143bb3}\label{structspecswd_1_1_mesh_aa1cc2bacd76263a1f5582cd2b6143bb3} 
+std\+::vector$<$ float $>$ {\bfseries vph\+\_\+tomo}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_af2f6346bc9ef685a0b793a6cc09e4da4}\label{structspecswd_1_1_mesh_af2f6346bc9ef685a0b793a6cc09e4da4} 
+std\+::vector$<$ float $>$ {\bfseries vsv\+\_\+tomo}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a805f88ac8a750c27e5f9bc3acb8e2b1c}\label{structspecswd_1_1_mesh_a805f88ac8a750c27e5f9bc3acb8e2b1c} 
+std\+::vector$<$ float $>$ {\bfseries vsh\+\_\+tomo}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_aa65830351f27adebbcadd9eefeae522e}\label{structspecswd_1_1_mesh_aa65830351f27adebbcadd9eefeae522e} 
+std\+::vector$<$ float $>$ {\bfseries eta\+\_\+tomo}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_ae56f191ff1d1c79d6e538d4ba708c1a4}\label{structspecswd_1_1_mesh_ae56f191ff1d1c79d6e538d4ba708c1a4} 
+std\+::vector$<$ float $>$ {\bfseries QC\+\_\+tomo}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a827afe53d91c1f8d5a8fd6e2b6bcb6f0}\label{structspecswd_1_1_mesh_a827afe53d91c1f8d5a8fd6e2b6bcb6f0} 
+std\+::vector$<$ float $>$ {\bfseries QA\+\_\+tomo}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_aa3b9d44f8a5f510b03544b52955efdbd}\label{structspecswd_1_1_mesh_aa3b9d44f8a5f510b03544b52955efdbd} 
+std\+::vector$<$ float $>$ {\bfseries QL\+\_\+tomo}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a9779c7bc3da4dc675ad7a320e11e241b}\label{structspecswd_1_1_mesh_a9779c7bc3da4dc675ad7a320e11e241b} 
+std\+::vector$<$ float $>$ {\bfseries QN\+\_\+tomo}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a7e90870ecdb18d2d6aa0dfcb61d83860}\label{structspecswd_1_1_mesh_a7e90870ecdb18d2d6aa0dfcb61d83860} 
+std\+::vector$<$ float $>$ {\bfseries c21\+\_\+tomo}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a61721c08fec78a924cc3199498e3a300}\label{structspecswd_1_1_mesh_a61721c08fec78a924cc3199498e3a300} 
+std\+::vector$<$ float $>$ {\bfseries Qani\+\_\+tomo}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a126320be5299508c81803389642c65d1}\label{structspecswd_1_1_mesh_a126320be5299508c81803389642c65d1} 
+std\+::vector$<$ float $>$ {\bfseries depth\+\_\+tomo}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a3833f35af3a8306fb8fb0946663f1703}\label{structspecswd_1_1_mesh_a3833f35af3a8306fb8fb0946663f1703} 
+std\+::vector$<$ int $>$ {\bfseries region\+\_\+bdry}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_aac878b88188d786af5c13ea41d8da8e8}\label{structspecswd_1_1_mesh_aac878b88188d786af5c13ea41d8da8e8} 
+std\+::vector$<$ int $>$ {\bfseries iregion\+\_\+flag}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a2427859caa23636ec1c016bc55b6253c}\label{structspecswd_1_1_mesh_a2427859caa23636ec1c016bc55b6253c} 
+std\+::vector$<$ char $>$ {\bfseries is\+\_\+el\+\_\+reg}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_adfefc8f02282ece89c0f5f387beb50f9}\label{structspecswd_1_1_mesh_adfefc8f02282ece89c0f5f387beb50f9} 
+std\+::vector$<$ char $>$ {\bfseries is\+\_\+ac\+\_\+reg}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a5f940bc0c3cbe30bfbf6c91d0250d33c}\label{structspecswd_1_1_mesh_a5f940bc0c3cbe30bfbf6c91d0250d33c} 
+float {\bfseries PHASE\+\_\+\+VELOC\+\_\+\+MIN}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a129800e900fe61b1b1e1e292e20cf632}\label{structspecswd_1_1_mesh_a129800e900fe61b1b1e1e292e20cf632} 
+float {\bfseries PHASE\+\_\+\+VELOC\+\_\+\+MAX}
+\item 
+\Hypertarget{structspecswd_1_1_mesh_a4e8c4145dec1af4a33a06575196e89ba}\label{structspecswd_1_1_mesh_a4e8c4145dec1af4a33a06575196e89ba} 
+float {\bfseries freq}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+SEM mesh class. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{structspecswd_1_1_mesh_aab9af1030741cbde219c597a01f0d928}\index{specswd::Mesh@{specswd::Mesh}!create\_database@{create\_database}}
+\index{create\_database@{create\_database}!specswd::Mesh@{specswd::Mesh}}
+\doxysubsubsection{\texorpdfstring{create\_database()}{create\_database()}}
+{\footnotesize\ttfamily \label{structspecswd_1_1_mesh_aab9af1030741cbde219c597a01f0d928} 
+void specswd\+::\+Mesh\+::create\+\_\+database (\begin{DoxyParamCaption}\item[{float}]{freq0}{, }\item[{float}]{phi}{}\end{DoxyParamCaption})}
+
+
+
+Create SEM database by using input model info. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em freq0} & current frequency, in Hz \\
+\hline
+{\em phi} & directional angle \\
+\hline
+\end{DoxyParams}
+\Hypertarget{structspecswd_1_1_mesh_aa76f6c4eae327a427804cc0dbaee65a6}\index{specswd::Mesh@{specswd::Mesh}!interp\_model@{interp\_model}}
+\index{interp\_model@{interp\_model}!specswd::Mesh@{specswd::Mesh}}
+\doxysubsubsection{\texorpdfstring{interp\_model()}{interp\_model()}}
+{\footnotesize\ttfamily \label{structspecswd_1_1_mesh_aa76f6c4eae327a427804cc0dbaee65a6} 
+void specswd\+::\+Mesh\+::interp\+\_\+model (\begin{DoxyParamCaption}\item[{const float \texorpdfstring{$\ast$}{*}}]{param}{, }\item[{const std\+::vector$<$ int $>$ \&}]{elmnts}{, }\item[{std\+::vector$<$ float $>$ \&}]{md}{}\end{DoxyParamCaption}) const}
+
+
+
+interpolate elastic/acoustic model by using coordinates 
+
+
+\begin{DoxyParams}{Parameters}
+{\em param} & input model parameter, shape(nz\+\_\+tomo) \\
+\hline
+{\em elmnts} & all elements used, ispec = elmnts\mbox{[}i\mbox{]} \\
+\hline
+{\em md} & model required to interpolate, shape(nspec\+\_\+el\texorpdfstring{$\ast$}{*}\+NGLL + nspec\+\_\+el\+\_\+grl \texorpdfstring{$\ast$}{*} NGRL) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{structspecswd_1_1_mesh_a6b644e2e2b248f8fb96d16cf50fb9199}\index{specswd::Mesh@{specswd::Mesh}!project\_kl@{project\_kl}}
+\index{project\_kl@{project\_kl}!specswd::Mesh@{specswd::Mesh}}
+\doxysubsubsection{\texorpdfstring{project\_kl()}{project\_kl()}}
+{\footnotesize\ttfamily \label{structspecswd_1_1_mesh_a6b644e2e2b248f8fb96d16cf50fb9199} 
+void specswd\+::\+Mesh\+::project\+\_\+kl (\begin{DoxyParamCaption}\item[{const float \texorpdfstring{$\ast$}{*}}]{frekl}{, }\item[{float \texorpdfstring{$\ast$}{*}}]{kl\+\_\+out}{}\end{DoxyParamCaption}) const}
+
+
+
+project kernels to original 1-\/D model 
+
+
+\begin{DoxyParams}{Parameters}
+{\em frekl} & derivatives, shape(nspec\texorpdfstring{$\ast$}{*}\+NGLL+\+NGRL) \\
+\hline
+{\em kl\+\_\+out} & derivatives on original 1-\/Dmodel, shape(nz\+\_\+) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{structspecswd_1_1_mesh_a6f7a9659aa684ed3deec61a052d99210}\index{specswd::Mesh@{specswd::Mesh}!read\_model@{read\_model}}
+\index{read\_model@{read\_model}!specswd::Mesh@{specswd::Mesh}}
+\doxysubsubsection{\texorpdfstring{read\_model()}{read\_model()}}
+{\footnotesize\ttfamily \label{structspecswd_1_1_mesh_a6f7a9659aa684ed3deec61a052d99210} 
+void specswd\+::\+Mesh\+::read\+\_\+model (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{filename}{}\end{DoxyParamCaption})}
+
+
+
+read 1D model 
+
+
+\begin{DoxyParams}{Parameters}
+{\em filename} & 1D model file \\
+\hline
+\end{DoxyParams}
+\Hypertarget{structspecswd_1_1_mesh_af0e109cbef2e0c7621081ff42f2b77bd}\index{specswd::Mesh@{specswd::Mesh}!read\_model\_full\_aniso\_@{read\_model\_full\_aniso\_}}
+\index{read\_model\_full\_aniso\_@{read\_model\_full\_aniso\_}!specswd::Mesh@{specswd::Mesh}}
+\doxysubsubsection{\texorpdfstring{read\_model\_full\_aniso\_()}{read\_model\_full\_aniso\_()}}
+{\footnotesize\ttfamily \label{structspecswd_1_1_mesh_af0e109cbef2e0c7621081ff42f2b77bd} 
+void specswd\+::\+Mesh\+::read\+\_\+model\+\_\+full\+\_\+aniso\+\_\+ (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{filename}{}\end{DoxyParamCaption})}
+
+
+
+read 1D full anisotropy model model for Rayleigh wave 
+
+
+\begin{DoxyParams}{Parameters}
+{\em filename} & 1D model file \\
+\hline
+\end{DoxyParams}
+\Hypertarget{structspecswd_1_1_mesh_aa98f47ba93310099040171d8ae5ada75}\index{specswd::Mesh@{specswd::Mesh}!read\_model\_header\_@{read\_model\_header\_}}
+\index{read\_model\_header\_@{read\_model\_header\_}!specswd::Mesh@{specswd::Mesh}}
+\doxysubsubsection{\texorpdfstring{read\_model\_header\_()}{read\_model\_header\_()}}
+{\footnotesize\ttfamily \label{structspecswd_1_1_mesh_aa98f47ba93310099040171d8ae5ada75} 
+void specswd\+::\+Mesh\+::read\+\_\+model\+\_\+header\+\_\+ (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{filename}{}\end{DoxyParamCaption})}
+
+
+
+read header of 1D model, including wave type, attenutation flag, attenuation model flag 
+
+
+\begin{DoxyParams}{Parameters}
+{\em filename} & model filename \\
+\hline
+\end{DoxyParams}
+\Hypertarget{structspecswd_1_1_mesh_ad1f5ab06320e557580ee584cb7cdf096}\index{specswd::Mesh@{specswd::Mesh}!read\_model\_love\_@{read\_model\_love\_}}
+\index{read\_model\_love\_@{read\_model\_love\_}!specswd::Mesh@{specswd::Mesh}}
+\doxysubsubsection{\texorpdfstring{read\_model\_love\_()}{read\_model\_love\_()}}
+{\footnotesize\ttfamily \label{structspecswd_1_1_mesh_ad1f5ab06320e557580ee584cb7cdf096} 
+void specswd\+::\+Mesh\+::read\+\_\+model\+\_\+love\+\_\+ (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{filename}{}\end{DoxyParamCaption})}
+
+
+
+read 1D VTI model for Love wave 
+
+
+\begin{DoxyParams}{Parameters}
+{\em filename} & 1D model file \\
+\hline
+\end{DoxyParams}
+\Hypertarget{structspecswd_1_1_mesh_a63cd34c44c032adf74f9070db2fb65dc}\index{specswd::Mesh@{specswd::Mesh}!read\_model\_rayl\_@{read\_model\_rayl\_}}
+\index{read\_model\_rayl\_@{read\_model\_rayl\_}!specswd::Mesh@{specswd::Mesh}}
+\doxysubsubsection{\texorpdfstring{read\_model\_rayl\_()}{read\_model\_rayl\_()}}
+{\footnotesize\ttfamily \label{structspecswd_1_1_mesh_a63cd34c44c032adf74f9070db2fb65dc} 
+void specswd\+::\+Mesh\+::read\+\_\+model\+\_\+rayl\+\_\+ (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{filename}{}\end{DoxyParamCaption})}
+
+
+
+read 1D VTI model for Rayleigh wave 
+
+
+\begin{DoxyParams}{Parameters}
+{\em filename} & 1D model file \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+mesh.\+hpp\item 
+database.\+cpp\item 
+initialize.\+cpp\item 
+interpolate.\+cpp\item 
+io.\+cpp\end{DoxyCompactItemize}

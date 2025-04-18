@@ -1,0 +1,30 @@
+\doxysection{attenuation.\+hpp}
+\hypertarget{attenuation_8hpp_source}{}\label{attenuation_8hpp_source}\index{attenuation.hpp@{attenuation.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#ifndef\ SPECSWD\_ATT\_TABLE\_H\_}}
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#define\ SPECSWD\_ATT\_TABLE\_H\_}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <complex>}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{keyword}{namespace\ }specswd}
+\DoxyCodeLine{00008\ \{}
+\DoxyCodeLine{00009\ \ \ \ \ }
+\DoxyCodeLine{00010\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ NSLS\ =\ 5;}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ std::complex<float>\ get\_sls\_modulus\_factor(\textcolor{keywordtype}{float}\ freq,\textcolor{keywordtype}{float}\ Q);}
+\DoxyCodeLine{00013\ \textcolor{keywordtype}{void}\ }
+\DoxyCodeLine{00014\ get\_sls\_Q\_derivative(\textcolor{keywordtype}{float}\ freq,\textcolor{keywordtype}{float}\ Qm,std::complex<float>\ \&s,}
+\DoxyCodeLine{00015\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::complex<float>\ \&dsdqi);}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{keywordtype}{void}\ get\_C21\_att(\textcolor{keywordtype}{float}\ freq,\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *Qm,\textcolor{keywordtype}{int}\ nQmodel,}
+\DoxyCodeLine{00018\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::complex<float>\ *\ c21,}
+\DoxyCodeLine{00019\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ funcid=1);}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \}}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -1,0 +1,555 @@
+\doxysection{frechet\+\_\+op.\+hpp}
+\hypertarget{frechet__op_8hpp_source}{}\label{frechet__op_8hpp_source}\index{frechet\_op.hpp@{frechet\_op.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ SPECSWD\_FRECHET\_OP\_H\_}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ SPECSWD\_FRECHET\_OP\_H\_}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ "{}shared/attenuation.hpp"{}}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ "{}shared/GQTable.hpp"{}}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#define\ GET\_REAL(dc\_dm,loc)\ frekl\_r[loc*size+id1]\ =\ dc\_dm.real();\ \(\backslash\)}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_i[loc*size+id1]\ =\ dc\_dm.imag();}}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \textcolor{keyword}{namespace\ }specswd}
+\DoxyCodeLine{00016\ \{}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00024\ \textcolor{keywordtype}{void}\ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00025\ get\_fQ\_kl(\textcolor{keywordtype}{int}\ npts,std::complex<float>\ f\_cmplx,}
+\DoxyCodeLine{00026\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *frekl\_r,}
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ *\_\_restrict\ frekl\_i)}
+\DoxyCodeLine{00028\ \{}
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keywordtype}{float}\ f\_real\ =\ f\_cmplx.real();}
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keywordtype}{float}\ f\_imag\ =\ f\_cmplx.imag();}
+\DoxyCodeLine{00031\ \ \ \ \ \textcolor{keywordtype}{float}\ fQi\ =\ 2.\ *\ f\_imag\ /\ f\_real;}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ ipt\ =\ 0;\ ipt\ <\ npts;\ ipt\ ++)\ \{}
+\DoxyCodeLine{00034\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ dQidm\ =\ (frekl\_i[ipt]\ *\ 2.\ -\/\ fQi\ *\ frekl\_r[ipt])\ /\ f\_real;}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ frekl\_i[ipt]\ =\ dQidm;}
+\DoxyCodeLine{00036\ \ \ \ \ \}}
+\DoxyCodeLine{00037\ \}}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00054\ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T\ =\ \textcolor{keywordtype}{float}\ >\ \textcolor{keywordtype}{void}\ }
+\DoxyCodeLine{00055\ love\_op\_matrix(\textcolor{keywordtype}{float}\ freq,T\ c\_M,\ T\ c\_K,T\ c\_E,\ \textcolor{keyword}{const}\ T\ *y,\textcolor{keyword}{const}\ T\ *x,\ }
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ nspec\_el,\textcolor{keywordtype}{int}\ nglob\_el,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ *ibool\_el,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *jaco,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xN,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xL,\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xQN,\ }
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xQL,\textcolor{keywordtype}{float}\ *\ \_\_restrict\ frekl\_r,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ *\ \_\_restrict\ frekl\_i)}
+\DoxyCodeLine{00061\ \{}
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{comment}{//\ check\ template\ type}}
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keyword}{static\_assert}(std::is\_same\_v<float,T>\ ||\ std::is\_same\_v<std::complex<float>,T>);}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keyword}{using\ namespace\ }GQTable;}
+\DoxyCodeLine{00066\ \ \ \ \ std::array<T,NGRL>\ rW,lW;}
+\DoxyCodeLine{00067\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ size\ =\ nspec\_el*NGLL\ +\ NGRL;}
+\DoxyCodeLine{00068\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ ispec\ =\ 0;\ ispec\ <\ nspec\_el\ +\ 1;\ ispec\ ++)\ \{\ \ \ }
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \textcolor{keywordtype}{id}\ =\ ispec\ *\ NGLL;}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ J\ =\ jaco[ispec];\ \textcolor{comment}{//\ jacobians\ in\ this\ layers}}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ is\_gll\ =\ (ispec\ !=\ nspec\_el);}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *w\ =\ is\_gll?\ wgll.data():\ wgrl.data();}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *hp\ =\ is\_gll?\ hprime.data():\ hprime\_grl.data();}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ NGL\ =\ is\_gll?\ NGLL\ :\ NGRL;;}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ cache\ displ\ in\ a\ element}}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ NGL;\ i\ ++)\ \{}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ iglob\ =\ ibool\_el[\textcolor{keywordtype}{id}+i];}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ \ \ \ rW[i]\ =\ x[iglob];}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ lW[i]\ =\ y[iglob];}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,std::complex<float>>)\ \{}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lW[i]\ =\ std::conj(lW[i]);}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ compute\ kernels}}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ T\ dc\_drho\{\},\ dc\_dN\{\},\ dc\_dL\{\};}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ T\ dc\_dqni\{\},\ dc\_dqli\{\};}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ T\ sn\ =\ 1.,\ sl\ =\ 1.;}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ T\ dsdqni\{\},\ dsdqli\{\};}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ m\ =\ 0;\ m\ <\ NGL;\ m\ ++)\ \{}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_drho\ =\ w[m]\ *\ J\ *\ rW[m]\ *\ lW[m]\ *\ c\_M;\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ get\ sls\ derivative\ if\ required}}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,std::complex<float>>)\ \{}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ get\_sls\_Q\_derivative(freq,xQN[\textcolor{keywordtype}{id}+m],sn,dsdqni);}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ get\_sls\_Q\_derivative(freq,xQL[\textcolor{keywordtype}{id}+m],sl,dsdqli);}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dsdqni\ *=\ xN[\textcolor{keywordtype}{id}+m];}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dsdqli\ *=\ xL[\textcolor{keywordtype}{id}+m];}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ N\ kernel}}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ T\ temp\ =\ rW[m]\ *\ lW[m]\ \ *\ J\ *\ w[m]\ *\ c\_K;}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dN\ =\ temp\ *\ sn;}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dqni\ =\ temp\ *\ dsdqni;}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ L\ kernel}}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \ \ T\ sx\{\},sy\{\};}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ NGL;\ i\ ++)\ \{}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sx\ +=\ hp[m*NGL+i]\ *\ rW[i];}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sy\ +=\ hp[m*NGL+i]\ *\ lW[i];}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ sx\ *\ sy\ *\ w[m]\ /\ J\ *\ c\_E;}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dL\ =\ temp\ *\ sl;}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dqli\ =\ temp\ *\ dsdqli;}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ copy\ to\ frekl}}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ id1\ =\ \textcolor{keywordtype}{id}\ +\ m;}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,std::complex<float>>)\ \{}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dN,0);\ GET\_REAL(dc\_dL,1);}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dqni,2);\ GET\_REAL(dc\_dqli,3);}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_drho,4);}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[0*size+id1]\ =\ dc\_dN;}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[1*size+id1]\ =\ dc\_dL;}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[2*size+id1]\ =\ dc\_drho;}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00131\ \ \ \ \ \}}
+\DoxyCodeLine{00132\ \}}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00165\ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T\ =\ \textcolor{keywordtype}{float}\ >}
+\DoxyCodeLine{00166\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00167\ rayl\_op\_matrix(\textcolor{keywordtype}{float}\ freq,T\ c\_M,T\ c\_K,\ T\ c\_E,\textcolor{keyword}{const}\ T\ *y,\ \textcolor{keyword}{const}\ T\ *x,}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ nspec\_el,\textcolor{keywordtype}{int}\ nspec\_ac,\textcolor{keywordtype}{int}\ nspec\_el\_grl,\textcolor{keywordtype}{int}\ nspec\_ac\_grl,\textcolor{keywordtype}{int}\ nglob\_el,}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ nglob\_ac,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ *el\_elmnts,\textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ *ac\_elmnts,}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}*\ ibool\_el,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}*\ ibool\_ac,}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *jaco,\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xrho\_el,\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xrho\_ac,}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xA,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xC,\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xL,\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xeta,\ }
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xQA,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xQC,\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xQL,\ }
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xkappa\_ac,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *xQk\_ac,}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ *\_\_restrict\ frekl\_r,}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ *\_\_restrict\ frekl\_i)}
+\DoxyCodeLine{00177\ \{}
+\DoxyCodeLine{00178\ \ \ \ \ \textcolor{comment}{//\ check\ template\ type}}
+\DoxyCodeLine{00179\ \ \ \ \ \textcolor{keyword}{static\_assert}(std::is\_same\_v<float,T>\ ||\ std::is\_same\_v<std::complex<float>,T>);}
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00181\ \ \ \ \ \textcolor{comment}{//\ constants}}
+\DoxyCodeLine{00182\ \ \ \ \ \textcolor{keyword}{using\ namespace\ }GQTable;}
+\DoxyCodeLine{00183\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ size\ =\ nspec\_el\ *\ NGLL\ +\ nspec\_el\_grl\ *\ NGRL\ +\ }
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ nspec\_ac\ *\ NGLL\ +\ nspec\_ac\_grl\ *\ NGRL;}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \ \ \ \ \textcolor{comment}{//\ loop\ elastic\ elements}}
+\DoxyCodeLine{00187\ \ \ \ \ std::array<T,NGRL>\ U,V,lU,lV;\ \textcolor{comment}{//left/right\ eigenvectors\ in\ on\ element}}
+\DoxyCodeLine{00188\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ ispec\ =\ 0;\ ispec\ <\ nspec\_el\ +\ nspec\_el\_grl;\ ispec\ ++)\ \{}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ iel\ =\ el\_elmnts[ispec];}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \textcolor{keywordtype}{id}\ =\ ispec\ *\ NGLL;}
+\DoxyCodeLine{00191\ }
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ jacobian}}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ J\ =\ jaco[iel];}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ get\ const\ arrays}}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ is\_gll\ =\ (ispec\ !=\ nspec\_el);}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *weight\ =\ is\_gll?\ wgll.data():\ wgrl.data();}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *hp\ =\ is\_gll?\ hprime.data():\ hprime\_grl.data();}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ NGL\ =\ is\_gll?\ NGLL\ :\ NGRL;}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ cache\ U,V\ and\ lU,lV}}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ NGL;\ i\ ++)\ \{}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ iglob\ =\ ibool\_el[\textcolor{keywordtype}{id}\ +\ i];}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \ \ \ \ U[i]\ =\ x[iglob];}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \ \ \ \ V[i]\ =\ x[iglob\ +\ nglob\_el];}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \ \ \ \ lU[i]\ =\ y[iglob];\ }
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \ \ \ \ lV[i]\ =\ y[iglob\ +\ nglob\_el];}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,std::complex<float>>)\ \{}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lU[i]\ =\ std::conj(lU[i]);}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lV[i]\ =\ std::conj(lV[i]);}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00213\ }
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \textcolor{comment}{//\ compute\ kernel}}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ T\ dc\_drho\{\},\ dc\_dA\{\},\ dc\_dC\{\},\ dc\_dL\{\};}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ T\ dc\_deta\{\},\ dc\_dQci\{\},dc\_dQai\{\},dc\_dQli\{\};}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ T\ two\ =\ 2.;}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ m\ =\ 0;\ m\ <\ NGL;\ m\ ++)\ \{}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ T\ temp\ =\ weight[m]\ *\ J\ *\ c\_M;}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_drho\ =\ temp\ *\ (U[m]\ *\ lU[m]\ +\ V[m]\ *\ lV[m]);}
+\DoxyCodeLine{00221\ }
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ get\ sls\ factor\ if\ required}}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ T\ sa\ =\ 1.,sl\ =\ 1.,sc\ =\ 1.;}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ \ \ T\ dsdqai\{\},dsdqci\{\},dsdqli\{\};}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \ \ \ \ T\ C\ =\ xC[\textcolor{keywordtype}{id}+m],\ A\ =\ xA[\textcolor{keywordtype}{id}+m],\ L\ =\ xL[\textcolor{keywordtype}{id}+m],\ eta\ =\ xeta[m];}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,std::complex<float>>)\ \{}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ get\_sls\_Q\_derivative(freq,xQA[\textcolor{keywordtype}{id}+m],sa,dsdqai);}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ get\_sls\_Q\_derivative(freq,xQC[\textcolor{keywordtype}{id}+m],sc,dsdqci);}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ get\_sls\_Q\_derivative(freq,xQL[\textcolor{keywordtype}{id}+m],sl,dsdqli);}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dsdqai\ *=\ A;}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dsdqci\ *=\ C;}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dsdqli\ *=\ L;}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00234\ }
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ K\ matrix}}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ dc\_dA}}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ weight[m]\ *\ J\ *\ U[m]\ *\ lU[m]\ *\ c\_K;}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dA\ =\ temp\ *\ sa;\ dc\_dQai\ =\ temp\ *\ dsdqai;}
+\DoxyCodeLine{00239\ }
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ dc\_dL}}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ weight[m]\ *\ J\ *\ V[m]\ *\ lV[m]\ *\ c\_K;}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dL\ =\ temp\ *\ sl;\ dc\_dQli\ =\ temp\ *\ dsdqli;}
+\DoxyCodeLine{00243\ }
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Ematrix}}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ \ T\ sx\{\},sy\{\},lsx\{\},lsy\{\};}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ NGL;\ i\ ++)\ \{}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sx\ +=\ hp[m*NGL+i]\ *\ U[i];}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sy\ +=\ hp[m*NGL+i]\ *\ V[i];}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lsx\ +=\ hp[m*NGL+i]\ *\ lU[i];}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lsy\ +=\ hp[m*NGL+i]\ *\ lV[i];}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00252\ }
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ E1}}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ weight[m]\ /\ J\ *\ sx\ *\ lsx\ *\ c\_E;}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dL\ +=\ temp\ *\ sl;\ dc\_dQli\ +=\ temp\ *\ dsdqli;}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ E3}}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ weight[m]\ /\ J\ *\ sy\ *\ lsy\ *\ c\_E;}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dC\ =\ temp\ *\ sc;\ dc\_dQci\ =\ temp\ *\ dsdqci;}
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ K2,\ \ d\ /\ dm\_k\ sum\_\{ij\}\ w\_j\ F\_j\ hpT(i,j)\ U\_j\ lV\_i\ }}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ =\ \(\backslash\)sum\_\{i\}\ w\_k\ dF/dm\_k\ hpT(i,k)\ U\_k\ lV\_i\ =\ lsy\ *\ w\_k\ *\ U\_k\ *\ dF/dm\_k\ }}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ weight[m]\ *\ U[m]\ *\ lsy\ *\ c\_K;}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_deta\ =\ temp\ *\ (A*sa\ -\/\ two*L*sl);\ }
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ *=\ eta;}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dA\ +=\ temp\ *\ sa;\ dc\_dQai\ +=\ temp\ *\ dsdqai;}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dL\ +=\ -\/\ temp\ *\ two\ *\ sl;\ dc\_dQli\ +=\ -\/temp\ *\ two\ *\ dsdqli;}
+\DoxyCodeLine{00268\ }
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ K2,\ -\/d\ /\ dm\_k\ sum\_\{ij\}\ w\_i\ L\_i\ hp(i,j)\ U\_j\ lV\_i}}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ =\ -\/\ \(\backslash\)sum\_\{j\}\ w\_k\ dL/dm\_k\ hp(j,k)\ U\_j\ lV\_k\ =\ -\/sx\ *\ w\_k\ *\ lV\_k\ dL/dm\_k}}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ -\/weight[m]\ *\ lV[m]\ *\ sx\ *\ c\_K;\ }
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dL\ +=\ -\/\ temp\ *\ two\ *\ sl;\ dc\_dQli\ +=\ -\/temp\ *\ two\ *\ dsdqli;}
+\DoxyCodeLine{00273\ }
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//E2\ \(\backslash\)sum\_\{j\}\ w\_k\ dF/dm\_k\ hp(j,k)\ V\_j\ lU\_k\ =\ -\/sx\ *\ w\_k\ *\ lV\_k\ dF/dm\_k}}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ weight[m]\ *\ lU[m]\ *\ sy\ *\ c\_E;\ }
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_deta\ =\ temp\ *\ (A*sa\ -\/\ two*L*sl);\ }
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ *=\ eta;}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dA\ +=\ temp\ *\ sa;\ dc\_dQai\ +=\ temp\ *\ dsdqai;}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dL\ +=\ -\/\ temp\ *\ two\ *\ sl;\ dc\_dQli\ +=\ -\/temp\ *\ two\ *\ dsdqli;}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ E2\ -\/lsx\ *\ w\_k\ *\ V\_k\ *\ dL/dm\_k\ }}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ -\/weight[m]\ *\ V[m]\ *\ lsx\ *\ c\_E;}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dL\ +=\ -\/\ temp\ *\ two\ *\ sl;\ dc\_dQli\ +=\ -\/temp\ *\ two\ *\ dsdqli;}
+\DoxyCodeLine{00284\ }
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ copy\ them\ to\ frekl}}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ id1\ =\ iel\ *\ NGLL\ +\ m;}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,float>)\ \{}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[0*size+id1]\ =\ dc\_dA;}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[1*size+id1]\ =\ dc\_dC;}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[2*size+id1]\ =\ dc\_dL;}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[3*size+id1]\ =\ dc\_deta;}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[5*size+id1]\ =\ dc\_drho;}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dA,0);}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dC,1);}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dL,2);}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_deta,3);}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dQai,4);}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dQci,5);}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dQli,6);}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_drho,9);}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00305\ \ \ \ \ \}}
+\DoxyCodeLine{00306\ }
+\DoxyCodeLine{00307\ \ \ \ \ \textcolor{comment}{//\ acoustic\ eleemnts}}
+\DoxyCodeLine{00308\ \ \ \ \ std::array<T,NGRL>\ chi,lchi;}
+\DoxyCodeLine{00309\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ ispec\ =\ 0;\ ispec\ <\ nspec\_ac\ +\ nspec\_ac\_grl;\ ispec\ ++)\ \{}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ iel\ =\ ac\_elmnts[ispec];}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \textcolor{keywordtype}{id}\ =\ ispec\ *\ NGLL;}
+\DoxyCodeLine{00312\ }
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ const\ arrays}}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ is\_gll\ =\ (ispec\ !=\ nspec\_ac);}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *weight\ =\ is\_gll?\ wgll.data():\ wgrl.data();}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ *hp\ =\ is\_gll?\ hprime.data():\ hprime\_grl.data();}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ NGL\ =\ is\_gll?\ NGLL\ :\ NGRL;}
+\DoxyCodeLine{00318\ }
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ jacobians}}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ J\ =\ jaco[iel];}
+\DoxyCodeLine{00321\ }
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ cache\ chi\ and\ lchi\ in\ one\ element}}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ NGL;\ i\ ++)\ \{}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ iglob\ =\ ibool\_ac[\textcolor{keywordtype}{id}\ +\ i];}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ \ \ \ \ chi[i]\ =\ (iglob\ ==\ -\/1)\ ?\ 0:\ x[iglob+nglob\_el*2];}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ \ \ \ \ lchi[i]\ =\ (iglob\ ==\ -\/1)\ ?\ 0.:\ y[iglob+nglob\_el*2];}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,std::complex<float>>)\ \{}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lchi[i]\ =\ std::conj(lchi[i]);}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00331\ }
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ derivatives}}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ T\ dc\_dkappa\{\},dc\_drho\{\},\ dc\_dqki\{\};}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ T\ sk\ =\ 1.,\ dskdqi\ =\ 0.;}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ m\ =\ 0;\ m\ <\ NGL;\ m\ ++\ )\{}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ copy\ material\ }}
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ rho\ =\ xrho\_ac[\textcolor{keywordtype}{id}+m];}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ kappa\ =\ xkappa\_ac[\textcolor{keywordtype}{id}+m];}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,std::complex<float>>)\ \{}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ get\_sls\_Q\_derivative(freq,xQk\_ac[\textcolor{keywordtype}{id}+m],sk,dskdqi);}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dskdqi\ *=\ kappa;}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ kappa\ kernel}}
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \ \ \ \ \ \ T\ temp\ =\ -\/c\_M\ *\ weight[m]*\ J*chi[m]\ *\ lchi[m]\ /\ (sk\ *\ kappa)\ /\ (sk\ *\ kappa);}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dkappa\ =\ temp\ *\ sk;}
+\DoxyCodeLine{00347\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dqki\ =\ \ temp\ *\ dskdqi;}
+\DoxyCodeLine{00348\ }
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_drho\ =\ -\/\ c\_K\ *\ weight[m]*\ J\ *\ chi[m]\ *\ lchi[m]\ /\ rho\ /\ rho;\ }
+\DoxyCodeLine{00350\ }
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \ \ \ \ \ \ T\ sx\{\},sy\{\};}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ NGL;\ i\ ++)\ \{}
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sx\ +=\ hp[m*NGL+i]\ *\ chi[i];}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sy\ +=\ hp[m*NGL+i]\ *\ lchi[i];}
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_drho\ +=\ -\/c\_E\ *\ weight[m]\ /\ J\ /\ (rho*rho)\ *\ sx\ *\ sy;}
+\DoxyCodeLine{00357\ }
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ copy\ to\ frekl}}
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ id1\ =\ iel\ *\ NGLL\ +\ m;}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,float>)\ \{}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[4*size+id1]\ =\ dc\_dkappa;}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[5*size+id1]\ =\ dc\_drho;}
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dkappa,7);}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dqki,8);}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_drho,9);}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00370\ \ \ \ \ \}}
+\DoxyCodeLine{00371\ \}}
+\DoxyCodeLine{00372\ }
+\DoxyCodeLine{00373\ \textcolor{comment}{//\ /**}}
+\DoxyCodeLine{00374\ \textcolor{comment}{//\ \ *\ @brief\ compute\ coef\ *\ y\string^dag\ @\ d(\ (w\string^2\ M\ -\/E)\ -\/\ k\string^2\ K)/dm\_i\ @\ x\ dm\_i}}
+\DoxyCodeLine{00375\ \textcolor{comment}{//\ \ *\ @param\ freq\ current\ frequency}}
+\DoxyCodeLine{00376\ \textcolor{comment}{//\ \ *\ @param\ c\ current\ phase\ velocity}}
+\DoxyCodeLine{00377\ \textcolor{comment}{//\ \ *\ @param\ coef\ derivative\ scaling\ coefs\ }}
+\DoxyCodeLine{00378\ \textcolor{comment}{//\ \ *\ @param\ y/x\ \ dot\ vector,shape(nglob\_el*2+nglob\_ac)}}
+\DoxyCodeLine{00379\ \textcolor{comment}{//\ \ *\ @param\ nspec\_el/nglob\_el\ mesh\ nelemnts/unique\ points\ for\ elastic}}
+\DoxyCodeLine{00380\ \textcolor{comment}{//\ \ *\ @param\ nspec\_ac/nglob\_ac\ mesh\ nelemnts/unique\ points\ for\ acoustic}}
+\DoxyCodeLine{00381\ \textcolor{comment}{//\ \ *\ @param\ nspec\_el/ac\_grl\ no.\ of\ GRL\ elements}}
+\DoxyCodeLine{00382\ \textcolor{comment}{//\ \ *\ @param\ ibool\_el\ elastic\ connectivity\ matrix,\ shape(nspec\_el*NGLL+nspec\_el\_grl*NGRL)}}
+\DoxyCodeLine{00383\ \textcolor{comment}{//\ \ *\ @param\ ibool\_ac\ elastic\ connectivity\ matrix,\ shape(nspec\_ac*NGLL+nspec\_ac\_grl*NGRL)}}
+\DoxyCodeLine{00384\ \textcolor{comment}{//\ \ *\ @param\ jaco\ jacobian\ matrix,\ shape\ (nspec\_el\ +\ 1)}}
+\DoxyCodeLine{00385\ \textcolor{comment}{//\ \ *\ @param\ xA/xC/xL/xeta/xQA/xQC/xQL/xrho\ elastic\ model\ parameters,ibool\_el.shape}}
+\DoxyCodeLine{00386\ \textcolor{comment}{//\ \ *\ @param\ xkappa\_ac/xQk\_ac/xrho\_ac\ acoustic\ model\ parameters,\ ibool\_ac.shape\ }}
+\DoxyCodeLine{00387\ \textcolor{comment}{//\ \ *\ @param\ frekl\_r\ dc/d(A/C/L/kappa/rho)\ (elastic)\ or\ dc/d(A/C/L/QA/QC/QL/kappa/Qk/rho)\ (anelstic)}}
+\DoxyCodeLine{00388\ \textcolor{comment}{//\ \ *\ @param\ frekl\_i\ nullptr\ or\ dqc/d(A/C/L/QA/QC/QL/kappa/Qk/rho)\ (anelstic)}}
+\DoxyCodeLine{00389\ \textcolor{comment}{//\ \ *\ @note\ frekl\_r\ and\ frekl\_i\ should\ be\ set\ to\ 0\ before\ calling\ this\ routine}}
+\DoxyCodeLine{00390\ \textcolor{comment}{//\ \ */}}
+\DoxyCodeLine{00391\ \textcolor{comment}{//\ template<typename\ T\ =\ float\ >}}
+\DoxyCodeLine{00392\ \textcolor{comment}{//\ void}}
+\DoxyCodeLine{00393\ \textcolor{comment}{//\ rayl\_deriv\_op(float\ freq,T\ c,T\ coef,const\ T\ *y,\ const\ T\ *x,}}
+\DoxyCodeLine{00394\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ int\ nspec\_el,int\ nspec\_ac,int\ nspec\_el\_grl,int\ nspec\_ac\_grl,int\ nglob\_el,}}
+\DoxyCodeLine{00395\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ int\ nglob\_ac,\ const\ int\ *el\_elmnts,const\ int\ *ac\_elmnts,}}
+\DoxyCodeLine{00396\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const\ int*\ ibool\_el,\ const\ int*\ ibool\_ac,}}
+\DoxyCodeLine{00397\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const\ float\ *jaco,const\ float\ *xrho\_el,const\ float\ *xrho\_ac,}}
+\DoxyCodeLine{00398\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const\ float\ *xA,\ const\ float\ *xC,const\ float\ *xL,const\ float\ *xeta,\ }}
+\DoxyCodeLine{00399\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const\ float\ *xQA,\ const\ float\ *xQC,const\ float\ *xQL,\ }}
+\DoxyCodeLine{00400\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const\ float\ *xkappa\_ac,\ const\ float\ *xQk\_ac,}}
+\DoxyCodeLine{00401\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ float\ *\_\_restrict\ frekl\_r,}}
+\DoxyCodeLine{00402\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ float\ *\_\_restrict\ frekl\_i)}}
+\DoxyCodeLine{00403\ \textcolor{comment}{//\ \{}}
+\DoxyCodeLine{00404\ \textcolor{comment}{//\ \ \ \ \ //\ check\ template\ type}}
+\DoxyCodeLine{00405\ \textcolor{comment}{//\ \ \ \ \ static\_assert(std::is\_same\_v<float,T>\ ||\ std::is\_same\_v<std::complex<float>,T>);}}
+\DoxyCodeLine{00406\ }
+\DoxyCodeLine{00407\ \textcolor{comment}{//\ \ \ \ \ //\ constants}}
+\DoxyCodeLine{00408\ \textcolor{comment}{//\ \ \ \ \ using\ namespace\ GQTable;}}
+\DoxyCodeLine{00409\ \textcolor{comment}{//\ \ \ \ \ size\_t\ size\ =\ nspec\_el\ *\ \ NGLL\ +\ nspec\_el\_grl\ *\ NGRL\ +\ }}
+\DoxyCodeLine{00410\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ nspec\_ac\ *\ NGLL\ +\ nspec\_ac\_grl\ *\ NGRL;}}
+\DoxyCodeLine{00411\ \textcolor{comment}{//\ \ \ \ \ T\ om\ =\ 2\ *\ M\_PI\ *\ freq;}}
+\DoxyCodeLine{00412\ \textcolor{comment}{//\ \ \ \ \ T\ k2\ =\ std::pow(om\ /\ c,2);}}
+\DoxyCodeLine{00413\ }
+\DoxyCodeLine{00414\ \textcolor{comment}{//\ \ \ \ \ //\ loop\ elastic\ elements}}
+\DoxyCodeLine{00415\ \textcolor{comment}{//\ \ \ \ \ std::array<T,NGRL>\ U,V,lU,lV;}}
+\DoxyCodeLine{00416\ \textcolor{comment}{//\ \ \ \ \ for(int\ ispec\ =\ 0;\ ispec\ <\ nspec\_el\ +\ nspec\_el\_grl;\ ispec\ ++)\ \{}}
+\DoxyCodeLine{00417\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ int\ iel\ =\ el\_elmnts[ispec];}}
+\DoxyCodeLine{00418\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ int\ id\ =\ ispec\ *\ NGLL;}}
+\DoxyCodeLine{00419\ }
+\DoxyCodeLine{00420\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ const\ float\ *weight\ =\ wgll.data();}}
+\DoxyCodeLine{00421\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ const\ float\ *hp\ =\ hprime.data();}}
+\DoxyCodeLine{00422\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ int\ NGL\ =\ NGLL;}}
+\DoxyCodeLine{00423\ }
+\DoxyCodeLine{00424\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ //\ jacobian}}
+\DoxyCodeLine{00425\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ float\ J\ =\ jaco[iel];}}
+\DoxyCodeLine{00426\ }
+\DoxyCodeLine{00427\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ //\ grl\ case}}
+\DoxyCodeLine{00428\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ if(ispec\ ==\ nspec\_el)\ \{}}
+\DoxyCodeLine{00429\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ weight\ =\ wgrl.data();}}
+\DoxyCodeLine{00430\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ hp\ =\ hprime\_grl.data();}}
+\DoxyCodeLine{00431\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ NGL\ =\ NGRL;}}
+\DoxyCodeLine{00432\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \}\ \ }}
+\DoxyCodeLine{00433\ }
+\DoxyCodeLine{00434\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ //\ cache\ U,V\ and\ lU,lV}}
+\DoxyCodeLine{00435\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ for(int\ i\ =\ 0;\ i\ <\ NGL;\ i\ ++)\ \{}}
+\DoxyCodeLine{00436\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ int\ iglob\ =\ ibool\_el[id\ +\ i];}}
+\DoxyCodeLine{00437\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ U[i]\ =\ x[iglob]\ *\ coef;\ }}
+\DoxyCodeLine{00438\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ V[i]\ =\ x[iglob\ +\ nglob\_el]\ *\ coef;}}
+\DoxyCodeLine{00439\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ lU[i]\ =\ y[iglob];\ }}
+\DoxyCodeLine{00440\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ lV[i]\ =\ y[iglob\ +\ nglob\_el];}}
+\DoxyCodeLine{00441\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ if\ \ constexpr\ (std::is\_same\_v<T,std::complex<float>>)\ \{}}
+\DoxyCodeLine{00442\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lU[i]\ =\ std::conj(lU[i]);}}
+\DoxyCodeLine{00443\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lV[i]\ =\ std::conj(lV[i]);}}
+\DoxyCodeLine{00444\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00445\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00446\ }
+\DoxyCodeLine{00447\ \textcolor{comment}{//\ \ \ \ \ \ \ \ //\ compute\ kernel}}
+\DoxyCodeLine{00448\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ T\ dc\_drho\{\},\ dc\_dA\{\},\ dc\_dC\{\},\ dc\_dL\{\};}}
+\DoxyCodeLine{00449\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ T\ dc\_deta\{\},\ dc\_dQci\{\},dc\_dQai\{\},dc\_dQli\{\};}}
+\DoxyCodeLine{00450\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ const\ T\ two\ =\ 2.;}}
+\DoxyCodeLine{00451\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ for(int\ m\ =\ 0;\ m\ <\ NGL;\ m\ ++)\ \{}}
+\DoxyCodeLine{00452\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ T\ temp\ =\ weight[m]\ *\ J;}}
+\DoxyCodeLine{00453\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_drho\ =\ temp\ *\ om\ *\ om\ *\ }}
+\DoxyCodeLine{00454\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (U[m]\ *\ lU[m]\ +\ V[m]\ *\ lV[m]);}}
+\DoxyCodeLine{00455\ }
+\DoxyCodeLine{00456\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ //\ get\ sls\ factor\ if\ required}}
+\DoxyCodeLine{00457\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ T\ sa\ =\ 1.,sl\ =\ 1.,sc\ =\ 1.;}}
+\DoxyCodeLine{00458\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ T\ dsdqai\{\},dsdqci\{\},dsdqli\{\};}}
+\DoxyCodeLine{00459\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ float\ C\ =\ xC[id+m],\ A\ =\ xA[id+m],}}
+\DoxyCodeLine{00460\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ L\ =\ xL[id+m],\ eta\ =\ xeta[m];}}
+\DoxyCodeLine{00461\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ if\ constexpr\ (std::is\_same\_v<T,std::complex<float>>)\ \{}}
+\DoxyCodeLine{00462\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ get\_sls\_Q\_derivative(freq,xQA[id+m],sa,dsdqai);}}
+\DoxyCodeLine{00463\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ get\_sls\_Q\_derivative(freq,xQC[id+m],sc,dsdqai);}}
+\DoxyCodeLine{00464\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ get\_sls\_Q\_derivative(freq,xQL[id+m],sl,dsdqai);}}
+\DoxyCodeLine{00465\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dsdqai\ *=\ A;}}
+\DoxyCodeLine{00466\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dsdqci\ *=\ C;}}
+\DoxyCodeLine{00467\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dsdqli\ *=\ L;}}
+\DoxyCodeLine{00468\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00469\ }
+\DoxyCodeLine{00470\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ //\ K\ matrix}}
+\DoxyCodeLine{00471\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ //\ dc\_dA}}
+\DoxyCodeLine{00472\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ -\/weight[m]\ *\ J\ *\ k2\ *\ U[m]\ *\ lU[m];}}
+\DoxyCodeLine{00473\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dA\ =\ temp\ *\ sa;\ dc\_dQai\ =\ temp\ *\ dsdqai;}}
+\DoxyCodeLine{00474\ }
+\DoxyCodeLine{00475\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ //\ dc\_dL}}
+\DoxyCodeLine{00476\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ -\/weight[m]\ *\ J\ *\ k2\ *\ V[m]\ *\ lV[m];}}
+\DoxyCodeLine{00477\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dL\ =\ temp\ *\ sl;\ dc\_dQli\ =\ temp\ *\ dsdqli;}}
+\DoxyCodeLine{00478\ }
+\DoxyCodeLine{00479\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ //\ Ematrix}}
+\DoxyCodeLine{00480\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ T\ sx\{\},sy\{\},lsx\{\},lsy\{\};}}
+\DoxyCodeLine{00481\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ for(int\ i\ =\ 0;\ i\ <\ NGL;\ i\ ++)\ \{}}
+\DoxyCodeLine{00482\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sx\ +=\ hp[m*NGL+i]\ *\ U[i];}}
+\DoxyCodeLine{00483\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sy\ +=\ hp[m*NGL+i]\ *\ V[i];}}
+\DoxyCodeLine{00484\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lsx\ +=\ hp[m*NGL+i]\ *\ lU[i];}}
+\DoxyCodeLine{00485\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lsy\ +=\ hp[m*NGL+i]\ *\ lV[i];}}
+\DoxyCodeLine{00486\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00487\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ -\/weight[m]\ /\ J\ *\ sx\ *\ lsx;}}
+\DoxyCodeLine{00488\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dL\ +=\ temp\ *\ sl;\ dc\_dQli\ +=\ temp\ *\ dsdqli;}}
+\DoxyCodeLine{00489\ }
+\DoxyCodeLine{00490\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ -\/\ weight[m]\ /\ J\ *\ sy\ *\ lsy;}}
+\DoxyCodeLine{00491\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dC\ =\ temp\ *\ sc;\ dc\_dQci\ =\ temp\ *\ dsdqci;}}
+\DoxyCodeLine{00492\ }
+\DoxyCodeLine{00493\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ //\ eta}}
+\DoxyCodeLine{00494\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ -\/\ (k2\ *\ weight[m]\ *\ U[m]\ *\ lsy\ +\ }}
+\DoxyCodeLine{00495\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ weight[m]\ *\ lU[m]\ *\ sy);}}
+\DoxyCodeLine{00496\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_deta\ =\ temp\ *\ (A*sa\ -\/\ two*L*sl);}}
+\DoxyCodeLine{00497\ }
+\DoxyCodeLine{00498\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ *=\ eta;}}
+\DoxyCodeLine{00499\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dA\ +=\ temp\ *\ sa;\ dc\_dQai\ +=\ temp\ *\ dsdqai;}}
+\DoxyCodeLine{00500\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dL\ +=\ -\/\ temp\ *\ two\ *\ sl;\ dc\_dQli\ +=\ -\/temp\ *\ two\ *\ dsdqli;}}
+\DoxyCodeLine{00501\ }
+\DoxyCodeLine{00502\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ k2\ *\ weight[m]\ *\ lV[m]\ *\ sx\ +\ weight[m]\ *\ V[m]\ *\ lsx;}}
+\DoxyCodeLine{00503\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ temp\ *=\ coef;}}
+\DoxyCodeLine{00504\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dL\ +=\ \ temp\ *\ sl;}}
+\DoxyCodeLine{00505\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dQli\ +=\ temp\ *\ dsdqli;}}
+\DoxyCodeLine{00506\ }
+\DoxyCodeLine{00507\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ //\ copy\ them\ to\ frekl}}
+\DoxyCodeLine{00508\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ int\ id1\ =\ iel\ *\ NGLL\ +\ m;}}
+\DoxyCodeLine{00509\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ if\ constexpr\ (std::is\_same\_v<T,float>)\ \{}}
+\DoxyCodeLine{00510\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[0*size+id1]\ =\ dc\_dA;}}
+\DoxyCodeLine{00511\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[1*size+id1]\ =\ dc\_dC;}}
+\DoxyCodeLine{00512\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[2*size+id1]\ =\ dc\_dL;}}
+\DoxyCodeLine{00513\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[3*size+id1]\ =\ dc\_deta;}}
+\DoxyCodeLine{00514\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[5*size+id1]\ =\ dc\_drho;}}
+\DoxyCodeLine{00515\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00516\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ else\ \{}}
+\DoxyCodeLine{00517\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dA,0);}}
+\DoxyCodeLine{00518\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dC,1);}}
+\DoxyCodeLine{00519\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dL,2);}}
+\DoxyCodeLine{00520\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_deta,3);}}
+\DoxyCodeLine{00521\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dQai,4);}}
+\DoxyCodeLine{00522\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dQci,5);}}
+\DoxyCodeLine{00523\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dQli,6);}}
+\DoxyCodeLine{00524\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_drho,9);}}
+\DoxyCodeLine{00525\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00526\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00527\ \textcolor{comment}{//\ \ \ \ \ \}}}
+\DoxyCodeLine{00528\ }
+\DoxyCodeLine{00529\ \textcolor{comment}{//\ \ \ \ \ //\ acoustic\ eleemnts}}
+\DoxyCodeLine{00530\ \textcolor{comment}{//\ \ \ \ \ std::array<T,NGRL>\ chi,lchi;}}
+\DoxyCodeLine{00531\ \textcolor{comment}{//\ \ \ \ \ for(int\ ispec\ =\ 0;\ ispec\ <\ nspec\_ac\ +\ nspec\_ac\_grl;\ ispec\ ++)\ \{}}
+\DoxyCodeLine{00532\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ int\ iel\ =\ ac\_elmnts[ispec];}}
+\DoxyCodeLine{00533\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ int\ id\ =\ ispec\ *\ NGLL;}}
+\DoxyCodeLine{00534\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ const\ float\ *weight\ =\ wgll.data();}}
+\DoxyCodeLine{00535\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ const\ float\ *hp\ =\ hprime.data();}}
+\DoxyCodeLine{00536\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ int\ NGL\ =\ NGLL;}}
+\DoxyCodeLine{00537\ }
+\DoxyCodeLine{00538\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ //\ jacobians}}
+\DoxyCodeLine{00539\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ float\ J\ =\ jaco[iel];}}
+\DoxyCodeLine{00540\ }
+\DoxyCodeLine{00541\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ //\ grl\ case}}
+\DoxyCodeLine{00542\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ if(ispec\ ==\ nspec\_ac)\ \{}}
+\DoxyCodeLine{00543\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ weight\ =\ wgrl.data();}}
+\DoxyCodeLine{00544\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ hp\ =\ hprime\_grl.data();}}
+\DoxyCodeLine{00545\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ NGL\ =\ NGRL;}}
+\DoxyCodeLine{00546\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \}\ \ \ }}
+\DoxyCodeLine{00547\ }
+\DoxyCodeLine{00548\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ //\ cache\ chi\ and\ lchi\ in\ one\ element}}
+\DoxyCodeLine{00549\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ for(int\ i\ =\ 0;\ i\ <\ NGL;\ i\ ++)\ \{}}
+\DoxyCodeLine{00550\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ int\ iglob\ =\ ibool\_ac[id\ +\ i];}}
+\DoxyCodeLine{00551\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ chi[i]\ =\ (iglob\ ==\ -\/1)\ ?\ 0:\ x[iglob+nglob\_el*2]\ *\ coef;}}
+\DoxyCodeLine{00552\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ lchi[i]\ =\ (iglob\ ==\ -\/1)\ ?\ 0.:\ y[iglob+nglob\_el*2];}}
+\DoxyCodeLine{00553\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ if\ \ constexpr\ (std::is\_same\_v<T,std::complex<float>>)\ \{}}
+\DoxyCodeLine{00554\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lchi[i]\ =\ std::conj(lchi[i]);}}
+\DoxyCodeLine{00555\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00556\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00557\ }
+\DoxyCodeLine{00558\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ //\ derivatives}}
+\DoxyCodeLine{00559\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ T\ dc\_dkappa\{\},dc\_drho\{\},\ dc\_dqki\{\};}}
+\DoxyCodeLine{00560\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ T\ sk\ =\ 1.,\ dskdqi\ =\ 0.;}}
+\DoxyCodeLine{00561\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ for(int\ m\ =\ 0;\ m\ <\ NGL;\ m\ ++\ )\{}}
+\DoxyCodeLine{00562\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ //\ copy\ material\ }}
+\DoxyCodeLine{00563\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ float\ rho\ =\ xrho\_ac[id+m];}}
+\DoxyCodeLine{00564\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ float\ kappa\ =\ xkappa\_ac[id+m];}}
+\DoxyCodeLine{00565\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ if\ constexpr\ (std::is\_same\_v<T,std::complex<float>>)\ \{}}
+\DoxyCodeLine{00566\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ get\_sls\_Q\_derivative(freq,xQk\_ac[id+m],sk,dskdqi);}}
+\DoxyCodeLine{00567\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dskdqi\ *=\ kappa;}}
+\DoxyCodeLine{00568\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00569\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00570\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ //\ kappa\ kernel}}
+\DoxyCodeLine{00571\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ T\ temp\ =\ std::pow(om/(sk\ *\ kappa),2)\ *weight[m]*\ J*}}
+\DoxyCodeLine{00572\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ chi[m]\ *\ lchi[m];}}
+\DoxyCodeLine{00573\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dkappa\ =\ temp\ *\ sk;}}
+\DoxyCodeLine{00574\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_dqki\ =\ \ temp\ *\ dskdqi;}}
+\DoxyCodeLine{00575\ }
+\DoxyCodeLine{00576\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_drho\ =\ -\/k2\ *\ std::pow(om/rho,2)\ *weight[m]*\ J*}}
+\DoxyCodeLine{00577\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ chi[m]\ *\ lchi[m];\ }}
+\DoxyCodeLine{00578\ }
+\DoxyCodeLine{00579\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ T\ sx\{\},sy\{\};}}
+\DoxyCodeLine{00580\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ for(int\ i\ =\ 0;\ i\ <\ NGL;\ i\ ++)\ \{}}
+\DoxyCodeLine{00581\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sx\ +=\ hp[m*NGL+i]\ *\ chi[i];}}
+\DoxyCodeLine{00582\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sy\ +=\ hp[m*NGL+i]\ *\ lchi[i];}}
+\DoxyCodeLine{00583\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00584\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ dc\_drho\ +=\ weight[m]\ /\ J\ /\ (rho*rho)\ *\ sx\ *\ sy;}}
+\DoxyCodeLine{00585\ }
+\DoxyCodeLine{00586\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ //\ copy\ to\ frekl}}
+\DoxyCodeLine{00587\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ int\ id1\ =\ iel\ *\ NGLL\ +\ m;}}
+\DoxyCodeLine{00588\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ if\ constexpr\ (std::is\_same\_v<T,float>)\ \{}}
+\DoxyCodeLine{00589\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[4*size+id1]\ =\ dc\_dkappa;}}
+\DoxyCodeLine{00590\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frekl\_r[5*size+id1]\ =\ dc\_drho;}}
+\DoxyCodeLine{00591\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00592\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ else\ \{}}
+\DoxyCodeLine{00593\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dkappa,7);}}
+\DoxyCodeLine{00594\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_dqki,8);}}
+\DoxyCodeLine{00595\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GET\_REAL(dc\_drho,9);}}
+\DoxyCodeLine{00596\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00597\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00598\ \textcolor{comment}{//\ \ \ \ \ \}}}
+\DoxyCodeLine{00599\ \textcolor{comment}{//\ \}}}
+\DoxyCodeLine{00600\ }
+\DoxyCodeLine{00601\ \ \ \ \ }
+\DoxyCodeLine{00602\ \}\ \textcolor{comment}{//\ namespace\ specswd}}
+\DoxyCodeLine{00603\ }
+\DoxyCodeLine{00604\ \textcolor{preprocessor}{\#undef\ GET\_REAL}}
+\DoxyCodeLine{00605\ }
+\DoxyCodeLine{00606\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

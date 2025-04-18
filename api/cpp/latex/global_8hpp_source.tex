@@ -1,0 +1,33 @@
+\doxysection{global.\+hpp}
+\hypertarget{global_8hpp_source}{}\label{global_8hpp_source}\index{global.hpp@{global.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ SPECSWD\_LIB\_GLOB\_H\_}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ SPECSWD\_LIB\_GLOB\_H\_}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}mesh/mesh.hpp"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}vti/vti.hpp"{}}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <complex>}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#define\ CNAME(a)\ extern\ "{}C"{}\ void\ a}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ global\ vars\ for\ solver/mesh}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{keyword}{namespace\ }specswd\_pylib}
+\DoxyCodeLine{00015\ \{}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{keyword}{extern}\ std::unique\_ptr<specswd::Mesh>\ M\_;}
+\DoxyCodeLine{00018\ \textcolor{keyword}{extern}\ std::unique\_ptr<specswd::SolverLove>\ LoveSol\_;}
+\DoxyCodeLine{00019\ \textcolor{keyword}{extern}\ std::unique\_ptr<specswd::SolverRayl>\ RaylSol\_;}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ global\ vars\ for\ eigenvalues/eigenvectors\ }}
+\DoxyCodeLine{00022\ \textcolor{keyword}{extern}\ std::vector<float>\ egnr\_,egnl\_,c\_,u\_;}
+\DoxyCodeLine{00023\ \textcolor{keyword}{extern}\ std::vector<specswd::scmplx>\ cegnr\_,cegnl\_,cc\_,cu\_;}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \}\ \textcolor{comment}{//\ namespace\ specswd\_pylib}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

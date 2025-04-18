@@ -1,0 +1,242 @@
+\doxysection{specswd\+::Solver\+Love Class Reference}
+\hypertarget{classspecswd_1_1_solver_love}{}\label{classspecswd_1_1_solver_love}\index{specswd::SolverLove@{specswd::SolverLove}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classspecswd_1_1_solver_love_a814718c8451461dbf06bcd44abc3dadd}\label{classspecswd_1_1_solver_love_a814718c8451461dbf06bcd44abc3dadd} 
+void {\bfseries prepare\+\_\+matrices} (const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&M)
+\begin{DoxyCompactList}\small\item\em prepare M/\+K/E matrices for Love wave, an/elastic case \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classspecswd_1_1_solver_love_a90f02fa55ac04e300c4c5c33c4007223}{compute\+\_\+egn}} (const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&M, std\+::vector$<$ float $>$ \&c, std\+::vector$<$ float $>$ \&egn, bool use\+\_\+qz=false)
+\begin{DoxyCompactList}\small\item\em compute Love wave dispersion and eigenfunctions, elastic case \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classspecswd_1_1_solver_love_a18a8b33f919fa95d87888afdf597d0c8}{compute\+\_\+egn\+\_\+att}} (const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&M, std\+::vector$<$ scmplx $>$ \&c, std\+::vector$<$ scmplx $>$ \&egn, bool use\+\_\+qz=false)
+\begin{DoxyCompactList}\small\item\em compute rayleigh wave dispersion and eigenfunctions, visco-\/elastic case \end{DoxyCompactList}\item 
+\Hypertarget{classspecswd_1_1_solver_love_a6994a414e98ffe3650d89d37d9ffce22}\label{classspecswd_1_1_solver_love_a6994a414e98ffe3650d89d37d9ffce22} 
+float {\bfseries group\+\_\+vel} (const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&M, float c, const float \texorpdfstring{$\ast$}{*}egn) const
+\begin{DoxyCompactList}\small\item\em compute velocity of love wave, elastic case \end{DoxyCompactList}\item 
+\Hypertarget{classspecswd_1_1_solver_love_a17c27ec2490d83f590afb18d2ec86742}\label{classspecswd_1_1_solver_love_a17c27ec2490d83f590afb18d2ec86742} 
+scmplx {\bfseries group\+\_\+vel\+\_\+att} (const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&M, scmplx c, const scmplx \texorpdfstring{$\ast$}{*}egn) const
+\begin{DoxyCompactList}\small\item\em compute velocity of love wave, anelastic case \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classspecswd_1_1_solver_love_aa8d094363eb717a0dea24ceb2a3fd86d}{compute\+\_\+phase\+\_\+kl}} (const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&M, float c, const float \texorpdfstring{$\ast$}{*}egn, std\+::vector$<$ float $>$ \&frekl) const
+\begin{DoxyCompactList}\small\item\em compute love wave phase velocity kernels, elastic case \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classspecswd_1_1_solver_love_a34d9df09948219009da2fcc30dfae05b}{compute\+\_\+phase\+\_\+kl\+\_\+att}} (const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&M, scmplx c, const scmplx \texorpdfstring{$\ast$}{*}egn, std\+::vector$<$ float $>$ \&frekl\+\_\+c, std\+::vector$<$ float $>$ \&frekl\+\_\+q) const
+\begin{DoxyCompactList}\small\item\em compute love wave phase velocity kernels, visco-\/elastic case \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classspecswd_1_1_solver_love_a31efeaa6e3c516269bbd2010ce7c62ce}{compute\+\_\+group\+\_\+kl}} (const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&M, float c, const float \texorpdfstring{$\ast$}{*}egn, std\+::vector$<$ float $>$ \&frekl) const
+\begin{DoxyCompactList}\small\item\em compute group velocity and kernels for love wave group velocity, elastic case \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classspecswd_1_1_solver_love_a70c25aaeaf3b8b7d1b2c85ac56a12d2c}{compute\+\_\+group\+\_\+kl\+\_\+att}} (const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&M, scmplx c, scmplx u, const scmplx \texorpdfstring{$\ast$}{*}egn, std\+::vector$<$ float $>$ \&frekl\+\_\+u, std\+::vector$<$ float $>$ \&frekl\+\_\+q) const
+\begin{DoxyCompactList}\small\item\em compute love wave group velocity kernels, visco-\/elastic case \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classspecswd_1_1_solver_love_ad2407ae6431b1c42cb07402924a33d85}{egn2displ}} (const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&M, float c, const float \texorpdfstring{$\ast$}{*}egn, float \texorpdfstring{$\ast$}{*}\+\_\+\+\_\+restrict displ) const
+\begin{DoxyCompactList}\small\item\em convert eigenvector to displacement,elastic case \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classspecswd_1_1_solver_love_a4dd64e9ccb1f02b49aa4e921ff4669af}{egn2displ\+\_\+att}} (const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&M, scmplx c, const scmplx \texorpdfstring{$\ast$}{*}egn, scmplx \texorpdfstring{$\ast$}{*}\+\_\+\+\_\+restrict displ) const
+\begin{DoxyCompactList}\small\item\em convert eigenvector to displacement, visco-\/elastic case \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classspecswd_1_1_solver_love_a3b95d4aebe024b40015e1f3990811f15}{transform\+\_\+kernels}} (const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&M, std\+::vector$<$ float $>$ \&frekl) const
+\begin{DoxyCompactList}\small\item\em transform modulus kernel to velocity kernel, Love wave case \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classspecswd_1_1_solver_love_a90f02fa55ac04e300c4c5c33c4007223}\index{specswd::SolverLove@{specswd::SolverLove}!compute\_egn@{compute\_egn}}
+\index{compute\_egn@{compute\_egn}!specswd::SolverLove@{specswd::SolverLove}}
+\doxysubsubsection{\texorpdfstring{compute\_egn()}{compute\_egn()}}
+{\footnotesize\ttfamily \label{classspecswd_1_1_solver_love_a90f02fa55ac04e300c4c5c33c4007223} 
+void specswd\+::\+Solver\+Love\+::compute\+\_\+egn (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&}]{mesh}{, }\item[{std\+::vector$<$ float $>$ \&}]{c}{, }\item[{std\+::vector$<$ float $>$ \&}]{egn}{, }\item[{bool}]{use\+\_\+qz}{ = {\ttfamily false}}\end{DoxyParamCaption})}
+
+
+
+compute Love wave dispersion and eigenfunctions, elastic case 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mesh} & \doxylink{structspecswd_1_1_mesh}{Mesh} class \\
+\hline
+{\em c} & dispersion, shape(nc) \\
+\hline
+{\em egn} & eigen functions(displ at y direction), shape(nc,nglob\+\_\+el) \\
+\hline
+{\em use\+\_\+qz} & if false, only compute phase velocities \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classspecswd_1_1_solver_love_a18a8b33f919fa95d87888afdf597d0c8}\index{specswd::SolverLove@{specswd::SolverLove}!compute\_egn\_att@{compute\_egn\_att}}
+\index{compute\_egn\_att@{compute\_egn\_att}!specswd::SolverLove@{specswd::SolverLove}}
+\doxysubsubsection{\texorpdfstring{compute\_egn\_att()}{compute\_egn\_att()}}
+{\footnotesize\ttfamily \label{classspecswd_1_1_solver_love_a18a8b33f919fa95d87888afdf597d0c8} 
+void specswd\+::\+Solver\+Love\+::compute\+\_\+egn\+\_\+att (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&}]{mesh}{, }\item[{std\+::vector$<$ scmplx $>$ \&}]{c}{, }\item[{std\+::vector$<$ scmplx $>$ \&}]{displ}{, }\item[{bool}]{use\+\_\+qz}{ = {\ttfamily false}}\end{DoxyParamCaption})}
+
+
+
+compute rayleigh wave dispersion and eigenfunctions, visco-\/elastic case 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mesh} & \doxylink{structspecswd_1_1_mesh}{Mesh} class \\
+\hline
+{\em c} & dispersion, shape(nc) c = c0(1 + i\+QL\texorpdfstring{$^\wedge$}{\string^}\{-\/1\}) \\
+\hline
+{\em displ} & eigen functions(displ at y direction), shape(nc,nglob\+\_\+el) \\
+\hline
+{\em use\+\_\+qz} & if true, save QZ matrix \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classspecswd_1_1_solver_love_a31efeaa6e3c516269bbd2010ce7c62ce}\index{specswd::SolverLove@{specswd::SolverLove}!compute\_group\_kl@{compute\_group\_kl}}
+\index{compute\_group\_kl@{compute\_group\_kl}!specswd::SolverLove@{specswd::SolverLove}}
+\doxysubsubsection{\texorpdfstring{compute\_group\_kl()}{compute\_group\_kl()}}
+{\footnotesize\ttfamily \label{classspecswd_1_1_solver_love_a31efeaa6e3c516269bbd2010ce7c62ce} 
+void specswd\+::\+Solver\+Love\+::compute\+\_\+group\+\_\+kl (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&}]{mesh}{, }\item[{float}]{c}{, }\item[{const float \texorpdfstring{$\ast$}{*}}]{egn}{, }\item[{std\+::vector$<$ float $>$ \&}]{frekl}{}\end{DoxyParamCaption}) const}
+
+
+
+compute group velocity and kernels for love wave group velocity, elastic case 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mesh} & \doxylink{structspecswd_1_1_mesh}{Mesh} class \\
+\hline
+{\em c} & current phase velocity \\
+\hline
+{\em egn} & eigen function, shape(nglob\+\_\+el) \\
+\hline
+{\em frekl} & Frechet kernels (N/\+L/rho) for elastic parameters, shape(3,nspec\texorpdfstring{$\ast$}{*}\+NGLL + NGRL) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classspecswd_1_1_solver_love_a70c25aaeaf3b8b7d1b2c85ac56a12d2c}\index{specswd::SolverLove@{specswd::SolverLove}!compute\_group\_kl\_att@{compute\_group\_kl\_att}}
+\index{compute\_group\_kl\_att@{compute\_group\_kl\_att}!specswd::SolverLove@{specswd::SolverLove}}
+\doxysubsubsection{\texorpdfstring{compute\_group\_kl\_att()}{compute\_group\_kl\_att()}}
+{\footnotesize\ttfamily \label{classspecswd_1_1_solver_love_a70c25aaeaf3b8b7d1b2c85ac56a12d2c} 
+void specswd\+::\+Solver\+Love\+::compute\+\_\+group\+\_\+kl\+\_\+att (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&}]{mesh}{, }\item[{scmplx}]{c}{, }\item[{scmplx}]{u}{, }\item[{const scmplx \texorpdfstring{$\ast$}{*}}]{egn}{, }\item[{std\+::vector$<$ float $>$ \&}]{frekl\+\_\+u}{, }\item[{std\+::vector$<$ float $>$ \&}]{frekl\+\_\+q}{}\end{DoxyParamCaption}) const}
+
+
+
+compute love wave group velocity kernels, visco-\/elastic case 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mesh} & \doxylink{structspecswd_1_1_mesh}{Mesh} class \\
+\hline
+{\em c} & current complex phase velocity \\
+\hline
+{\em u} & current complex group velocity \\
+\hline
+{\em egn} & eigen function, shape(nglob\+\_\+el) \\
+\hline
+{\em frekl\+\_\+u} & d\+Re(u)/d(N/\+L/\+QN/\+QL/rho) shape(5,nspec\texorpdfstring{$\ast$}{*}\+NGLL + NGRL) \\
+\hline
+{\em frekl\+\_\+q} & d(qi)/d(N/\+L/\+QN/\+QL/rho) shape(5,nspec\texorpdfstring{$\ast$}{*}\+NGLL + NGRL) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classspecswd_1_1_solver_love_aa8d094363eb717a0dea24ceb2a3fd86d}\index{specswd::SolverLove@{specswd::SolverLove}!compute\_phase\_kl@{compute\_phase\_kl}}
+\index{compute\_phase\_kl@{compute\_phase\_kl}!specswd::SolverLove@{specswd::SolverLove}}
+\doxysubsubsection{\texorpdfstring{compute\_phase\_kl()}{compute\_phase\_kl()}}
+{\footnotesize\ttfamily \label{classspecswd_1_1_solver_love_aa8d094363eb717a0dea24ceb2a3fd86d} 
+void specswd\+::\+Solver\+Love\+::compute\+\_\+phase\+\_\+kl (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&}]{M}{, }\item[{float}]{c}{, }\item[{const float \texorpdfstring{$\ast$}{*}}]{egn}{, }\item[{std\+::vector$<$ float $>$ \&}]{frekl}{}\end{DoxyParamCaption}) const}
+
+
+
+compute love wave phase velocity kernels, elastic case 
+
+
+\begin{DoxyParams}{Parameters}
+{\em M} & \doxylink{structspecswd_1_1_mesh}{Mesh} clas \\
+\hline
+{\em c} & current phase velocity \\
+\hline
+{\em egn} & eigen function, shape(nglob\+\_\+el) \\
+\hline
+{\em frekl} & Frechet kernels (N/\+L/rho) for elastic parameters, shape(3,nspec\texorpdfstring{$\ast$}{*}\+NGLL + NGRL) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classspecswd_1_1_solver_love_a34d9df09948219009da2fcc30dfae05b}\index{specswd::SolverLove@{specswd::SolverLove}!compute\_phase\_kl\_att@{compute\_phase\_kl\_att}}
+\index{compute\_phase\_kl\_att@{compute\_phase\_kl\_att}!specswd::SolverLove@{specswd::SolverLove}}
+\doxysubsubsection{\texorpdfstring{compute\_phase\_kl\_att()}{compute\_phase\_kl\_att()}}
+{\footnotesize\ttfamily \label{classspecswd_1_1_solver_love_a34d9df09948219009da2fcc30dfae05b} 
+void specswd\+::\+Solver\+Love\+::compute\+\_\+phase\+\_\+kl\+\_\+att (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&}]{M}{, }\item[{scmplx}]{c}{, }\item[{const scmplx \texorpdfstring{$\ast$}{*}}]{egn}{, }\item[{std\+::vector$<$ float $>$ \&}]{frekl\+\_\+c}{, }\item[{std\+::vector$<$ float $>$ \&}]{frekl\+\_\+q}{}\end{DoxyParamCaption}) const}
+
+
+
+compute love wave phase velocity kernels, visco-\/elastic case 
+
+
+\begin{DoxyParams}{Parameters}
+{\em M} & mesh class \\
+\hline
+{\em c} & current complex phase velocity \\
+\hline
+{\em egn} & eigen function, shape(nglob\+\_\+el) \\
+\hline
+{\em frekl\+\_\+c} & d\+Re(c)/d(N/\+L/\+QN/\+QL/rho) shape(5,nspec\texorpdfstring{$\ast$}{*}\+NGLL + NGRL) \\
+\hline
+{\em frekl\+\_\+q} & d(qi)/d(N/\+L/\+QN/\+QL/rho) shape(5,nspec\texorpdfstring{$\ast$}{*}\+NGLL + NGRL) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classspecswd_1_1_solver_love_ad2407ae6431b1c42cb07402924a33d85}\index{specswd::SolverLove@{specswd::SolverLove}!egn2displ@{egn2displ}}
+\index{egn2displ@{egn2displ}!specswd::SolverLove@{specswd::SolverLove}}
+\doxysubsubsection{\texorpdfstring{egn2displ()}{egn2displ()}}
+{\footnotesize\ttfamily \label{classspecswd_1_1_solver_love_ad2407ae6431b1c42cb07402924a33d85} 
+void specswd\+::\+Solver\+Love\+::egn2displ (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&}]{M}{, }\item[{float}]{c}{, }\item[{const float \texorpdfstring{$\ast$}{*}}]{egn}{, }\item[{float \texorpdfstring{$\ast$}{*}\+\_\+\+\_\+restrict}]{displ}{}\end{DoxyParamCaption}) const}
+
+
+
+convert eigenvector to displacement,elastic case 
+
+
+\begin{DoxyParams}{Parameters}
+{\em M} & mesh class \\
+\hline
+{\em c} & current phase velocity \\
+\hline
+{\em egn} & eigenvector \\
+\hline
+{\em displ} & output displacement, shape(nspec\texorpdfstring{$\ast$}{*}\+NGLL+\+NGRL) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classspecswd_1_1_solver_love_a4dd64e9ccb1f02b49aa4e921ff4669af}\index{specswd::SolverLove@{specswd::SolverLove}!egn2displ\_att@{egn2displ\_att}}
+\index{egn2displ\_att@{egn2displ\_att}!specswd::SolverLove@{specswd::SolverLove}}
+\doxysubsubsection{\texorpdfstring{egn2displ\_att()}{egn2displ\_att()}}
+{\footnotesize\ttfamily \label{classspecswd_1_1_solver_love_a4dd64e9ccb1f02b49aa4e921ff4669af} 
+void specswd\+::\+Solver\+Love\+::egn2displ\+\_\+att (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&}]{M}{, }\item[{scmplx}]{c}{, }\item[{const scmplx \texorpdfstring{$\ast$}{*}}]{egn}{, }\item[{scmplx \texorpdfstring{$\ast$}{*}\+\_\+\+\_\+restrict}]{displ}{}\end{DoxyParamCaption}) const}
+
+
+
+convert eigenvector to displacement, visco-\/elastic case 
+
+
+\begin{DoxyParams}{Parameters}
+{\em M} & mesh class \\
+\hline
+{\em c} & current phase velocity \\
+\hline
+{\em egn} & eigenvector \\
+\hline
+{\em displ} & output displacement, shape(nspec\texorpdfstring{$\ast$}{*}\+NGLL+\+NGRL) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classspecswd_1_1_solver_love_a3b95d4aebe024b40015e1f3990811f15}\index{specswd::SolverLove@{specswd::SolverLove}!transform\_kernels@{transform\_kernels}}
+\index{transform\_kernels@{transform\_kernels}!specswd::SolverLove@{specswd::SolverLove}}
+\doxysubsubsection{\texorpdfstring{transform\_kernels()}{transform\_kernels()}}
+{\footnotesize\ttfamily \label{classspecswd_1_1_solver_love_a3b95d4aebe024b40015e1f3990811f15} 
+void specswd\+::\+Solver\+Love\+::transform\+\_\+kernels (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structspecswd_1_1_mesh}{Mesh}} \&}]{M}{, }\item[{std\+::vector$<$ float $>$ \&}]{frekl}{}\end{DoxyParamCaption}) const}
+
+
+
+transform modulus kernel to velocity kernel, Love wave case 
+
+
+\begin{DoxyParams}{Parameters}
+{\em M} & mesh class \\
+\hline
+{\em frekl} & frechet kernels, the shape depends on\+:
+\begin{DoxyItemize}
+\item {\ttfamily 1}\+: elastic love wave\+: N/\+L/rho -\/\texorpdfstring{$>$}{>} vsh/vsv/rho ~\newline
+
+\item {\ttfamily 2}\+: anelastic love wave\+: N/\+L/\+QNi/\+QLi/rho -\/\texorpdfstring{$>$}{>} vsh/vsv/\+QNi/\+QLi/rho 
+\end{DoxyItemize}\\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+vti.\+hpp\item 
+eigenvalues.\+cpp\item 
+frechet.\+cpp\item 
+frechet\+\_\+group.\+cpp\item 
+group\+\_\+velocity.\+cpp\item 
+sem.\+cpp\item 
+transform.\+cpp\end{DoxyCompactItemize}
