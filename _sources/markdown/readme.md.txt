@@ -10,7 +10,7 @@
 
 2. packages:
 * [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) >= 3.4.0
-* [MKL](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html) or [LAPACK](https://github.com/Reference-LAPACK/lapack) (LAPACKE is required)
+* [MKL](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html) or [OpenBLAS](http://www.openmathlib.org/OpenBLAS/)
 * [doxygen](https://www.doxygen.nl/) for api document generation
 
 3. Python environments
