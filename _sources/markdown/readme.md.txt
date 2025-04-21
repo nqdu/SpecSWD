@@ -29,9 +29,9 @@ make -j4
 make install 
 ```
 
-5. Install low-level API docs
+5. Install low-level C++ API docs
 ```bash
-doxygen docs/api/cpp/config.cfg
+doxygen misc/doxygen/doxygen.cfg
 ```
 
 6. Python libraries

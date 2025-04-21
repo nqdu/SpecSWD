@@ -52,6 +52,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">specd package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-specd.THSolver">specd.THSolver module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd-attenuation-module">specd.attenuation module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-specd.specd">specd.specd module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-specd">Module contents</a></li>
 </ul>
@@ -123,11 +124,14 @@
 </dd></dl>
 
 </section>
+<section id="specd-attenuation-module">
+<h2>specd.attenuation module<a class="headerlink" href="#specd-attenuation-module" title="Link to this heading"></a></h2>
+</section>
 <section id="module-specd.specd">
 <span id="specd-specd-module"></span><h2>specd.specd module<a class="headerlink" href="#module-specd.specd" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="specd.specd.SpecWorkSpace">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">specd.specd.</span></span><span class="sig-name descname"><span class="pre">SpecWorkSpace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavetype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vpv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vsh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vsv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qa</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ql</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c21</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nQani</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qani</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.specd.SpecWorkSpace" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">specd.specd.</span></span><span class="sig-name descname"><span class="pre">SpecWorkSpace</span></span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.specd.SpecWorkSpace" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="specd.specd.SpecWorkSpace.compute_egn">
@@ -147,6 +151,44 @@ if True, phase velocities and eigenfunctions will be computed</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.specd.SpecWorkSpace.get_group_kl">
+<span class="sig-name descname"><span class="pre">get_group_kl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.get_group_kl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.specd.SpecWorkSpace.get_group_kl" title="Link to this definition"></a></dt>
+<dd><p>compute group velocity sensitivity kernels for mode {imode}</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>imode</strong> (<em>int</em>) – compute kernels at imode, imode elong [0,max_mode)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>frekl_c</strong> (<em>np.ndarray</em>) – group velocity kernels, shape(nkers,self._nz)</p></li>
+<li><p><strong>frekl_q</strong> (<em>np.ndarray</em>) – group velocity Q kernels,shape(nkers,self._nz), only returns when
+self._has_att = True</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.specd.SpecWorkSpace.get_phase_kl">
+<span class="sig-name descname"><span class="pre">get_phase_kl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.get_phase_kl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.specd.SpecWorkSpace.get_phase_kl" title="Link to this definition"></a></dt>
+<dd><p>compute phase velocity sensitivity kernels for mode {imode}</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>imode</strong> (<em>int</em>) – compute kernels at imode, imode elong [0,max_mode)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>frekl_c</strong> (<em>np.ndarray</em>) – phase velocity kernels, shape(nkers,self._nz)</p></li>
+<li><p><strong>frekl_q</strong> (<em>np.ndarray</em>) – phase velocity Q kernels,shape(nkers,self._nz), only returns when
+self._has_att = True</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -173,9 +215,31 @@ if True, phase velocities and eigenfunctions will be computed</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="specd.specd.SpecWorkSpace.print_info">
-<span class="sig-name descname"><span class="pre">print_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.print_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.specd.SpecWorkSpace.print_info" title="Link to this definition"></a></dt>
-<dd><p>print required information</p>
+<dt class="sig sig-object py" id="specd.specd.SpecWorkSpace.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavetype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vpv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vsh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vsv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qa</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ql</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c21</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nQani</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qani</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.specd.SpecWorkSpace.initialize" title="Link to this definition"></a></dt>
+<dd><p>initialize working space for SEM</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wavetype</strong> (<em>str</em>) – wavetype, one of [‘love’,’rayl’,’aniso’]</p></li>
+<li><p><strong>z</strong> (<em>np.ndarray</em>) – depth vector, should include discontinuities at half sapce</p></li>
+<li><p><strong>rho</strong> (<em>np.ndarray</em>) – density, shape_like(z)</p></li>
+<li><p><strong>vph/vpv/vsh/vsv</strong> (<em>np.ndarray</em>) – VTI parameters, shape_like(z)</p></li>
+<li><p><strong>Qa/Qc/Qn/Ql</strong> (<em>np.ndarray</em>) – VTI quality factors, shape_like(z)</p></li>
+<li><p><strong>c21</strong> (<em>np.ndarray</em>) – 21 elastic tensor, shape(21,nz)</p></li>
+<li><p><strong>nQani</strong> (<em>int</em>) – no. of Q models for fully anisotropy</p></li>
+<li><p><strong>Qnai</strong> (<em>np.ndarray</em>) – quality factors, shape(nQnai,nz)</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – if True print model information</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The input parameters should be carefully chose by user. For
+Love wave, only vsh/vsv/Qsh/Qsv can be enabled, and for
+Rayleigh wave, only vph/vpv/vsv can ve enabled, and
+other params are for full anisotropy</p>
+</div>
 </dd></dl>
 
 </dd></dl>

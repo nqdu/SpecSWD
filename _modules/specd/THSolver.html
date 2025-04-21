@@ -125,12 +125,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># check input args</span>
         <span class="k">assert</span> <span class="n">wavetype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Rc&#39;</span><span class="p">,</span><span class="s1">&#39;Rg&#39;</span><span class="p">,</span><span class="s1">&#39;Lc&#39;</span><span class="p">,</span><span class="s1">&#39;Lg&#39;</span><span class="p">],</span> <span class="s2">&quot;check wave type!&quot;</span>
-        <span class="n">c</span><span class="p">,</span><span class="n">flag</span> <span class="o">=</span> <span class="n">cps330</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span>
+        <span class="n">c</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">cps330</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_thick</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_vp</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_vs</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_rho</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">wavetype</span><span class="p">,</span><span class="n">mode</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_spherical</span><span class="p">)</span>
 
-        <span class="k">assert</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">c</span></div>
 </div>
 

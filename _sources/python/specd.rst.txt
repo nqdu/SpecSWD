@@ -12,6 +12,14 @@ specd.THSolver module
    :show-inheritance:
    :undoc-members:
 
+specd.attenuation module
+------------------------
+
+.. automodule:: specd.attenuation
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 specd.specd module
 ------------------
 

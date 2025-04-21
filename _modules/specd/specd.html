@@ -93,9 +93,19 @@
 <a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace">[docs]</a>
 <span class="k">class</span> <span class="nc">SpecWorkSpace</span><span class="p">:</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">wavetype</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">z</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">rho</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_mode</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span> <span class="o">=</span> <span class="kc">None</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_qz</span> <span class="o">=</span> <span class="kc">None</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="o">=</span> <span class="kc">None</span>  
+
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="SpecWorkSpace.initialize">
+<a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.initialize">[docs]</a>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">wavetype</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">z</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">rho</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                 <span class="n">vph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vpv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vsh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vsv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">Qa</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Ql</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">eta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qa</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Ql</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">c21</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">nQani</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qani</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -132,9 +142,10 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="o">=</span> <span class="n">wavetype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_use_qz</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nz</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
         <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;love&#39;</span><span class="p">,</span><span class="s1">&#39;rayl&#39;</span><span class="p">,</span><span class="s1">&#39;aniso&#39;</span><span class="p">])</span>
 
-        <span class="n">_model_sanity_check</span><span class="p">(</span><span class="n">wavetype</span><span class="p">,</span><span class="n">vpv</span><span class="p">,</span><span class="n">vph</span><span class="p">,</span><span class="n">vsv</span><span class="p">,</span><span class="n">vsh</span><span class="p">,</span><span class="n">Qa</span><span class="p">,</span>
+        <span class="n">_model_sanity_check</span><span class="p">(</span><span class="n">wavetype</span><span class="p">,</span><span class="n">vph</span><span class="p">,</span><span class="n">vpv</span><span class="p">,</span><span class="n">vsh</span><span class="p">,</span><span class="n">vsv</span><span class="p">,</span><span class="n">Qa</span><span class="p">,</span>
                             <span class="n">Qc</span><span class="p">,</span><span class="n">Qn</span><span class="p">,</span><span class="n">Ql</span><span class="p">,</span><span class="n">c21</span><span class="p">,</span><span class="n">nQani</span><span class="p">,</span><span class="n">Qani</span><span class="p">)</span>
         
         <span class="c1"># init work space by calling libswd</span>
@@ -144,8 +155,15 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">libswd</span><span class="o">.</span><span class="n">init_love</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">rho</span><span class="p">,</span><span class="n">vsh</span><span class="p">,</span><span class="n">vsv</span><span class="p">,</span><span class="n">Qn</span><span class="p">,</span><span class="n">Ql</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">,</span><span class="n">disp</span><span class="p">)</span>
 
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="o">==</span> <span class="s1">&#39;rayl&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Qn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">Qa</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">Qc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">libswd</span><span class="o">.</span><span class="n">init_rayl</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">rho</span><span class="p">,</span><span class="n">vph</span><span class="p">,</span><span class="n">vpv</span><span class="p">,</span><span class="n">vsv</span><span class="p">,</span><span class="n">eta</span><span class="p">,</span><span class="n">Qa</span><span class="p">,</span><span class="n">Qc</span><span class="p">,</span><span class="n">Ql</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">,</span><span class="n">disp</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;not implemented!&quot;</span><span class="p">)</span>
+            <span class="k">assert</span><span class="p">(</span><span class="mi">0</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="SpecWorkSpace.compute_egn">
 <a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.compute_egn">[docs]</a>
@@ -176,6 +194,9 @@
             <span class="n">c</span> <span class="o">=</span> <span class="n">libswd</span><span class="o">.</span><span class="n">compute_egn_att</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span><span class="n">max_order</span><span class="p">,</span><span class="n">use_qz</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">c</span> <span class="o">=</span> <span class="n">libswd</span><span class="o">.</span><span class="n">compute_egn</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span><span class="n">max_order</span><span class="p">,</span><span class="n">use_qz</span><span class="p">)</span>
+
+        <span class="c1"># save current mode number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_mode</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">c</span></div>
 
@@ -209,17 +230,65 @@
 
         <span class="k">return</span> <span class="n">u</span></div>
 
-    
-<div class="viewcode-block" id="SpecWorkSpace.print_info">
-<a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.print_info">[docs]</a>
-    <span class="k">def</span> <span class="nf">print_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+<div class="viewcode-block" id="SpecWorkSpace.get_phase_kl">
+<a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.get_phase_kl">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_phase_kl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">imode</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        print required information</span>
+<span class="sd">        compute phase velocity sensitivity kernels for mode {imode}</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -------------</span>
+<span class="sd">        imode : int </span>
+<span class="sd">            compute kernels at imode, imode \belong [0,max_mode)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -----------</span>
+<span class="sd">        frekl_c: np.ndarray</span>
+<span class="sd">            phase velocity kernels, shape(nkers,self._nz)</span>
+<span class="sd">        frekl_q: np.ndarray</span>
+<span class="sd">            phase velocity Q kernels,shape(nkers,self._nz), only returns when</span>
+<span class="sd">            self._has_att = True</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;hello&quot;</span></div>
-</div>
+        <span class="k">if</span><span class="p">(</span><span class="n">imode</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_mode</span><span class="p">):</span> 
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;imode should inside [0,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_mode</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="n">frekl_c</span><span class="p">,</span><span class="n">frekl_q</span> <span class="o">=</span> <span class="n">libswd</span><span class="o">.</span><span class="n">phase_kl</span><span class="p">(</span><span class="n">imode</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">frekl_c</span><span class="p">,</span><span class="n">frekl_q</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">frekl_c</span></div>
 
         
+<div class="viewcode-block" id="SpecWorkSpace.get_group_kl">
+<a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.get_group_kl">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_group_kl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">imode</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        compute group velocity sensitivity kernels for mode {imode}</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -------------</span>
+<span class="sd">        imode : int </span>
+<span class="sd">            compute kernels at imode, imode \belong [0,max_mode)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -----------</span>
+<span class="sd">        frekl_c: np.ndarray</span>
+<span class="sd">            group velocity kernels, shape(nkers,self._nz)</span>
+<span class="sd">        frekl_q: np.ndarray</span>
+<span class="sd">            group velocity Q kernels,shape(nkers,self._nz), only returns when</span>
+<span class="sd">            self._has_att = True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">imode</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_mode</span><span class="p">):</span> 
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;imode should inside [0,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_mode</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="n">frekl_c</span><span class="p">,</span><span class="n">frekl_q</span> <span class="o">=</span> <span class="n">libswd</span><span class="o">.</span><span class="n">group_kl</span><span class="p">(</span><span class="n">imode</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">frekl_c</span><span class="p">,</span><span class="n">frekl_q</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">frekl_c</span></div>
+</div>
+
 </pre></div>
 
            </div>
