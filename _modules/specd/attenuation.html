@@ -1,0 +1,447 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>specd.attenuation &mdash; SpecSWD  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            SpecSWD
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../markdown/readme.html">SpecSWD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../markdown/readme.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../markdown/Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../markdown/gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Library API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SpecSWD</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">specd.attenuation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for specd.attenuation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span> 
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">dual_annealing</span>
+
+<div class="viewcode-block" id="compute_q_sls_model">
+<a class="viewcode-back" href="../../python/specd.html#specd.attenuation.compute_q_sls_model">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_q_sls_model</span><span class="p">(</span><span class="n">y_sls</span><span class="p">,</span><span class="n">w_sls</span><span class="p">,</span><span class="n">om</span><span class="p">,</span><span class="n">exact</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    compute Q model by a given SLS coefficients:</span>
+<span class="sd">    Q^{-1}(om) =  D(om) / N(om)</span>
+<span class="sd">    where N(om) = \sum_p y[p] * om^2 / (om^2 + w[p]^2) and </span>
+<span class="sd">    D(om) = y[p] * om^2 / (om^2 + w[p]^2)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y_sls: np.ndarray</span>
+<span class="sd">        y coefficients, shape(NSLS)</span>
+<span class="sd">    w_sls: np.ndarray</span>
+<span class="sd">        w coefficients, shape(NSLS)</span>
+<span class="sd">    om: np.ndarray</span>
+<span class="sd">        current angular frequency</span>
+<span class="sd">    exact: bool</span>
+<span class="sd">        if True, N(om) and D(om) are all computed. Else set N =1.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Q_ls</span> <span class="o">=</span> <span class="mf">1.</span> 
+    <span class="n">nsls</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_sls</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">exact</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsls</span><span class="p">):</span>
+            <span class="n">Q_ls</span> <span class="o">+=</span> <span class="n">y_sls</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">*</span> <span class="n">om</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">om</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">w_sls</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># denom</span>
+    <span class="n">Q_demon</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsls</span><span class="p">):</span>
+        <span class="n">Q_demon</span> <span class="o">+=</span> <span class="n">y_sls</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">*</span> <span class="n">om</span> <span class="o">*</span> <span class="n">w_sls</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">om</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">w_sls</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">Q_ls</span> <span class="o">/</span> <span class="n">Q_demon</span></div>
+
+
+<span class="k">def</span> <span class="nf">_compute_q_model</span><span class="p">(</span><span class="n">Q0</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">om</span><span class="p">,</span><span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span><span class="n">om_ref</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    User defined power law Q model: Q = Q0 (om/om_ref)**alpha</span>
+
+<span class="sd">    Parameters </span>
+<span class="sd">    ----------</span>
+<span class="sd">    Q0: float</span>
+<span class="sd">        target constant Q</span>
+<span class="sd">    om: np.ndarray</span>
+<span class="sd">        angular frequency used</span>
+<span class="sd">    alpha: float</span>
+<span class="sd">        power factor</span>
+<span class="sd">    om_ref: float</span>
+<span class="sd">        reference angular frequency</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    q: np.ndarray</span>
+<span class="sd">        target q model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">Q0</span> <span class="o">*</span> <span class="p">(</span><span class="n">om</span> <span class="o">/</span> <span class="n">om_ref</span><span class="p">)</span> <span class="o">**</span> <span class="n">alpha</span>
+
+    <span class="k">return</span> <span class="n">q</span>
+
+<span class="k">def</span> <span class="nf">_misfit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">om</span><span class="p">,</span><span class="n">q_target</span><span class="p">,</span><span class="n">weights</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    misfit function of targeted and synthetic Q model  = 1/2 \int d\om log[(Q_sls / Q_target)]**2 * weights </span>
+
+<span class="sd">    Parameter</span>
+<span class="sd">    ------------</span>
+<span class="sd">    x: np.ndarray</span>
+<span class="sd">        sls coefs [y,w] with shape(NSLS * 2)</span>
+<span class="sd">    om: np.ndarray</span>
+<span class="sd">        angular frequency used</span>
+<span class="sd">    q_target: np.ndarray</span>
+<span class="sd">        target Q model at om </span>
+<span class="sd">    weights: np.darray or float</span>
+<span class="sd">        weights </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -----------</span>
+<span class="sd">    f: float</span>
+<span class="sd">        misfit = 1/2 \int d\om log[(Q_sls / Q_target)]**2 * weights </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NSLS</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">y_sls</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="n">NSLS</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1.</span> 
+    <span class="n">w_sls</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">NSLS</span><span class="p">:]</span> <span class="o">*</span> <span class="mf">1.</span> 
+    <span class="n">q_sls</span> <span class="o">=</span> <span class="n">compute_q_sls_model</span><span class="p">(</span><span class="n">y_sls</span><span class="p">,</span><span class="n">w_sls</span><span class="p">,</span><span class="n">om</span><span class="p">,</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">q_sls</span><span class="o">/</span><span class="n">q_target</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span> 
+
+<div class="viewcode-block" id="y_corrector">
+<a class="viewcode-back" href="../../python/specd.html#specd.attenuation.y_corrector">[docs]</a>
+<span class="k">def</span> <span class="nf">y_corrector</span><span class="p">(</span><span class="n">y_sls</span><span class="p">,</span><span class="n">Q_ref</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">Q</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    correction from reference y to target y </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    --------------</span>
+<span class="sd">    y_sls: np.ndarray</span>
+<span class="sd">        y factor for refernce sls model</span>
+<span class="sd">    Q_ref: float</span>
+<span class="sd">        refernce Q</span>
+<span class="sd">    Q: float</span>
+<span class="sd">        target Q</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># note y_sls is fitted</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y_sls</span> <span class="o">/</span> <span class="n">Q</span> <span class="o">*</span> <span class="n">Q_ref</span> 
+    <span class="n">dy</span> <span class="o">=</span> <span class="n">y</span> <span class="o">*</span> <span class="mf">0.</span> 
+
+    <span class="c1"># corrector</span>
+    <span class="n">dy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)):</span>
+        <span class="n">dy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dy</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">dy</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    
+    <span class="c1"># corrected y_sls</span>
+    <span class="k">return</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">y</span> </div>
+
+
+<div class="viewcode-block" id="compute_sls_coefs">
+<a class="viewcode-back" href="../../python/specd.html#specd.attenuation.compute_sls_coefs">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_sls_coefs</span><span class="p">(</span><span class="n">freqmin</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">freqmax</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">NSLS</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">nfsamp</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                      <span class="n">weight_by_freq</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;dual&#39;</span><span class="p">,</span>
+                      <span class="n">Q_ref</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span><span class="n">random_seed</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    compute SLS coefs for reference model, by nonlinear inversion</span>
+
+<span class="sd">    Parameter</span>
+<span class="sd">    ------------</span>
+<span class="sd">    freqmin: float</span>
+<span class="sd">        minimum frequency</span>
+<span class="sd">    freqmax: float</span>
+<span class="sd">        maximum frequency</span>
+<span class="sd">    NSLS: int</span>
+<span class="sd">        no. of SLS solids, default = 5</span>
+<span class="sd">    nfsamp: int</span>
+<span class="sd">        no. of sampling points in [freqmin,freqmax], default = 100</span>
+<span class="sd">    weight_by_freq: bool</span>
+<span class="sd">        if apply frequency weighting in misfit function ,default = True</span>
+<span class="sd">    method: str</span>
+<span class="sd">        one of [&#39;dual&#39;,&#39;simulated&#39;], dual or regular simulated annealling</span>
+<span class="sd">    Q_ref: float</span>
+<span class="sd">        reference Q value, default is 1. Donnot change it unless you know what you&#39;re doning</span>
+<span class="sd">    random_seed: int</span>
+<span class="sd">        random seed, default 10</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    ------------</span>
+<span class="sd">    y: np.ndarray</span>
+<span class="sd">        SLS factor</span>
+<span class="sd">    w: np.ndarray</span>
+<span class="sd">        SLS angular frequency</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># get min/max freq, with a bigger range</span>
+    <span class="n">min_freq</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">freqmin</span> 
+    <span class="n">max_freq</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">freqmax</span> 
+
+    <span class="c1"># check OPT_METHOD</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dual&#39;</span><span class="p">,</span><span class="s1">&#39;simulated&#39;</span><span class="p">])</span>
+    
+    <span class="c1"># get om vector</span>
+    <span class="n">om</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">min_freq</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">max_freq</span><span class="p">),</span><span class="n">nfsamp</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span> 
+
+    <span class="c1"># initial y_sls and w_sls</span>
+    <span class="n">w_sls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">min_freq</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">max_freq</span><span class="p">),</span><span class="n">NSLS</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span> 
+    <span class="n">y_sls</span> <span class="o">=</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">NSLS</span><span class="p">))</span> <span class="o">/</span> <span class="n">Q_ref</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_sls</span><span class="p">,</span><span class="n">w_sls</span><span class="p">)</span>
+
+    <span class="c1"># weight factor</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">om</span> <span class="o">*</span> <span class="mi">0</span> <span class="o">+</span> <span class="mf">1.</span>
+    <span class="k">if</span> <span class="n">weight_by_freq</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">om</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">om</span><span class="p">)</span>
+
+    <span class="c1"># target Q model</span>
+    <span class="n">q_target</span> <span class="o">=</span> <span class="n">_compute_q_model</span><span class="p">(</span><span class="n">Q_ref</span><span class="p">,</span><span class="n">om</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;simulated&#39;</span><span class="p">:</span>
+        <span class="c1"># set random seed</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">random_seed</span><span class="p">)</span>
+
+        <span class="c1"># now call a simulated annealing optimizer</span>
+        <span class="n">Tw</span> <span class="o">=</span> <span class="mf">0.1</span> 
+        <span class="n">Ty</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">chi</span> <span class="o">=</span> <span class="n">_misfit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">om</span><span class="p">,</span><span class="n">q_target</span><span class="p">,</span><span class="n">weights</span><span class="p">)</span>
+        
+        <span class="n">x_test</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="mf">1.</span>
+        <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100000</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NSLS</span><span class="p">):</span>
+                <span class="n">x_test</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">())</span> <span class="o">*</span> <span class="n">Ty</span><span class="p">)</span>
+                <span class="n">x_test</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">NSLS</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">NSLS</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">())</span> <span class="o">*</span> <span class="n">Tw</span><span class="p">)</span>
+            
+            <span class="c1"># compute Q </span>
+            <span class="n">chi_test</span> <span class="o">=</span> <span class="n">_misfit_func</span><span class="p">(</span><span class="n">x_test</span><span class="p">,</span><span class="n">om</span><span class="p">,</span><span class="n">q_target</span><span class="p">,</span><span class="n">weights</span><span class="p">)</span>
+            <span class="n">Ty</span> <span class="o">*=</span> <span class="mf">0.995</span>
+            <span class="n">Tw</span> <span class="o">*=</span> <span class="mf">0.995</span>
+            
+            <span class="c1"># check if accept this parameter</span>
+            <span class="k">if</span> <span class="n">chi_test</span> <span class="o">&lt;</span> <span class="n">chi</span><span class="p">:</span>
+                <span class="n">x</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">x_test</span><span class="p">[:]</span> <span class="o">*</span> <span class="mf">1.</span>
+                <span class="n">chi</span> <span class="o">=</span> <span class="n">chi_test</span> <span class="o">*</span> <span class="mf">1.</span>
+
+        <span class="c1"># return taget model</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;final misift = &#39;</span><span class="p">,</span><span class="n">chi</span><span class="p">)</span>
+        <span class="n">y_opt</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="n">NSLS</span><span class="p">]</span>
+        <span class="n">w_opt</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">NSLS</span><span class="p">:]</span>
+    <span class="k">else</span> <span class="p">:</span> <span class="c1"># dual annealing</span>
+        <span class="c1"># set search boundary for w_sls and y_sls</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NSLS</span><span class="p">):</span>
+            <span class="n">y_min</span> <span class="o">=</span> <span class="n">y_sls</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.8</span>
+            <span class="n">y_max</span> <span class="o">=</span> <span class="n">y_sls</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1.5</span>
+            <span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">y_min</span><span class="p">,</span><span class="n">y_max</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NSLS</span><span class="p">):</span>
+            <span class="n">w_min</span> <span class="o">=</span> <span class="n">w_sls</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.8</span>
+            <span class="n">w_max</span> <span class="o">=</span> <span class="n">w_sls</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1.5</span>
+            <span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">w_min</span><span class="p">,</span><span class="n">w_max</span><span class="p">))</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">dual_annealing</span><span class="p">(</span><span class="n">_misfit_func</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">om</span><span class="p">,</span><span class="n">q_target</span><span class="p">,</span><span class="n">weights</span><span class="p">),</span>  \
+                             <span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">maxiter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">seed</span><span class="o">=</span><span class="n">random_seed</span><span class="p">)</span>
+        <span class="n">y_opt</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">[:</span><span class="n">NSLS</span><span class="p">]</span>
+        <span class="n">w_opt</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">NSLS</span><span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">y_opt</span><span class="p">,</span><span class="n">w_opt</span></div>
+
+
+<div class="viewcode-block" id="test">
+<a class="viewcode-back" href="../../python/specd.html#specd.attenuation.test">[docs]</a>
+<span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="c1"># set your parameters here </span>
+    <span class="c1">##### target Q power law model Q(w) = Q (w / w_ref)^alpha</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.</span>   <span class="c1"># </span>
+    <span class="n">om_ref</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="mi">20</span>
+
+    <span class="c1"># SLS q model</span>
+    <span class="n">NSLS</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">min_freq</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="mf">1.0e-2</span>
+    <span class="n">max_freq</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="n">nfsamp</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1"># no. of frequency points in om to fit Q model</span>
+    <span class="n">weight_by_freq</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># optimization method</span>
+    <span class="n">OPT_METHOD</span> <span class="o">=</span> <span class="s1">&#39;dual&#39;</span> <span class="c1"># 1 for simulated annealing and 2 for dual anneling</span>
+    <span class="n">rand_seed</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="c1">#### STOP HERE  #####</span>
+
+    <span class="c1"># reference Q to fitting</span>
+    <span class="n">Q_ref</span> <span class="o">=</span> <span class="mf">1.</span>
+
+    <span class="c1"># check OPT_METHOD</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">OPT_METHOD</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dual&#39;</span><span class="p">,</span><span class="s1">&#39;simulated&#39;</span><span class="p">])</span>
+    
+    <span class="c1"># get om vector</span>
+    <span class="n">om</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">min_freq</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">max_freq</span><span class="p">),</span><span class="n">nfsamp</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span> 
+
+    <span class="c1"># initial y_sls and w_sls</span>
+    <span class="n">w_sls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">min_freq</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">max_freq</span><span class="p">),</span><span class="n">NSLS</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span> 
+    <span class="n">y_sls</span> <span class="o">=</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">NSLS</span><span class="p">))</span> <span class="o">/</span> <span class="n">Q_ref</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_sls</span><span class="p">,</span><span class="n">w_sls</span><span class="p">)</span>
+
+    <span class="c1"># weight factor</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">om</span> <span class="o">*</span> <span class="mi">0</span> <span class="o">+</span> <span class="mf">1.</span>
+    <span class="k">if</span> <span class="n">weight_by_freq</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">om</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">om</span><span class="p">)</span>
+
+    <span class="c1"># target Q model</span>
+    <span class="n">q_target</span> <span class="o">=</span> <span class="n">_compute_q_model</span><span class="p">(</span><span class="n">Q_ref</span><span class="p">,</span><span class="n">om</span><span class="p">,</span><span class="n">alpha</span><span class="p">,</span><span class="n">om_ref</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">OPT_METHOD</span> <span class="o">==</span> <span class="s1">&#39;simulated&#39;</span><span class="p">:</span>
+        <span class="c1"># set random seed</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">rand_seed</span><span class="p">)</span>
+
+        <span class="c1"># now call a simulated annealing optimizer</span>
+        <span class="n">Tw</span> <span class="o">=</span> <span class="mf">0.1</span> 
+        <span class="n">Ty</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">chi</span> <span class="o">=</span> <span class="n">_misfit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">om</span><span class="p">,</span><span class="n">q_target</span><span class="p">,</span><span class="n">weights</span><span class="p">)</span>
+        
+        <span class="n">x_test</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="mf">1.</span>
+        <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100000</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NSLS</span><span class="p">):</span>
+                <span class="n">x_test</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">())</span> <span class="o">*</span> <span class="n">Ty</span><span class="p">)</span>
+                <span class="n">x_test</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">NSLS</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">NSLS</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">())</span> <span class="o">*</span> <span class="n">Tw</span><span class="p">)</span>
+            
+            <span class="c1"># compute Q </span>
+            <span class="n">chi_test</span> <span class="o">=</span> <span class="n">_misfit_func</span><span class="p">(</span><span class="n">x_test</span><span class="p">,</span><span class="n">om</span><span class="p">,</span><span class="n">q_target</span><span class="p">,</span><span class="n">weights</span><span class="p">)</span>
+            <span class="n">Ty</span> <span class="o">*=</span> <span class="mf">0.995</span>
+            <span class="n">Tw</span> <span class="o">*=</span> <span class="mf">0.995</span>
+            
+            <span class="c1"># check if accept this parameter</span>
+            <span class="k">if</span> <span class="n">chi_test</span> <span class="o">&lt;</span> <span class="n">chi</span><span class="p">:</span>
+                <span class="n">x</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">x_test</span><span class="p">[:]</span> <span class="o">*</span> <span class="mf">1.</span>
+                <span class="n">chi</span> <span class="o">=</span> <span class="n">chi_test</span> <span class="o">*</span> <span class="mf">1.</span>
+
+        <span class="c1"># return taget model</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;final misift = &#39;</span><span class="p">,</span><span class="n">chi</span><span class="p">)</span>
+        <span class="n">y_opt</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="n">NSLS</span><span class="p">]</span>
+        <span class="n">w_opt</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">NSLS</span><span class="p">:]</span>
+    <span class="k">else</span> <span class="p">:</span> <span class="c1"># dual annealing</span>
+        <span class="c1"># set search boundary for w_sls and y_sls</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NSLS</span><span class="p">):</span>
+            <span class="n">y_min</span> <span class="o">=</span> <span class="n">y_sls</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.8</span>
+            <span class="n">y_max</span> <span class="o">=</span> <span class="n">y_sls</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1.5</span>
+            <span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">y_min</span><span class="p">,</span><span class="n">y_max</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NSLS</span><span class="p">):</span>
+            <span class="n">w_min</span> <span class="o">=</span> <span class="n">w_sls</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.8</span>
+            <span class="n">w_max</span> <span class="o">=</span> <span class="n">w_sls</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1.5</span>
+            <span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">w_min</span><span class="p">,</span><span class="n">w_max</span><span class="p">))</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">dual_annealing</span><span class="p">(</span><span class="n">_misfit_func</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">om</span><span class="p">,</span><span class="n">q_target</span><span class="p">,</span><span class="n">weights</span><span class="p">),</span>  \
+                             <span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">maxiter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">seed</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+        <span class="n">y_opt</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">[:</span><span class="n">NSLS</span><span class="p">]</span>
+        <span class="n">w_opt</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">NSLS</span><span class="p">:]</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># # save optimized y_sls and w_sls</span>
+    <span class="c1"># fio = open(&quot;include/atteunuation_table.hpp&quot;,&quot;w&quot;)</span>
+    <span class="c1"># fio.write(&quot;#include &lt;array&gt;\n&quot;)</span>
+    <span class="c1"># fio.write(&quot;const int NSLS = 5;\n&quot;)</span>
+    <span class="c1"># y_opt_str = &quot;,&quot;.join([str(y_opt[i]) for i in range(len(y_opt))])</span>
+    <span class="c1"># w_opt_str = &quot;,&quot;.join([str(w_opt[i]) for i in range(len(y_opt))])</span>
+    <span class="c1"># fio.write(&quot;const std::array&lt;double,NSLS&gt; y_sls_ref = {%s};\n&quot; % (y_opt_str))</span>
+    <span class="c1"># fio.write(&quot;const std::array&lt;double,NSLS&gt; w_sls_ref = {%s};\n&quot; % (w_opt_str))</span>
+    <span class="c1"># fio.close()</span>
+
+    <span class="c1"># plot Q model</span>
+    <span class="n">om_plot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">min_freq</span><span class="o">*</span><span class="mf">0.01</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">max_freq</span><span class="o">*</span><span class="mi">100</span><span class="p">),</span><span class="mi">500</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;optimized y_sls_ref = &#39;</span><span class="p">,</span><span class="n">y_opt</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;optimized w_sls_ref = &#39;</span><span class="p">,</span><span class="n">w_opt</span><span class="p">)</span>
+    <span class="n">y_opt</span> <span class="o">=</span> <span class="n">y_corrector</span><span class="p">(</span><span class="n">y_opt</span><span class="p">,</span><span class="n">Q_ref</span><span class="p">,</span><span class="n">Q</span><span class="p">)</span>
+    <span class="n">Q_opt</span> <span class="o">=</span> <span class="n">compute_q_sls_model</span><span class="p">(</span><span class="n">y_opt</span><span class="p">,</span><span class="n">w_opt</span><span class="p">,</span><span class="n">om_plot</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">Q_pow</span> <span class="o">=</span> <span class="n">_compute_q_model</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span><span class="n">om_plot</span><span class="p">,</span><span class="n">alpha</span><span class="p">,</span><span class="n">om_ref</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">om_plot</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span><span class="mf">1.</span><span class="o">/</span><span class="n">Q_opt</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;1/Q_opt&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">om_plot</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span><span class="mf">1.</span><span class="o">/</span><span class="n">Q_pow</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;1/Q_target&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency,Hz&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;$Q^{-1}$&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">min_freq</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">max_freq</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;Qmodel.jpg&quot;</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

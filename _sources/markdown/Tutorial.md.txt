@@ -41,7 +41,8 @@ model = np.array([
 z,rho,vsh,vsv,_,_ = (model[:, i].reshape(3) for i in range(6))
 
 # create work space
-ws = SpecWorkSpace('love',z,rho,vsh=vsh,vsv=vsv,disp=True)
+ws = SpecWorkSpace()
+ws.initialize('love',z,rho,vsh=vsh,vsv=vsv,disp=True)
 
 # compute phase velocity
 c = ws.compute_egn(1.,-1,False)

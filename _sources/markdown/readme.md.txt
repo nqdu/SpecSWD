@@ -17,7 +17,7 @@
 ```bash
 conda create -n specswd python=3.10
 conda activate specswd
-conda install numpy scipy matplotlib pybind11
+conda install numpy scipy matplotlib pybind11 numba
 ```
 
 4. Install
@@ -36,5 +36,5 @@ doxygen misc/doxygen/doxygen.cfg
 
 6. Python libraries
 ```bash
-pip install .
+pip install -e .
 ```

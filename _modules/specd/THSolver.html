@@ -97,10 +97,10 @@
 <span class="sd">            density</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># backup input params</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_thick</span> <span class="o">=</span> <span class="n">thick</span> 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_vp</span> <span class="o">=</span> <span class="n">vp</span> 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_vs</span> <span class="o">=</span> <span class="n">vs</span> 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_rho</span> <span class="o">=</span> <span class="n">rho</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thick</span> <span class="o">=</span> <span class="n">thick</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vp</span> <span class="o">=</span> <span class="n">vp</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vs</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rho</span> <span class="o">=</span> <span class="n">rho</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_spherical</span> <span class="o">=</span> <span class="n">spherical</span>
     
 <div class="viewcode-block" id="THSolver.compute_swd">

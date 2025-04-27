@@ -1,0 +1,29 @@
+specd.lib package
+=================
+
+Submodules
+----------
+
+specd.lib.cps330 module
+-----------------------
+
+.. automodule:: specd.lib.cps330
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+specd.lib.libswd module
+-----------------------
+
+.. automodule:: specd.lib.libswd
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: specd.lib
+   :members:
+   :show-inheritance:
+   :undoc-members:
