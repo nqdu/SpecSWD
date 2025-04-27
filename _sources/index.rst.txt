@@ -1,4 +1,4 @@
-Welcome to My Project
+Welcome to SpecSWD
 =====================
 
 .. toctree::
