@@ -107,6 +107,7 @@
 <li class="toctree-l3"><a class="reference internal" href="specd.lib.html#specd.lib.libswd.compute_egn"><code class="docutils literal notranslate"><span class="pre">compute_egn()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="specd.lib.html#specd.lib.libswd.compute_egn_att"><code class="docutils literal notranslate"><span class="pre">compute_egn_att()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="specd.lib.html#specd.lib.libswd.get_egn"><code class="docutils literal notranslate"><span class="pre">get_egn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="specd.lib.html#specd.lib.libswd.get_znodes"><code class="docutils literal notranslate"><span class="pre">get_znodes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="specd.lib.html#specd.lib.libswd.group_kl"><code class="docutils literal notranslate"><span class="pre">group_kl()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="specd.lib.html#specd.lib.libswd.group_vel"><code class="docutils literal notranslate"><span class="pre">group_vel()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="specd.lib.html#specd.lib.libswd.group_vel_att"><code class="docutils literal notranslate"><span class="pre">group_vel_att()</span></code></a></li>
@@ -260,6 +261,23 @@ if True, phase velocities and eigenfunctions will be computed</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="specd.specd.SpecWorkSpace.get_egnfunc">
+<span class="sig-name descname"><span class="pre">get_egnfunc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_displ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.get_egnfunc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.specd.SpecWorkSpace.get_egnfunc" title="Link to this definition"></a></dt>
+<dd><p>get eigenfunctions at current frequency/mode</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imode</strong> (<em>int</em>) – mode number</p></li>
+<li><p><strong>return_left</strong> (<em>bool</em>) – if true, return left eigenvectors
+else return right eigenvectors</p></li>
+<li><p><strong>return_displ</strong> (<em>bool</em>) – if true return displacement instead of eigenvectors
+e.g. in scholte wave, eigenvectors = [u,v^{ar},chi^{ar}]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="specd.specd.SpecWorkSpace.get_group_kl">
 <span class="sig-name descname"><span class="pre">get_group_kl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.get_group_kl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.specd.SpecWorkSpace.get_group_kl" title="Link to this definition"></a></dt>
 <dd><p>compute group velocity sensitivity kernels for mode {imode}</p>
@@ -295,6 +313,12 @@ self._has_att = True</p></li>
 </p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.specd.SpecWorkSpace.get_znodes">
+<span class="sig-name descname"><span class="pre">get_znodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.get_znodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.specd.SpecWorkSpace.get_znodes" title="Link to this definition"></a></dt>
+<dd><p>get mesh coordiantes, shape(nspec*NGLL+NGRL)</p>
 </dd></dl>
 
 <dl class="py method">

@@ -49,6 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Tutorial</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Gallery</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#two-layer-love-wave-model">Two layer Love wave Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scholte-wave-example">Scholte Wave example</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python Library API Reference</a></li>
@@ -118,6 +119,53 @@
 <em>Benchmark of phase velocity sensitivity kernels ith Analytical Solution</em></p>
 <p><img alt="image" src="../_images/group_deriv_veloc_att.jpg" />
 <em>Benchmark of group velocity sensitivity kernels ith Analytical Solution</em></p>
+</section>
+<section id="scholte-wave-example">
+<h2>Scholte Wave example<a class="headerlink" href="#scholte-wave-example" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Layer Number</p></th>
+<th class="head"><p>h</p></th>
+<th class="head"><p>$\rho$</p></th>
+<th class="head"><p>$\alpha$</p></th>
+<th class="head"><p>$\beta$</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>5</p></td>
+<td><p>2.8</p></td>
+<td><p>1.0</p></td>
+<td><p>1.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>45</p></td>
+<td><p>2.8</p></td>
+<td><p>2.57</p></td>
+<td><p>5.22</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>50</p></td>
+<td><p>2.8</p></td>
+<td><p>2.95</p></td>
+<td><p>6.94</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>$\infty$</p></td>
+<td><p>3.57</p></td>
+<td><p>5.0</p></td>
+<td><p>8.75</p></td>
+</tr>
+</tbody>
+</table>
+<p><img alt="image" src="../_images/eigenvalues.jpg" />
+<em>Benchmark of phase/group/ velocities with CPS330.</em></p>
+<p><img alt="image" src="../_images/eigenvecs.jpg" />
+<em>Normalized eigenfunctions</em></p>
+<p><img alt="image" src="../_images/phase_deriv.jpg" />
+<em>Benchmark of phase velocity derivativates with FD approximation</em></p>
+<p><img alt="image" src="../_images/group_deriv.jpg" />
+<em>Benchmark of group velocity derivativates with FD approximation</em></p>
 <!-- # Gallery
 ### Benchmark: SWDTTI with CPS330
 ![image](example//rayleigh/phase.jpg)
