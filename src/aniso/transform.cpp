@@ -90,7 +90,7 @@ egn2displ_aniso(int nspec_el,int nspec_ac,int nspec_el_grl,int nspec_ac_grl,
  * @param egn eigenfunction,shape(nglob_el*2+nglob_ac)
  * @param displ displacement, shape(2,npts)
  */
-void SolverAni::
+void SolverAniso::
 egn2displ(const Mesh &M,
          float c,
          const scmplx *egn,
@@ -114,7 +114,7 @@ egn2displ(const Mesh &M,
  * @param egn eigenfunction,shape(nglob_el*2+nglob_ac)
  * @param displ displacement, shape(2,npts)
  */
-void SolverAni::
+void SolverAniso::
 egn2displ_att(const Mesh &M,
          scmplx c,
          const scmplx *egn,

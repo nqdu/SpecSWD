@@ -329,7 +329,10 @@ specswd_group_kl(int imode,float *frekl_c,float *frekl_q)
                 &cegnr_[imode*ng],
                 &cegnl_[imode*ng],f,fq
             ); 
+            // transform kernels
+            RaylSol.transform_kernels(mesh,fq);
         }
+        RaylSol.transform_kernels(mesh,f);
     }
     else {
         printf("not implemented!\n");

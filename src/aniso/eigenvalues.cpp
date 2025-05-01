@@ -15,7 +15,7 @@ namespace specswd
  * @param egn eigen functions(displ at y direction), shape(nc,nglob_el)
  * @param use_qz if true, save QZ matrix
  */
-void SolverAni::
+void SolverAniso::
 compute_egn(const Mesh &mesh,
             std::vector<float> &c,
             std::vector<scmplx> &egn,
@@ -116,7 +116,7 @@ compute_egn(const Mesh &mesh,
  * @param ur,ul left/right eigen functions(displ at y direction), shape(nc,nglob_el)
  * @param use_qz if true, save QZ matrix
  */
-void SolverAni::
+void SolverAniso::
 compute_egn_att(const Mesh &mesh,
                 std::vector<scmplx> &c,
                 std::vector<scmplx> &ur,

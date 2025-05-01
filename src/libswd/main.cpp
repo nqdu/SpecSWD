@@ -174,6 +174,24 @@ compute_group_kl(int imode,bool HAS_ATT)
     return std::make_tuple(frekl_c,frekl_q);
 }
 
+vec 
+get_znodes()
+{
+    vec z;
+    int nz,nsize,nglob;
+    specswd_const(&nz,&nsize,&nglob);
+    z.resize({nsize});
+    auto zcords = z.mutable_unchecked<1>();
+
+    // copy coordinates
+    using specswd_pylib::mesh;
+    for(int i = 0; i < nsize; i ++) {
+        zcords(i) = mesh.znodes[i];
+    }
+    
+    return z;
+}   
+
 std::tuple<vec,vec>
 get_eigen(int imode,int return_left,int return_displ,
           bool HAS_ATT)
@@ -266,5 +284,10 @@ PYBIND11_MODULE(libswd,m){
         arg("return_displ"),
         arg("HAS_ATT"),
         "get eigenvectors"
+    );
+
+    m.def(
+        "get_znodes",&get_znodes,
+        "get z coordinates"
     );
 }

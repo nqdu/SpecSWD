@@ -218,3 +218,36 @@ class SpecWorkSpace:
             return frekl_c,frekl_q
         else:
             return frekl_c
+        
+    def get_egnfunc(self,imode:int,
+                    return_displ:bool,
+                    return_left = False):
+        """
+        get eigenfunctions at current frequency/mode
+
+        Parameters
+        ================
+        imode: int
+            mode number
+        return_left: bool
+            if true, return left eigenvectors
+            else return right eigenvectors
+        return_displ: bool
+            if true return displacement instead of eigenvectors
+            e.g. in scholte wave, eigenvectors = [u,v^{\bar},chi^{\bar}]
+        """
+        egntp = libswd.get_egn(
+                imode,
+                return_left,
+                return_displ,
+                self._has_att)
+        if self._has_att:
+            return egntp # egn_r and egn_i
+        else:
+            return egntp[0] # only egn_r
+        
+    def get_znodes(self):
+        """
+        get mesh coordiantes, shape(nspec*NGLL+NGRL)
+        """
+        return libswd.get_znodes()

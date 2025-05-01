@@ -139,16 +139,18 @@ prepare_rayl_(float freq,int nspec_el,int nspec_ac,
                 const float *xQA, const float *xQC, const float *xQL,
                 const float *xkappa_ac, const float *xQk_ac,int nfaces_bdry,
                 const int* ispec_bdry,const char *bdry_norm_direc,vector<T> &Mmat,
-                vector<T> &Kmat,vector<T> &Emat)
+                vector<T> &Kmat,vector<T> &Emat,vector<float> &dwdEmat)
 {
     // allocate space and set zero
     int ng = nglob_ac + nglob_el * 2;
     Mmat.resize(ng);
     Emat.resize(ng * ng);
     Kmat.resize(ng * ng);
+    dwdEmat.resize(ng*ng);
     std::fill(Mmat.begin(),Mmat.end(),(T)0.);
     std::fill(Emat.begin(),Emat.end(),(T)0.);
     std::fill(Kmat.begin(),Kmat.end(),(T)0.);
+    std::fill(dwdEmat.begin(),dwdEmat.end(),0.);
 
     // compute M/K/E for gll/grl layer, elastic
     using namespace GQTable;
@@ -272,7 +274,7 @@ prepare_rayl_(float freq,int nspec_el,int nspec_ac,
         int ispec_ac = ispec_bdry[iface * 2 + 0];
         int ispec_el = ispec_bdry[iface * 2 + 1];
         const char is_pos = bdry_norm_direc[iface];
-        T norm = is_pos ? -1 : 1.;
+        float norm = is_pos ? -1 : 1.;
         int igll_el = is_pos ? 0 : NGLL - 1;
         int igll_ac = is_pos ? NGLL - 1 : 0;
 
@@ -284,11 +286,15 @@ prepare_rayl_(float freq,int nspec_el,int nspec_ac,
         // E(nglob_el + iglob_el, nglob_el*2 + iglob_ac) += 
         int id = (nglob_el + iglob_el) * ng + (nglob_el * 2 + iglob_ac);
         Emat[id] += (T)(om * om * norm);
+
+        // dwdE
+        dwdEmat[id] += 2.0 * om * norm;
         
         // acoustic case
         // E(nglob_el*2 + iglob_ac, nglob_el + iglob_el) += norm
         id = (nglob_el*2 + iglob_ac) * ng + (nglob_el + iglob_el);
         Emat[id] += (T)norm;
+
     }
 }
 
@@ -309,7 +315,7 @@ void SolverRayl::prepare_matrices(const Mesh &M)
             nullptr,nullptr,nullptr,M.xkappa_ac.data(),
             nullptr,M.nfaces_bdry,M.ispec_bdry.data(),
             M.bdry_norm_direc.data(),
-            Mmat,Kmat,Emat
+            Mmat,Kmat,Emat,dwdEmat
         );
     }
     else {
@@ -324,7 +330,7 @@ void SolverRayl::prepare_matrices(const Mesh &M)
             M.xkappa_ac.data(),M.xQk_ac.data(),
             M.nfaces_bdry,M.ispec_bdry.data(),
             M.bdry_norm_direc.data(),
-            CMmat,CKmat,CEmat
+            CMmat,CKmat,CEmat,dwdEmat
         );
     }
 

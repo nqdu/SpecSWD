@@ -38,36 +38,32 @@ get_fQ_kl(int npts,std::complex<float> f_cmplx,
 
 /**
  * @brief compute y^H @ d(c_M * M + c_K * K + c_E * E )/dm_i @ x dm_i where
+ * @param Me mesh class
  * @param c_M,c_K,c_E coefs for each matrix
  * @param y,x vectors, shape_like(eigenvector)
- * @param freq input data type, float or complex<float>
- * @param nspec_el no. of elastic GLL elements
- * @param nglob_el unique points in elastic domain
- * @param ibool_el  connectivity matrix,in el shape(nspec_?*NGLL+nspec_?_grl*NGRL)
- * @param jaco jacobians, shape(nspec_ac+nspec_el+1)
- * @param xN VTI N parameter, in el
- * @param xL VTI L parameter, in el
- * @param xQN VTI Qn parameter, in el
- * @param xQL VTI Ql parameter, in el
  * @param frekl_r,frekl_i real/imaginary parts of derivatives
  */
 template<typename T = float > void 
-love_op_matrix(float freq,T c_M, T c_K,T c_E, const T *y,const T *x, 
-               int nspec_el,int nglob_el, const int *ibool_el,
-               const float *jaco, const float *xN,
-               const float *xL,const float *xQN, 
-               const float *xQL,float * __restrict frekl_r,
-               float * __restrict frekl_i)
+love_op_matrix(
+    const Mesh &Me,T c_M, T c_K,T c_E, 
+    const T *y,const T *x,
+    float * __restrict frekl_r,
+    float * __restrict frekl_i
+)
 {
     // check template type
     static_assert(std::is_same_v<float,T> || std::is_same_v<std::complex<float>,T>);
 
+    // get const
+    int nspec_el = Me.nspec_el;
+    float freq = Me.freq;
+
     using namespace GQTable;
     std::array<T,NGRL> rW,lW;
-    size_t size = nspec_el*NGLL + NGRL;
+    size_t size = nspec_el * NGLL + NGRL;
     for(int ispec = 0; ispec < nspec_el + 1; ispec ++) {   
         int id = ispec * NGLL;
-        float J = jaco[ispec]; // jacobians in this layers
+        float J = Me.jaco[ispec]; // jacobians in this layers
 
         const bool is_gll = (ispec != nspec_el);
         const float *w = is_gll? wgll.data(): wgrl.data();
@@ -76,7 +72,7 @@ love_op_matrix(float freq,T c_M, T c_K,T c_E, const T *y,const T *x,
 
         // cache displ in a element
         for(int i = 0; i < NGL; i ++) {
-            int iglob = ibool_el[id+i];
+            int iglob = Me.ibool_el[id+i];
             rW[i] = x[iglob];
             lW[i] = y[iglob];
             if constexpr (std::is_same_v<T,std::complex<float>>) {
@@ -94,10 +90,10 @@ love_op_matrix(float freq,T c_M, T c_K,T c_E, const T *y,const T *x,
 
             // get sls derivative if required
             if constexpr (std::is_same_v<T,std::complex<float>>) {
-                get_sls_Q_derivative(freq,xQN[id+m],sn,dsdqni);
-                get_sls_Q_derivative(freq,xQL[id+m],sl,dsdqli);
-                dsdqni *= xN[id+m];
-                dsdqli *= xL[id+m];
+                get_sls_Q_derivative(freq,Me.xQN[id+m],sn,dsdqni);
+                get_sls_Q_derivative(freq,Me.xQL[id+m],sl,dsdqli);
+                dsdqni *= Me.xN[id+m];
+                dsdqli *= Me.xL[id+m];
             }
 
             // N kernel
@@ -135,62 +131,41 @@ love_op_matrix(float freq,T c_M, T c_K,T c_E, const T *y,const T *x,
  * @brief  compute y^H @ d(c_M * M + c_K * K + c_E * E )/dm_i @ x dm_i where
  * 
  * @tparam T data type, float or complex<float>
+ * @param Me mesh class
  * @param c_M,c_K,c_E coefs for each matrix
  * @param y,x vectors, shape_like(eigenvector)
- * @param freq input data type, float or complex<float>
- * @param nspec_el no. of elastic GLL elements
- * @param nspec_ac no. of acoustic GLL elements
- * @param nspec_el_grl  no. of elastic GRL elements
- * @param nspec_ac_grl no. of acoustic GRL elements
- * @param nglob_el unique points in elastic domain
- * @param nglob_ac unique points in acoustic domain
- * @param el_elmnts mapping from el elements to global index
- * @param ac_elmnts mapping from ac elements to global index
- * @param xrho_el density in elastic domain
- * @param xrho_ac density in acoustic domain
- * @param ibool_el  connectivity matrix,in el shape(nspec_?*NGLL+nspec_?_grl*NGRL)
- * @param ibool_ac connectivity matrix,in ac shape(nspec_?*NGLL+nspec_?_grl*NGRL)
- * @param jaco jacobians, shape(nspec_ac+nspec_el+1)
- * @param xA VTI A parameter, in el
- * @param xC VTI C parameter, in el
- * @param xL VTI L parameter, in el
- * @param xeta VTI eta parameter, in el
- * @param xQA VTI Qa parameter, in el
- * @param xQC VTI Qc parameter, in el
- * @param xQL VTI Ql parameter, in el
- * @param xkappa_ac kappa in ac domain
- * @param xQk_ac Qkappa, in ac domain
  * @param frekl_r,frekl_i real/imaginary parts of derivatives
  */
 template<typename T = float >
 void
-rayl_op_matrix(float freq,T c_M,T c_K, T c_E,const T *y, const T *x,
-                int nspec_el,int nspec_ac,int nspec_el_grl,int nspec_ac_grl,int nglob_el,
-                int nglob_ac, const int *el_elmnts,const int *ac_elmnts,
-                const int* ibool_el, const int* ibool_ac,
-                const float *jaco,const float *xrho_el,const float *xrho_ac,
-                const float *xA, const float *xC,const float *xL,const float *xeta, 
-                const float *xQA, const float *xQC,const float *xQL, 
-                const float *xkappa_ac, const float *xQk_ac,
+rayl_op_matrix(const Mesh &Me,T c_M,T c_K, T c_E,
+                const T *y, const T *x,
                 float *__restrict frekl_r,
-                float *__restrict frekl_i)
+                float *__restrict frekl_i
+)
 {
     // check template type
     static_assert(std::is_same_v<float,T> || std::is_same_v<std::complex<float>,T>);
 
     // constants
     using namespace GQTable;
+    int nspec_el = Me.nspec_el, nspec_ac = Me.nspec_ac;
+    int nspec_el_grl = Me.nspec_el_grl;
+    int nspec_ac_grl = Me.nspec_ac_grl;
+    float freq = Me.freq;
+    int nglob_el = Me.nglob_el;
     size_t size = nspec_el * NGLL + nspec_el_grl * NGRL + 
                   nspec_ac * NGLL + nspec_ac_grl * NGRL;
+    
 
     // loop elastic elements
     std::array<T,NGRL> U,V,lU,lV; //left/right eigenvectors in on element
     for(int ispec = 0; ispec < nspec_el + nspec_el_grl; ispec ++) {
-        int iel = el_elmnts[ispec];
+        int iel = Me.el_elmnts[ispec];
         int id = ispec * NGLL;
 
         // jacobian
-        float J = jaco[iel];
+        float J = Me.jaco[iel];
 
         // get const arrays
         const bool is_gll = (ispec != nspec_el);
@@ -200,7 +175,7 @@ rayl_op_matrix(float freq,T c_M,T c_K, T c_E,const T *y, const T *x,
 
         // cache U,V and lU,lV
         for(int i = 0; i < NGL; i ++) {
-            int iglob = ibool_el[id + i];
+            int iglob = Me.ibool_el[id + i];
             U[i] = x[iglob];
             V[i] = x[iglob + nglob_el];
             lU[i] = y[iglob]; 
@@ -222,11 +197,12 @@ rayl_op_matrix(float freq,T c_M,T c_K, T c_E,const T *y, const T *x,
             // get sls factor if required
             T sa = 1.,sl = 1.,sc = 1.;
             T dsdqai{},dsdqci{},dsdqli{};
-            T C = xC[id+m], A = xA[id+m], L = xL[id+m], eta = xeta[m];
+            T C = Me.xC[id+m], A = Me.xA[id+m];
+            T L = Me.xL[id+m], eta = Me.xeta[m];
             if constexpr (std::is_same_v<T,std::complex<float>>) {
-                get_sls_Q_derivative(freq,xQA[id+m],sa,dsdqai);
-                get_sls_Q_derivative(freq,xQC[id+m],sc,dsdqci);
-                get_sls_Q_derivative(freq,xQL[id+m],sl,dsdqli);
+                get_sls_Q_derivative(freq,Me.xQA[id+m],sa,dsdqai);
+                get_sls_Q_derivative(freq,Me.xQC[id+m],sc,dsdqci);
+                get_sls_Q_derivative(freq,Me.xQL[id+m],sl,dsdqli);
                 dsdqai *= A;
                 dsdqci *= C;
                 dsdqli *= L;
@@ -268,8 +244,8 @@ rayl_op_matrix(float freq,T c_M,T c_K, T c_E,const T *y, const T *x,
 
             // K2, -d / dm_k sum_{ij} w_i L_i hp(i,j) U_j lV_i
             // = - \sum_{j} w_k dL/dm_k hp(j,k) U_j lV_k = -sx * w_k * lV_k dL/dm_k
-            temp = -weight[m] * lV[m] * sx * c_K; 
-            dc_dL += - temp * two * sl; dc_dQli += -temp * two * dsdqli;
+            temp = weight[m] * lV[m] * sx * c_K; 
+            dc_dL += - temp * sl; dc_dQli += -temp * dsdqli;
 
             //E2 \sum_{j} w_k dF/dm_k hp(j,k) V_j lU_k = -sx * w_k * lV_k dF/dm_k
             temp = weight[m] * lU[m] * sy * c_E; 
@@ -279,8 +255,8 @@ rayl_op_matrix(float freq,T c_M,T c_K, T c_E,const T *y, const T *x,
             dc_dL += - temp * two * sl; dc_dQli += -temp * two * dsdqli;
 
             // E2 -lsx * w_k * V_k * dL/dm_k 
-            temp = -weight[m] * V[m] * lsx * c_E;
-            dc_dL += - temp * two * sl; dc_dQli += -temp * two * dsdqli;
+            temp = weight[m] * V[m] * lsx * c_E;
+            dc_dL += - temp * sl; dc_dQli += -temp * dsdqli;
 
             // copy them to frekl
             int id1 = iel * NGLL + m;
@@ -307,7 +283,7 @@ rayl_op_matrix(float freq,T c_M,T c_K, T c_E,const T *y, const T *x,
     // acoustic eleemnts
     std::array<T,NGRL> chi,lchi;
     for(int ispec = 0; ispec < nspec_ac + nspec_ac_grl; ispec ++) {
-        int iel = ac_elmnts[ispec];
+        int iel = Me.ac_elmnts[ispec];
         int id = ispec * NGLL;
 
         // const arrays
@@ -317,11 +293,11 @@ rayl_op_matrix(float freq,T c_M,T c_K, T c_E,const T *y, const T *x,
         const int NGL = is_gll? NGLL : NGRL;
 
         // jacobians
-        float J = jaco[iel];
+        float J = Me.jaco[iel];
 
         // cache chi and lchi in one element
         for(int i = 0; i < NGL; i ++) {
-            int iglob = ibool_ac[id + i];
+            int iglob = Me.ibool_ac[id + i];
             chi[i] = (iglob == -1) ? 0: x[iglob+nglob_el*2];
             lchi[i] = (iglob == -1) ? 0.: y[iglob+nglob_el*2];
             if  constexpr (std::is_same_v<T,std::complex<float>>) {
@@ -334,10 +310,10 @@ rayl_op_matrix(float freq,T c_M,T c_K, T c_E,const T *y, const T *x,
         T sk = 1., dskdqi = 0.;
         for(int m = 0; m < NGL; m ++ ){
             // copy material 
-            float rho = xrho_ac[id+m];
-            float kappa = xkappa_ac[id+m];
+            float rho = Me.xrho_ac[id+m];
+            float kappa = Me.xkappa_ac[id+m];
             if constexpr (std::is_same_v<T,std::complex<float>>) {
-                get_sls_Q_derivative(freq,xQk_ac[id+m],sk,dskdqi);
+                get_sls_Q_derivative(freq,Me.xQk_ac[id+m],sk,dskdqi);
                 dskdqi *= kappa;
             }
             

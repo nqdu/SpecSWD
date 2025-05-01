@@ -51,51 +51,48 @@ egn2displ_att(const Mesh &M,scmplx c, const scmplx *egn,scmplx * __restrict disp
 
 
 template<typename T = float>
-void egn2displ_rayl_(int nspec_el,int nspec_ac,int nspec_el_grl,int nspec_ac_grl,
-                    int nglob_el,int nglob_ac,const float* jaco,const int *ibool_el,
-                    const int *ibool_ac, const int *el_elmnts,
-                    const int *ac_elmnts,const float *xrho_ac,
-                    const T *egn, float freq,T c, T * __restrict displ)
+void egn2displ_rayl_(const Mesh &M,T c, const T *egn, T * __restrict displ)
 {
 
     // get wave number
-    T k = (T)(M_PI * 2.) * freq / c;
+    T k = (T)(M_PI * 2.) * M.freq / c;
 
     // size
     using namespace GQTable;
-    int npts = (nspec_el + nspec_ac) * NGLL + (nspec_ac_grl + nspec_el_grl) * NGRL;
+    int npts = (M.nspec_el + M.nspec_ac) * NGLL + 
+                (M.nspec_ac_grl + M.nspec_el_grl) * NGRL;
 
     // loop elastic elements
-    for(int ispec = 0; ispec < nspec_el+nspec_el_grl; ispec ++) {
-        int iel = el_elmnts[ispec];
+    for(int ispec = 0; ispec < M.nspec_el+M.nspec_el_grl; ispec ++) {
+        int iel = M.el_elmnts[ispec];
         int id0 = ispec * NGLL;
         int id1 = iel * NGLL;
         int NGL = NGLL;
 
         // grl case
-        if(ispec == nspec_el) {
+        if(ispec == M.nspec_el) {
             NGL = NGRL;
         }
 
         for(int i = 0; i < NGL; i ++) {
-            int iglob = ibool_el[id0+i];
+            int iglob = M.ibool_el[id0+i];
             displ[0*npts + id1+i] = egn[iglob];
-            displ[1*npts + id1+i] = egn[iglob + nglob_el] / k; // this is V\bar = kV
+            displ[1*npts + id1+i] = egn[iglob + M.nglob_el] / k; // this is V\bar = kV
         }
     }   
 
     // loop each acoustic element
     std::array<T,NGRL> chi;
-    for(int ispec = 0; ispec < nspec_ac + nspec_ac_grl; ispec += 1) {
-        int iel = ac_elmnts[ispec];
+    for(int ispec = 0; ispec < M.nspec_ac + M.nspec_ac_grl; ispec += 1) {
+        int iel = M.ac_elmnts[ispec];
         int NGL = NGLL;
         int id0 = ispec * NGLL;
         int id1 = iel * NGLL;
         const float *hp = &hprime[0];
-        const float J = jaco[iel];
+        const float J = M.jaco[iel];
 
         // GRL layer
-        if(ispec == nspec_ac) {
+        if(ispec == M.nspec_ac) {
             NGL = NGRL;
             hp = &hprime_grl[0];
         }
@@ -103,8 +100,8 @@ void egn2displ_rayl_(int nspec_el,int nspec_ac,int nspec_el_grl,int nspec_ac_grl
         // cache chi in an element
         for(int i = 0; i < NGL; i ++) {
             int id = id0 + i;
-            int iglob = ibool_ac[id];
-            chi[i] = (iglob == -1) ? (T)0.: egn[nglob_el * 2 + iglob] / k;
+            int iglob = M.ibool_ac[id];
+            chi[i] = (iglob == -1) ? (T)0.: egn[M.nglob_el * 2 + iglob] / k;
         }
 
 
@@ -117,8 +114,9 @@ void egn2displ_rayl_(int nspec_el,int nspec_ac,int nspec_el_grl,int nspec_ac_grl
             dchi /= J;
 
             // set value to displ
-            displ[0*npts + id1+i] = k / xrho_ac[id0 + i] * chi[i];
-            displ[1*npts + id1+i] = dchi / xrho_ac[id0 + i];
+            float rho = M.xrho_ac[id0 + i];
+            displ[0*npts + id1+i] = -k / rho  * chi[i];
+            displ[1*npts + id1+i] = dchi / rho;
         }
     }
 
@@ -135,12 +133,7 @@ void egn2displ_rayl_(int nspec_el,int nspec_ac,int nspec_el_grl,int nspec_ac_grl
 void SolverRayl::
 egn2displ(const Mesh &M,float c, const float *egn,float * __restrict displ ) const 
 {
-    egn2displ_rayl_(
-        M.nspec_el,M.nspec_ac,M.nspec_el_grl,M.nspec_ac_grl,
-        M.nglob_el,M.nglob_ac,M.jaco.data(),M.ibool_el.data(),
-        M.ibool_ac.data(),M.el_elmnts.data(),M.ac_elmnts.data(),
-        M.xrho_ac.data(),egn,M.freq,c,displ
-    );
+    egn2displ_rayl_(M,c,egn,displ);
 }
 
 /**
@@ -154,12 +147,7 @@ egn2displ(const Mesh &M,float c, const float *egn,float * __restrict displ ) con
 void SolverRayl::
 egn2displ_att(const Mesh &M,scmplx c, const scmplx *egn,scmplx * __restrict displ ) const 
 {
-    egn2displ_rayl_(
-        M.nspec_el,M.nspec_ac,M.nspec_el_grl,M.nspec_ac_grl,
-        M.nglob_el,M.nglob_ac,M.jaco.data(),M.ibool_el.data(),
-        M.ibool_ac.data(),M.el_elmnts.data(),M.ac_elmnts.data(),
-        M.xrho_ac.data(),egn,M.freq,c,displ
-    );
+    egn2displ_rayl_(M,c,egn,displ);
 }
 
 /**
@@ -257,7 +245,7 @@ transform_kernels(const Mesh &M,std::vector<float> &frekl) const
             rho_kl = frekl[loc * npts + ipt];
 
             // compute vph/vpv/vsh/vsv/
-            double rho = M.xrho_el[ipt];
+            double rho = M.xrho_el[id];
             double vph = std::sqrt(M.xA[id] / rho);
             double vpv = std::sqrt(M.xC[id] / rho);
             double vsv = std::sqrt(M.xL[id] / rho);
@@ -265,8 +253,10 @@ transform_kernels(const Mesh &M,std::vector<float> &frekl) const
             double vph_kl = 2. * rho * vph * A_kl;
             double vpv_kl = 2. * rho * vpv * C_kl;
             double vsv_kl = 2. * rho * vsv * L_kl;
-            double r_kl = vph * vph * A_kl + vpv * vpv * C_kl + 
-                          + vsv * vsv * L_kl + rho_kl;
+            double r_kl = vph * vph * A_kl + 
+                          vpv * vpv * C_kl + 
+                          vsv * vsv * L_kl + 
+                          rho_kl;
             frekl[0 * npts + ipt] = vph_kl;
             frekl[1 * npts + ipt] = vpv_kl;
             frekl[2 * npts + ipt] = vsv_kl;

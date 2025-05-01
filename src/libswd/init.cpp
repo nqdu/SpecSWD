@@ -95,7 +95,7 @@ specswd_kernel_size()
         }
     }
     else if (SWD_TYPE == 1) {
-        nker = 5;
+        nker = 6;
         if (HAS_ATT) {
             nker = 10;
         }

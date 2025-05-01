@@ -11,15 +11,17 @@ namespace specswd
 
 typedef std::complex<float>  scmplx;
 
-class SolverAni {
+class SolverAniso {
 
 private:
     // solver matrices
     std::vector<float> Mmat,Emat,Kmat,Hmat;
     std::vector<scmplx> CMmat,CEmat,CKmat,CHmat;
 
+    // derivative matrix
+    std::vector<float> dwdEmat; // dE / dw
+
     // QZ matrix all are column major
-    std::vector<float> Qmat_,Zmat_,Smat_,Spmat_; // column major!
     std::vector<scmplx> cQmat_,cZmat_,cSmat_,cSpmat_;
 
 public:

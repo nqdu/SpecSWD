@@ -71,6 +71,7 @@ private:
     // solver matrices
     std::vector<float> Mmat,Emat,Kmat;
     std::vector<scmplx> CMmat,CEmat,CKmat;
+    std::vector<float> dwdEmat; // dE / dw
 
     // QZ matrix all are column major
     std::vector<float> Qmat_,Zmat_,Smat_,Spmat_; // column major!
