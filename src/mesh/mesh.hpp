@@ -1,6 +1,7 @@
 #ifndef SPECSWD_MESH_H_
 #define SPECSWD_MESH_H_
 
+#include <cstdint>
 #include <complex>
 #include <vector>
 #include <array>
