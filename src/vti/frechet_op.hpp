@@ -1,5 +1,5 @@
-#ifndef SPECSWD_FRECHET_OP_H_
-#define SPECSWD_FRECHET_OP_H_
+#ifndef SPECSWD_FRECHET_VTI_OP_H_
+#define SPECSWD_FRECHET_VTI_OP_H_
 
 /**
  * @brief derivative operators:
@@ -14,27 +14,6 @@
 
 namespace specswd
 {
-
-/**
- * @brief convert df_complx/dm to df_real/dm and dfQi_dm, where f_complx = f_real (1 + 0.5 i * fQi) = f_real + i f_imag
- * @param npts size of frekl_r
- * @param f_cmplx user defiend quantity
- * @param frekl_r,frekl_i real/imag parts of derivatives
- */
-void inline
-get_fQ_kl(int npts,std::complex<float> f_cmplx,
-          const float *frekl_r,
-          float *__restrict frekl_i)
-{
-    float f_real = f_cmplx.real();
-    float f_imag = f_cmplx.imag();
-    float fQi = 2. * f_imag / f_real;
-
-    for(int ipt = 0; ipt < npts; ipt ++) {
-        float dQidm = (frekl_i[ipt] * 2. - fQi * frekl_r[ipt]) / f_real;
-        frekl_i[ipt] = dQidm;
-    }
-}
 
 /**
  * @brief compute y^H @ d(c_M * M + c_K * K + c_E * E )/dm_i @ x dm_i where

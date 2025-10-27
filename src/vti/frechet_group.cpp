@@ -3,7 +3,6 @@
 #include "shared/iofunc.hpp"
 
 #include <Eigen/Core>
-// #include <Eigen/Dense>
 
 #include <iostream>
 

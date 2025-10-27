@@ -65,6 +65,28 @@ void init_rayl(const vec &z,const vec &rho,
     );
 }
 
+void init_aniso(const vec &z,const vec &rho,
+             const vec &c21, const vec &Qani,
+             bool HAS_ATT, 
+             int Qfunc_id,
+             bool print_info)
+{
+    // init GQtable
+    specswd_init_GQTable(); 
+
+    // q 
+    const float *q = nullptr;
+    if(HAS_ATT) q = Qani.data();
+
+    int nz = z.size();
+    int nQani = Qani.size() / nz;
+    specswd_init_mesh_aniso(
+        nz,z.data(),rho.data(),c21.data(),
+        q,HAS_ATT,nQani,Qfunc_id,
+        print_info
+    );
+}
+
 template <typename T> py::array_t<T> 
 compute_swd(float freq,float phi_in_deg,bool use_qz) 
 {
@@ -245,27 +267,41 @@ PYBIND11_MODULE(libswd,m){
           arg("QA"),arg("QC"),
           arg("QL"),arg("HAS_ATT") = false,
           arg("print_info") = false,
-          "initialize global vars for rayleigh wave");
+          "initialize global vars for rayleigh wave"
+    );
+    
+    m.def("init_aniso",&init_aniso,arg("z"),
+          arg("rho"),arg("c21"),arg("Qani"),
+          arg("HAS_ATT") = false,
+          arg("Qfunc_id") = 1,
+          arg("print_info") = false,
+          "initialize global vars for anisotropic wave"
+    );
     
     m.def("compute_egn",&compute_swd<float>,
           arg("freq"),
           arg("phi_in_deg") = 0.,
           arg("use_qz")=true,
-          "compute dispersions for elastic wave");
+          "compute dispersions for elastic wave"
+    );
 
     m.def("compute_egn_att",&compute_swd<std::complex<float>>,
           arg("freq"),
           arg("phi_in_deg") = 0.,
           arg("use_qz")=true,
-          "compute dispersions for visco-elastic wave");
+          "compute dispersions for visco-elastic wave"
+    );
 
     m.def("group_vel",&compute_group_vel<float>,
             arg("imode"),
-         "compute group velocity for elastic wave");
+         "compute group velocity for elastic wave"
+    );
 
     m.def("group_vel_att",&compute_group_vel<std::complex<float>>,
             arg("imode"),
-         "compute group velocity for visco-elastic wave");
+         "compute group velocity for visco-elastic wave"
+    );
+    
     m.def(
         "phase_kl",&compute_phase_kl,
         arg("imode"),arg("HAS_ATT"),

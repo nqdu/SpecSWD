@@ -71,6 +71,39 @@ specswd_init_mesh_rayl(
     }
 }
 
+
+extern "C" void 
+specswd_init_mesh_aniso(
+    int nz, const float *z,const float *rho,
+    const float *c21,const float* Qani,
+    bool HAS_ATT,int nQani,int Qfunc_id,
+    bool print_tomo_info
+)
+{
+    using namespace specswd_pylib;
+
+    // allocate space for tomo, and set model
+    mesh.allocate_1D_model(nz,2,HAS_ATT,nQani,Qfunc_id);
+    for(int i = 0; i < nz; i ++) {
+        for(int j = 0; j < 21; j ++) {
+            mesh.c21_tomo[j*nz+i] = c21[j*nz+i];
+        }
+        mesh.rho_tomo[i] = rho[i];
+        mesh.depth_tomo[i] = z[i];;
+        if (HAS_ATT) {
+            for(int j = 0; j < nQani; j ++) {
+                mesh.Qani_tomo[j*nz+i] = Qani[j*nz+i];
+            }
+        }
+    }
+
+    // create attributes
+    mesh.create_model_attributes();
+    if (print_tomo_info) {
+        mesh.print_model();
+    }
+}
+
 static void 
 _egn_love(float freq,bool use_qz)
 {
@@ -143,6 +176,35 @@ _egn_rayl(float freq,bool use_qz)
     }
 }
 
+static void 
+_egn_aniso(float freq,float phi,bool use_qz)
+{
+    // get contants
+    using namespace specswd_pylib;
+    bool HAS_ATT = mesh.HAS_ATT;
+
+    // create database
+    mesh.create_database(freq,phi);
+    AniSol.prepare_matrices(mesh);
+
+    // compute
+    if(!HAS_ATT) {
+        AniSol.compute_egn(mesh,c_,cegnr_,cegnl_,use_qz);
+        // allocate space for group velocity
+        if(use_qz) {
+            u_.resize(c_.size());
+        }
+    }
+    else {
+        AniSol.compute_egn_att(mesh,cc_,cegnr_,cegnl_,use_qz);
+
+        // allocate space for group velocity
+        if(use_qz) {
+            cu_.resize(cc_.size());
+        }
+    }
+}
+
 void specswd_execute(float freq,float phi,bool use_qz)
 {
     switch (specswd_pylib::mesh.SWD_TYPE)
@@ -154,6 +216,7 @@ void specswd_execute(float freq,float phi,bool use_qz)
         _egn_rayl(freq,use_qz);
         break;
     default:
+        _egn_aniso(freq,phi,use_qz);
         break;
     }
 }

@@ -1,14 +1,16 @@
 #include "mesh/mesh.hpp"
 #include "shared/GQTable.hpp"
 
+#include <iostream>
+
 namespace specswd
 {
 
-void solve_christoffel(float phi, const float *c21,float &cmin,float &cmax);
+void solve_christoffel(float phi, const double *c21,double *cphase);
 
 
 void Mesh:: 
-compute_minmax_veloc_(float phi,std::vector<float> &vmin,std::vector<float> &vmax)
+compute_minmax_veloc_(std::vector<double> &vmin,std::vector<double> &vmax)
 {
     vmin.resize(nregions);
     vmax.resize(nregions);
@@ -16,35 +18,40 @@ compute_minmax_veloc_(float phi,std::vector<float> &vmin,std::vector<float> &vma
     for(int ig = 0; ig < nregions; ig ++ ) {
         int istart = region_bdry[ig*2+0];
         int iend = region_bdry[ig*2+1];
-        float v0 = 1.0e20, v1 = -1.0e20;
+        double v0 = 1.0e20, v1 = -1.0e20;
 
         for(int i = istart; i <= iend; i ++) {
             if(SWD_TYPE == 0) { // love wave
-                float vsh = vsh_tomo[i];
+                double vsh = vsh_tomo[i];
                 v0 = std::min(v0,vsh);
-                // if(HAS_ATT) {
-                //     vsh *= 1. + 0.125 / std::pow(QN_[i],2); // correction to second order
-                // }
                 v1 = std::max(v1,vsh);
             }
             else if (SWD_TYPE == 1) { // rayleigh
                 if(is_el_reg[ig]) {
-                    v0 = std::min(v0,vsv_tomo[i]);
-                    v1 = std::max(v1,vsv_tomo[i]);
+                    double vsv = vsv_tomo[i];
+                    v0 = std::min(v0,vsv);
+                    v1 = std::max(v1,vsv);
                 }
                 else {
-                    v0 = std::min(v0,vpv_tomo[i]);
-                    v1 = std::max(v1,vpv_tomo[i]);
+                    double vpv = vpv_tomo[i];
+                    v0 = std::min(v0,vpv);
+                    v1 = std::max(v1,vpv);
                 }
             }
             else { // aniso
-                float temp[21],cmin,cmax;
+                double temp[21],cphase[3];
                 for(int j = 0; j < 21; j ++) {
-                    temp[j] = c21_tomo[j*21+i];
+                    temp[j] = c21_tomo[j*nz_tomo+i] / rho_tomo[i];
                 }
-                solve_christoffel(phi,temp,cmin,cmax);
-                v0 = std::min(cmin,v0);
-                v1 = std::max(cmax,v1);
+                solve_christoffel(phi,temp,cphase);
+                if(is_el_reg[ig]) {
+                    v0 = std::min(cphase[0],v0);
+                    v1 = std::max(cphase[2],v1);
+                }
+                else {
+                    v0 = std::min(cphase[2],v0);
+                    v1 = std::max(cphase[2],v1);
+                }
             }
         }
 
@@ -70,17 +77,18 @@ create_database(float freq0,float phi0)
 
     using namespace GQTable;
 
-    std::vector<float> vmin,vmax;
-    this -> compute_minmax_veloc_(phi,vmin,vmax);
+    std::vector<double> vmin,vmax;
+    this -> compute_minmax_veloc_(vmin,vmax);
 
     // find min/max vs
     PHASE_VELOC_MAX = -1.;
     PHASE_VELOC_MIN = 1.0e20;
     for(int i = 0; i < nregions; i ++) {
-        PHASE_VELOC_MAX = std::max(vmax[i],PHASE_VELOC_MAX);
-        PHASE_VELOC_MIN = std::min(vmin[i],PHASE_VELOC_MIN);
+        PHASE_VELOC_MAX = std::max(vmax[i],(double)PHASE_VELOC_MAX);
+        PHASE_VELOC_MIN = std::min(vmin[i],(double)PHASE_VELOC_MIN);
     }
     PHASE_VELOC_MIN *= 0.85;
+    //std::cout << PHASE_VELOC_MIN << " " << PHASE_VELOC_MAX << "\n";
     
     // loop every region to find best element size
     nspec = 0;
@@ -143,7 +151,11 @@ create_database(float freq0,float phi0)
 
     // half space skeleton
     nspec_el_grl = 0; nspec_ac_grl = 0;
-    float scale = PHASE_VELOC_MAX / freq / xgrl[NGRL-1] * 20;  // up to 50 wavelength
+    float max_lambda_in_bottom = 20;
+    if (HAS_ATT) {
+        max_lambda_in_bottom = 5;
+    }
+    float scale = vmax[nregions-1] / freq / xgrl[NGRL-1] * max_lambda_in_bottom;  // up to 50 wavelength
     skel[nspec * 2 + 0] = depth_tomo[nz_tomo-1];
     skel[nspec * 2 + 1] = depth_tomo[nz_tomo-1] + xgrl[NGRL-1] * scale;
     iregion_flag[nspec] = nregions - 1;
@@ -220,13 +232,13 @@ create_db_love_()
     }
 
     // Q model
-    nQmodel_ani = 0;
+    nQani = 0;
     if(HAS_ATT) {
         // interpolate Q model
         xQL.resize(size); xQN.resize(size);
         this -> interp_model(QL_tomo.data(),el_elmnts,xQL);
         this -> interp_model(QN_tomo.data(),el_elmnts,xQN);
-        nQmodel_ani = 2;
+        nQani = 2;
     }
 }
 
@@ -271,7 +283,7 @@ create_db_rayl_()
         xkappa_ac[i] = xkappa_ac[i] * xkappa_ac[i] * xrho_ac[i];
     }
 
-    nQmodel_ani = 0;
+    nQani = 0;
     if(HAS_ATT) {
         // allocate space for  Q
         xQL.resize(size_el); xQA.resize(size_el);
@@ -281,7 +293,7 @@ create_db_rayl_()
         this -> interp_model(QA_tomo.data(),el_elmnts,xQA);
         this -> interp_model(QC_tomo.data(),ac_elmnts,xQk_ac);
 
-        nQmodel_ani = 4;
+        nQani = 4;
     }
 }
 
@@ -307,7 +319,7 @@ create_db_aniso_()
     xC21.resize(21*size_el);
     xkappa_ac.resize(size_ac);
     for(int i = 0; i < 21; i ++) {
-        this -> interp_model(&c21_tomo[21*nz_tomo],el_elmnts,xtemp_el);
+        this -> interp_model(&c21_tomo[i*nz_tomo],el_elmnts,xtemp_el);
         for(size_t j = 0; j < size_el;j ++) {
             xC21[i*size_el+j] = xtemp_el[j];
         }
@@ -316,7 +328,8 @@ create_db_aniso_()
     // acoustic domain
     this -> interp_model(&c21_tomo[0],ac_elmnts,xkappa_ac);
     if(HAS_ATT) {
-        for(int iq = 0; iq < nQmodel_ani; iq ++) {
+        xQani.resize(size_el * nQani);
+        for(int iq = 0; iq < nQani; iq ++) {
             this -> interp_model(&Qani_tomo[iq*nz_tomo],el_elmnts,xtemp_el);
             for(size_t j = 0; j < size_el;j ++) {
                 xQani[iq*size_el+j] = xtemp_el[j];

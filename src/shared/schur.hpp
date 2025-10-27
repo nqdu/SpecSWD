@@ -4,7 +4,7 @@
 #include <Eigen/Core>
 #include <Eigen/Eigenvalues>
 
-#ifdef SPECSWD_EGN_DOUBLE
+#ifndef SPECSWD_EGN_DOUBLE
 typedef double realw;
 #define LAPACKE_REAL(name) LAPACKE_d ## name
 #define LAPACKE_CMPLX(name) LAPACKE_z ## name
@@ -33,7 +33,8 @@ namespace specswd {
  * @param vr left eigenvectors, shape(n,n)
  * @param vl right eigenvectors shape(n,n)
  * @param Qmat,Zmat,Smat,Spmat QZ matrix, where A = Q @ S @ Z.H, B = Q @ S' @ Z.H
- * @param compute_left_egn if true also compute left eigenvectors
+ * @param jobvr if true compute right eigenvectors
+ * @param jobvl if true compute left eigenvectors
  */
 template<typename COMMTP=double,typename SAVETP=float>  void
 schur_qz(
@@ -46,7 +47,8 @@ schur_qz(
     std::vector<SAVETP> &Zmat,
     std::vector<SAVETP> &Smat,
     std::vector<SAVETP> &Spmat,
-    bool compute_left_egn = false
+    bool jobvr = true,
+    bool jobvl = false
 )
 {
     static_assert(std::is_same_v<SAVETP,float> || 
@@ -62,8 +64,16 @@ schur_qz(
 
     // eigenvalues/vectors for compute
     Eigen::VectorX<COMMTP> alpha(ng),beta(ng);
-    char side = 'R';
-    if(compute_left_egn) side = 'B';
+    char side;
+    if(jobvr && jobvl) {
+        side = 'B';
+    }
+    else if (jobvl) {
+        side = 'L';
+    }
+    else {
+        side = 'R';
+    }
 
     // run Qz
     int sdim = 0,m = ng;
@@ -78,7 +88,6 @@ schur_qz(
             alphai.data(),beta.data(),Q.data(),ng,
             Z.data(),ng
         );
-
         LAPACKE_REAL(tgevc)(
             LAPACK_COL_MAJOR,side,'A',nullptr,
             ng,A.data(),ng,B.data(),ng,
@@ -106,15 +115,17 @@ schur_qz(
 
     // compute right eigenvector
     using Eigen::indexing::all;
-    Eigen::Map<Eigen::MatrixX<COMMTP>> VR(vr,ng,ng);
-    VR = Z * VR;
-    for(int i = 0; i < ng; i ++) { // normalize
-        COMMTP s = VR(all,i).norm();
-        VR(all,i) /= s;
+    if(jobvr) {
+        Eigen::Map<Eigen::MatrixX<COMMTP>> VR(vr,ng,ng);
+        VR = Z * VR;
+        for(int i = 0; i < ng; i ++) { // normalize
+            COMMTP s = VR(all,i).norm();
+            VR(all,i) /= s;
+        }
     }
 
     // left eigenvector if required
-    if(compute_left_egn) {
+    if(jobvl) {
         Eigen::Map<Eigen::MatrixX<COMMTP>> VL(vl,ng,ng);
         VL = Q * VL;
 

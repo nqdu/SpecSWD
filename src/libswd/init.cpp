@@ -2,6 +2,7 @@
 #include "shared/attenuation.hpp"
 #include "mesh/mesh.hpp"
 #include "vti/vti.hpp"
+#include "aniso/aniso.hpp"
 
 #include <memory>
 #include <complex>
@@ -19,6 +20,7 @@ namespace specswd_pylib
 specswd::Mesh mesh;
 specswd::SolverLove LoveSol;
 specswd::SolverRayl RaylSol;
+specswd::SolverAniso AniSol;
 
 // global vars for eigenvalues/eigenvectors 
 std::vector<float> egnr_,egnl_,c_,u_;
@@ -103,7 +105,7 @@ specswd_kernel_size()
     else {
         nker = 22;
         if(HAS_ATT) {
-            nker += mesh.nQmodel_ani;
+            nker += mesh.nQani;
         }
     }
 

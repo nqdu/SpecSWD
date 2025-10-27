@@ -1,6 +1,9 @@
 #include "shared/GQTable.hpp"
 #include "aniso/aniso.hpp"
 #include "shared/attenuation.hpp"
+#include "shared/voigt.hpp"
+
+#include <algorithm>
 
 namespace specswd
 {
@@ -26,27 +29,27 @@ prepare_aniso_(const Mesh &Me,vector<T> &Mmat,
     float freq = Me.freq, phi = Me.phi;
     int nspec_ac = Me.nspec_ac, nspec_el = Me.nspec_el;
     int nspec_ac_grl = Me.nspec_ac_grl, nspec_el_grl = Me.nspec_el_grl;
-    int nglob_el = Me.nglob_el, nglob_ac = Me.nglob_ac;
-    int nQmodel = Me.nQmodel_ani;
+    int nglob_el = Me.nglob_el;
+    int nQmodel = Me.nQani;
     float k[2] = {std::cos(phi),std::sin(phi)};
 
     // allocate space and set zero
     int ng = Me.nglob_ac + Me.nglob_el * 3;
     Mmat.resize(ng);
-    Emat.resize(ng * ng);
-    Kmat.resize(ng); Hmat.resize(ng*ng);
+    Emat.resize(ng*ng);
+    Kmat.resize(ng*ng); Hmat.resize(ng*ng);
     dwdEmat.resize(ng*ng);
     std::fill(Mmat.begin(),Mmat.end(),(T)0.);
     std::fill(Emat.begin(),Emat.end(),(T)0.);
     std::fill(Kmat.begin(),Kmat.end(),(T)0.);
     std::fill(Hmat.begin(),Hmat.end(),(T)0.);
-    std::fill(dwdEmat.begin(),dwdEmat.end(),(T)0.);
+    std::fill(dwdEmat.begin(),dwdEmat.end(),0.);
 
     // temp arrays to save elastic tensor
     using namespace GQTable;
-    const int size_el = nspec_el*NGLL + nspec_el_grl * NGRL;
-    std::array<T,NGRL*21> sumC21;
-    #define C21(i,j,p,q,a) sumC21[a * NGRL + Index(i,j,p,q)]
+    const int size_el = Me.ibool_el.size();
+    std::array<T,NGRL*21> sumC21; // shape(NGRL,21)
+    #define C21(i,j,p,q,a) sumC21[a * 21 + voigt4(i,j,p,q)]
 
     // compute M/K/H/E for gll/grl layer, elastic
     for(int ispec = 0; ispec < nspec_el + nspec_el_grl; ispec ++) {
@@ -64,31 +67,38 @@ prepare_aniso_(const Mesh &Me,vector<T> &Mmat,
         // cache temporary arrays
         for(int i = 0; i < NGL; i ++) {
             for(int idx = 0; idx < 21; idx ++) {
-                sumC21[i*NGRL+idx] = xc21[idx*size_el+i];
+                sumC21[i*21+idx] = Me.xC21[idx*size_el+id+i];
             }
 
             // apply Q model to C21 if required
             if constexpr (std::is_same_v<T,scmplx>) {
                 std::array<float,21> Qm;
                 for(int q = 0; q < nQmodel; q ++) {
-                    Qm[q] = Me.xQani[q*size_el+i];
+                    Qm[q] = Me.xQani[q*size_el+id+i];
                 }
-                get_C21_att(
-                    freq,Qm.data(),nQmodel,
-                    &sumC21[i*NGRL]
-                );
-            }
-
-            
-            // add other terms
-            for(int idx = 0; idx < 21; idx ++) {
-                sumC21[i*NGRL+idx] *= J * weight[i];
+                Me.get_cmplx_c21(Qm.data(),&sumC21[i*21]);
             }
         }
 
-        // assemble H/E
+        // assemble H/E/M/K
         for(int a = 0; a < NGL; a ++) {
             int iglob = Me.ibool_el[id + a];
+
+            // mass matrix
+            T M0 = weight[a] * J * Me.xrho_el[id + a];
+            for(int i = 0; i < 3; i ++) {
+                Mmat[iglob + nglob_el * i] += M0;
+                for(int p = 0; p < 3; p ++) {
+                    T temp = C21(i,0,p,0,a) * k[0] * k[0] + 
+                             C21(i,0,p,1,a) * k[0] * k[1] + 
+                             C21(i,1,p,0,a) * k[0] * k[1] +
+                             C21(i,1,p,1,a) * k[1] * k[1];
+                    int idx = (i*nglob_el+iglob) * ng + (p*nglob_el+iglob);
+
+                    Kmat[idx] += temp * J * weight[a];
+                }
+            }
+
             for(int b = 0; b < NGL; b ++) {
                 int iglob1 = Me.ibool_el[id+b];
 
@@ -100,37 +110,19 @@ prepare_aniso_(const Mesh &Me,vector<T> &Mmat,
                     // E
                     T sx{};
                     for(int s = 0; s < NGL; s ++) {
-                        sx += C21(i,2,p,2,s) * hpT[a*NGL+s] * hpT[b*NGL+s];
+                        sx += C21(i,2,p,2,s) * weight[s] * hpT[a*NGL+s] * hpT[b*NGL+s];
                     }
-                    Emat[idx] += sx / (J * J);
+                    Emat[idx] += sx / J;
 
                     // H
                     T temp1 = C21(i,0,p,2,a) * k[0] + 
                                 C21(i,1,p,2,a) * k[1];
                     T temp2 = C21(i,2,p,0,b) * k[0] + 
                                 C21(i,2,p,1,b) * k[1];
-                    Hmat[idx] += temp1 * hp[a*NGL+b] - 
-                                 temp2 * hpT[a*NGL+b];
+
+                    Hmat[idx] += temp1 * hp[a*NGL+b] * weight[a] - 
+                                 temp2 * hpT[a*NGL+b] * weight[b];
                 }}
-            }
-        }
-
-        // compute M/K
-        for(int a = 0; a < NGL; a ++) {
-            int iglob = Me.ibool_el[id + a];
-
-            // compute mass matrix
-            T M0 = weight[a] * J * Me.xrho_el[id + a];
-            for(int i = 0; i < 3; i ++) {
-                Mmat[iglob + nglob_el * i] += M0;
-                for(int p = 0; p < 3; p ++) {
-                    T temp = C21(i,0,p,0,a) * k[0] * k[0] + 
-                             C21(i,0,p,1,a) * k[0] * k[1] + 
-                             C21(i,1,p,0,a) * k[0] * k[1] +
-                             C21(i,1,p,1,a) * k[1] * k[1];
-                    int idx = (i*nglob_el+iglob) * ng + (p*nglob_el+iglob);
-                    Kmat[idx] += temp;
-                }
             }
         }
     }
@@ -142,7 +134,7 @@ prepare_aniso_(const Mesh &Me,vector<T> &Mmat,
         int id = ispec * NGLL;
 
         // get const arrays
-        const bool is_gll = (ispec != nspec_el);
+        const bool is_gll = (ispec != nspec_ac);
         const float *weight = is_gll? wgll.data(): wgrl.data();
         const float *hpT = is_gll? hprimeT.data(): hprimeT_grl.data();
         const int NGL = is_gll? NGLL : NGRL;
@@ -150,12 +142,12 @@ prepare_aniso_(const Mesh &Me,vector<T> &Mmat,
 
         // cache temporary arrays
         for(int i = 0; i < NGL; i ++) {
-            sumL[i] =  weight[i] / J / xrho_ac[id+i];
+            sumL[i] =  weight[i] / J / Me.xrho_ac[id+i];
         }
 
         // compute M/K/E
         for(int i = 0; i < NGL; i ++) {
-            int ig0 = ibool_ac[id + i];
+            int ig0 = Me.ibool_ac[id + i];
             if(ig0 == -1) continue;
             int iglob = ig0 + nglob_el * 3;
             T temp = weight[i] * J;
@@ -166,11 +158,12 @@ prepare_aniso_(const Mesh &Me,vector<T> &Mmat,
                 sk = get_sls_modulus_factor(freq,Me.xQk_ac[id+i]);
             }
             Mmat[iglob] += temp / (sk * Me.xkappa_ac[id + i]);
+
             Kmat[iglob * ng + iglob] += temp / Me.xrho_ac[id + i];
 
             // assemble E
             for(int j = 0; j < NGL; j ++) {
-                int ig1 = ibool_ac[id + j];
+                int ig1 = Me.ibool_ac[id + j];
                 if(ig1 == -1) continue;
                 int iglob1 = ig1 + nglob_el * 3;
                 T s{};
@@ -187,14 +180,10 @@ prepare_aniso_(const Mesh &Me,vector<T> &Mmat,
     for(int iface = 0; iface < Me.nfaces_bdry; iface ++) {
         int ispec_ac = Me.ispec_bdry[iface * 2 + 0];
         int ispec_el = Me.ispec_bdry[iface * 2 + 1];
-        float norm = -1.;
-        int igll_el = 0;
-        int igll_ac = NGLL - 1;
-        if(!Me.bdry_norm_direc[iface]) {
-            norm = 1.;
-            igll_ac = 0;
-            igll_el = NGLL - 1;
-        }
+        const auto is_pos = Me.bdry_norm_direc[iface];
+        float norm = is_pos ? -1 : 1.;
+        int igll_el = is_pos ? 0 : NGLL - 1;
+        int igll_ac = is_pos ? NGLL - 1 : 0;
 
         // get ac/el global loc
         int iglob_el = Me.ibool_el[ispec_el * NGLL + igll_el];

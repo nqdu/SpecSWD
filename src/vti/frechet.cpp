@@ -173,18 +173,6 @@ compute_phase_kl_att(const Mesh &M,
         M,c_M,c_K,c_E,ul,ur,
         frekl_c.data(),frekl_q.data()
     );
-
-    // rayl_op_matrix(
-    //     freq,c_M,c_K,c_E,ul,ur,M.nspec_el,M.nspec_ac,
-    //     M.nspec_el_grl,M.nspec_ac_grl,M.nglob_el,M.nglob_ac,
-    //     M.el_elmnts.data(),M.ac_elmnts.data(),
-    //     M.ibool_el.data(),M.ibool_ac.data(),
-    //     M.jaco.data(),M.xrho_el.data(),M.xrho_ac.data(),
-    //     M.xA.data(),M.xC.data(),M.xL.data(),
-    //     M.xeta.data(),M.xQA.data(),M.xQC.data(),
-    //     M.xQL.data(),M.xkappa_ac.data(),M.xQk_ac.data(),
-    //     frekl_c.data(),frekl_q.data()
-    // );
     
     // convert to c/QR kernel
     get_fQ_kl(10*size,c,frekl_c.data(),frekl_q.data());

@@ -3,6 +3,7 @@
 
 #include "mesh/mesh.hpp"
 #include "vti/vti.hpp"
+#include "aniso/aniso.hpp"
 
 #include <memory>
 #include <complex>
@@ -15,6 +16,7 @@ namespace specswd_pylib
 extern specswd::Mesh mesh;
 extern specswd::SolverLove LoveSol;
 extern specswd::SolverRayl RaylSol;
+extern specswd::SolverAniso AniSol;
 
 // global vars for eigenvalues/eigenvectors 
 extern std::vector<float> egnr_,egnl_,c_,u_;

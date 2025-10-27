@@ -138,7 +138,7 @@ prepare_rayl_(float freq,int nspec_el,int nspec_ac,
                 const float *xA,const float *xC,const float *xL,const float *xeta,
                 const float *xQA, const float *xQC, const float *xQL,
                 const float *xkappa_ac, const float *xQk_ac,int nfaces_bdry,
-                const int* ispec_bdry,const char *bdry_norm_direc,vector<T> &Mmat,
+                const int* ispec_bdry,const uint8_t *bdry_norm_direc,vector<T> &Mmat,
                 vector<T> &Kmat,vector<T> &Emat,vector<float> &dwdEmat)
 {
     // allocate space and set zero
@@ -273,7 +273,7 @@ prepare_rayl_(float freq,int nspec_el,int nspec_ac,
     for(int iface = 0; iface < nfaces_bdry; iface ++) {
         int ispec_ac = ispec_bdry[iface * 2 + 0];
         int ispec_el = ispec_bdry[iface * 2 + 1];
-        const char is_pos = bdry_norm_direc[iface];
+        const auto is_pos = bdry_norm_direc[iface];
         float norm = is_pos ? -1 : 1.;
         int igll_el = is_pos ? 0 : NGLL - 1;
         int igll_ac = is_pos ? NGLL - 1 : 0;
