@@ -1,4 +1,5 @@
 #include "mesh/mesh.hpp"
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -17,8 +18,17 @@ allocate(int n,T &vec1,Args& ...args)
     }
 }
 
+/**
+ * @brief allocate 1D tomography model
+ * 
+ * @param nz0 no. of points in total
+ * @param swd_type surface wave type = [0,1,2]
+ * @param has_att has attenuation
+ * @param nQani_tomo no. of q used, only used for SWD_TYPE = 2
+ * @param Qfunc_id q model function, only used for SWD_TYPE = 2
+ */
 void Mesh:: 
-allocate_1D_model(int nz0,int swd_type,int has_att)
+allocate_1D_model(int nz0,int swd_type,int has_att,int nQani_tomo,int Qfunc_id)
 {
     // copy value to mesh type 
     SWD_TYPE = swd_type;
@@ -40,7 +50,14 @@ allocate_1D_model(int nz0,int swd_type,int has_att)
     else if(SWD_TYPE == 2) {
         allocate(nz_tomo*21,c21_tomo);
         allocate(nz_tomo,rho_tomo);
-        if(HAS_ATT) allocate(nz_tomo*21,Qani_tomo);
+
+        if(HAS_ATT) {
+            nQani = nQani_tomo;
+            Qani_funcid = Qfunc_id;
+
+            // allocate Q model
+            allocate(nQani * nz_tomo,Qani_tomo);
+        }
 
     }
     else {
@@ -74,10 +91,17 @@ read_model_header_(const char *filename)
     std::getline(infile,line);
     
     // read SWD_TYPE and HAS_ATT
-    int dummy[2];
+    std::array<int,4> dummy{};
     {
         std::istringstream info(line);
         info >> dummy[0] >> dummy[1];
+        if((dummy[0] == 2)  && (dummy[1] == 1)) {
+            info >> dummy[2] >> dummy[3];
+        }
+        else {
+            dummy[2] = 0;
+            dummy[3] = 1;
+        }
     }
 
     // find how many depth points in this file
@@ -89,7 +113,7 @@ read_model_header_(const char *filename)
     infile.close();
 
     // allocate model
-    this -> allocate_1D_model(nz,dummy[0],dummy[1]);
+    this -> allocate_1D_model(nz,dummy[0],dummy[1],dummy[2],dummy[3]);
 
     // allocate depth
     float z = 0.;
@@ -183,16 +207,20 @@ read_model_full_aniso_(const char *filename)
     std::getline(infile,line);
 
     for(int i = 0; i < nz_tomo; i ++) {
-        float temp;
-        infile >> temp >> rho_tomo[i];
+        std::getline(infile,line);
+        std::istringstream info(line);
+        double temp;
+        info >> temp >> rho_tomo[i];
         for(int j = 0; j < 21; j ++ ) {
-            infile >> c21_tomo[j*nz_tomo+i];
+            info >> temp;
+            c21_tomo[j*nz_tomo+i] = temp;
         }
         if(HAS_ATT) {
-            for(int j = 0; j < nQmodel_ani; j ++) {
-                infile >> Qani_tomo[j*nz_tomo+i];
+            for(int j = 0; j < nQani; j ++) {
+                info >> Qani_tomo[j*nz_tomo+i];
             }
         }
+        info.clear();
     }
 
     // close 
@@ -230,14 +258,13 @@ static bool
 check_fluid_c21(const float *c21)
 {
     bool flag = true;
+    const float eps = 1.0e-12;
     float c0 = c21[0];
     flag = flag & (c0 > 0);
     for(int i = 2; i < 21; i ++) {
-        if(i == 1 || i == 6 || i == 11 ) {
-            flag = flag && (c21[i] == c0);
-        }
-        else if(i == 2 || i == 7) {
-            flag = flag && (c21[i] == 2 * c0);
+        if(i == 1 || i == 2 || i == 6 || i == 7 || i == 11 ) 
+        {
+            flag = flag && (std::abs(c21[i] - c0) < eps);
         }
         else {
             flag = flag && (c21[i] == 0.);
@@ -282,7 +309,7 @@ create_model_attributes()
     nregions = region_bdry.size() / 2;
 
     // now check where the fluid is
-    std::vector<char> is_ac_pts; 
+    std::vector<uint8_t> is_ac_pts; 
     is_ac_pts.resize(nz_tomo);
     for(int i = 0; i < nz_tomo; i ++) {
         is_ac_pts[i] = 0;
@@ -309,17 +336,21 @@ create_model_attributes()
             }
         }
         else { // full aniso
-            float temp_c21[21], temp_Qc21[21];
+            float temp_c21[21];
             for(int j = 0; j < 21; j ++) {
-                temp_c21[j] = c21_tomo[j*21+i];
+                temp_c21[j] = c21_tomo[j*nz_tomo+i];
             }
             bool flag = check_fluid_c21(temp_c21);
             
-            if(HAS_ATT) {
-                for(int j = 0; j < nQmodel_ani; j ++) {
-                    temp_Qc21[j] = Qani_tomo[j*nQmodel_ani+i];
+            if(HAS_ATT && flag) { 
+                // all Q should be equal
+                float Q0 = Qani_tomo[i];
+                for(int j = 1; j < nQani; j ++) {
+                    if(std::abs(Qani_tomo[j*nQani+i] - Q0) >= 1.0e-6) {
+                        printf("in fluid region, all Q should be the same!\n");
+                        exit(1);
+                    }
                 }
-                flag = flag && check_fluid_c21(temp_Qc21);
             }
 
             if(flag) {
@@ -376,11 +407,14 @@ print_model() const
     }
 
     for(int ig = 0; ig < nregions; ig ++) {
+        // properties
+        std::string mprop = "solid";
+        if(is_ac_reg[ig]) mprop = "fluid";
         if(ig == nregions - 1) {
             printf("\nhalf space begins at depth = %f\n",
                     depth_tomo[nz_tomo - 1]);
         }
-        printf("\nregion %d:\n",ig + 1);
+        printf("\nregion %d: %s\n",ig + 1,mprop.data());
         printf("=======================\n");
         int istart = region_bdry[ig*2+0];
         int iend = region_bdry[ig*2+1];
@@ -415,7 +449,25 @@ print_model() const
             }
         }
         else {
-
+            printf("depth\t rho\t c11\t c22\t c33\t c44\t c55\t c66\t (Qmodel)\t \n");
+            for(int i = istart; i <= iend; i ++) {
+                printf("%f %f %f %f %f %f %f %f ",
+                        depth_tomo[i],rho_tomo[i], 
+                        c21_tomo[0*nz_tomo+i],
+                        c21_tomo[6*nz_tomo+i], // c22
+                        c21_tomo[11*nz_tomo+i], // c33
+                        c21_tomo[15*nz_tomo+i], // c44
+                        c21_tomo[18*nz_tomo+i], // c55
+                        c21_tomo[20*nz_tomo+i] // c66
+                );
+                if(HAS_ATT) {
+                    for(int j = 0; j < nQani; j ++) {
+                        printf("%f ",Qani_tomo[j*nz_tomo+i]);
+                    }
+                    
+                }
+                printf("\n");
+            }
         }
     }
 }
@@ -425,7 +477,7 @@ print_database() const
 {
     // print SEM mesh information for debug
     printf("\n====================================\n");
-    printf("========= DATABASE Description ========\n");
+    printf("========= DATABASE Description =====\n");
     printf("====================================\n\n");
 
     printf("elements:\n");

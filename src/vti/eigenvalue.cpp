@@ -57,7 +57,7 @@ compute_egn(const Mesh &mesh,
         schur_qz<realw,float>(
             A,B,k2_all,vsr.data(),nullptr,
             Qmat_,Zmat_,Smat_,Spmat_,
-            false
+            true,false
         );
     }
     k_all = k2_all.cast<crealw>().sqrt();
@@ -145,7 +145,7 @@ compute_egn_att(const Mesh &mesh,
         schur_qz<crealw,scmplx> (
             A,B,k,vsr.data(),nullptr,
             cQmat_,cZmat_,cSmat_,cSpmat_,
-            false
+            true,false
         );
     }
     k = k.sqrt();
@@ -242,7 +242,7 @@ compute_egn(const Mesh &mesh,
         schur_qz<realw,float> (
             A,B,k2_all,vsr.data(),vsl.data(),
             Qmat_,Zmat_,Smat_,Spmat_,
-            true
+            true,true
         );
 
         // A = omega2 * rmat2(M.cast<realw>().asDiagonal()) - E.cast<realw>();
@@ -354,7 +354,7 @@ compute_egn_att(const Mesh &mesh,
         schur_qz<crealw,scmplx> (
             A,B,k_all,vsr.data(),vsl.data(),
             cQmat_,cZmat_,cSmat_,cSpmat_,
-            true
+            true,true
         );
     }
     k_all = k_all.sqrt();

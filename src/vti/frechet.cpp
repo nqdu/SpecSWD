@@ -40,10 +40,9 @@ compute_phase_kl(const Mesh &M,
 
     // compute kernels
     love_op_matrix(
-        freq,c_M,c_K,c_E,egn,egn,M.nspec_el,M.nglob_el,
-        M.ibool_el.data(),M.jaco.data(),
-        nullptr,nullptr,nullptr,nullptr,
-        frekl.data(),nullptr
+        M,c_M,c_K,c_E,
+        egn,egn,frekl.data(),
+        nullptr
     );
 }
 
@@ -87,9 +86,7 @@ compute_phase_kl_att(const Mesh &M,
 
     // get kernels
     love_op_matrix(
-        freq,c_M,c_K,c_E,y.data(),x.data(),M.nspec_el,M.nglob_el,
-        M.ibool_el.data(),M.jaco.data(),M.xN.data(),
-        M.xL.data(), M.xQN.data(),M.xQL.data(),
+        M,c_M,c_K,c_E,y.data(),x.data(),
         frekl_c.data(),frekl_q.data()
     );
 
@@ -129,16 +126,8 @@ compute_phase_kl(const Mesh &M,
     float c_M = (float)(om * om) * coef; 
     float c_E = -coef;
     float c_K = -std::pow((float)om / c,2) * coef;
-
     rayl_op_matrix(
-        freq,c_M,c_K,c_E,ul,ur,M.nspec_el,M.nspec_ac,
-        M.nspec_el_grl,M.nspec_ac_grl,M.nglob_el,M.nglob_ac,
-        M.el_elmnts.data(),M.ac_elmnts.data(),
-        M.ibool_el.data(),M.ibool_ac.data(),
-        M.jaco.data(),M.xrho_el.data(),M.xrho_ac.data(),
-        M.xA.data(),M.xC.data(),M.xL.data(),
-        M.xeta.data(),nullptr,nullptr,
-        nullptr,M.xkappa_ac.data(),nullptr,
+        M,c_M,c_K,c_E,ul,ur,
         frekl.data(),nullptr
     );
 }
@@ -180,16 +169,8 @@ compute_phase_kl_att(const Mesh &M,
     scmplx c_M = (float)(om * om) * coef;
     scmplx c_E = -coef;
     scmplx c_K = -om_sq / c_sq * coef;
-
     rayl_op_matrix(
-        freq,c_M,c_K,c_E,ul,ur,M.nspec_el,M.nspec_ac,
-        M.nspec_el_grl,M.nspec_ac_grl,M.nglob_el,M.nglob_ac,
-        M.el_elmnts.data(),M.ac_elmnts.data(),
-        M.ibool_el.data(),M.ibool_ac.data(),
-        M.jaco.data(),M.xrho_el.data(),M.xrho_ac.data(),
-        M.xA.data(),M.xC.data(),M.xL.data(),
-        M.xeta.data(),M.xQA.data(),M.xQC.data(),
-        M.xQL.data(),M.xkappa_ac.data(),M.xQk_ac.data(),
+        M,c_M,c_K,c_E,ul,ur,
         frekl_c.data(),frekl_q.data()
     );
     

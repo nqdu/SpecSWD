@@ -32,6 +32,14 @@ specswd_init_mesh_rayl(
     const float *QL, bool HAS_ATT,bool print_tomo_info = false
 );
 
+void
+specswd_init_mesh_aniso(
+    int nz, const float *z,const float *rho,
+    const float *c21,const float* Qani,
+    bool HAS_ATT,int nQani,int Qfunc_id,
+    bool print_tomo_info
+);
+
 void specswd_execute(float freq,float phi_in_deg,bool use_qz);
 
 void 

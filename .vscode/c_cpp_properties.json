@@ -1,13 +1,13 @@
 {
     "configurations": [
         {
-            "name": "LINUX",
+            "name": "macOS",
             "includePath": [
                 "${workspaceFolder}/**",
                 "~/software/eigen-3.4.0",
-                "/opt/homebrew/Cellar/open-mpi/5.0.7/include",
-                "/Users/nqdu/software/miniconda3/include/python3.11",
-                "/Users/nqdu/software/miniconda3/lib/python3.11/site-packages/pybind11/include"
+                "/opt/homebrew/Cellar/open-mpi/5.0.8/include",
+                "/Users/nqdu/software/miniconda3/include/python3.12",
+                "/Users/nqdu/software/miniconda3/lib/python3.12/site-packages/pybind11/include"
             ],
             "compilerPath": "/usr/bin/g++",
             "cStandard": "gnu17",

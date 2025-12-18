@@ -35,7 +35,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/build/obj)
 
 ################# cmake setup #################
-set(CMAKE_CXX_FLAGS  "-g -Wall")
+set(CMAKE_CXX_FLAGS  "-g -Wall -DEIGEN_DONT_PARALLELIZE")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU") 
   set(CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
@@ -53,9 +53,6 @@ endif()
 set(CMAKE_VERBOSE_MAKEFILE on)
 
 ################# find packages #################
-# path of *.cmake files
-#set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/include/cmake)
-
 # eigen
 include_directories(${EIGEN_INC})
 
@@ -65,6 +62,13 @@ find_package(LAPACK REQUIRED)
 find_package(LAPACKE REQUIRED)
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DEIGEN_USE_LAPACKE")
 
+#find_package(OpenMP REQUIRED)
+if (OPENMP_FOUND)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+    include_directories(${OpenMP_CXX_INCLUDE_DIRS})
+endif()
+
 ################# include paths #################
 include_directories(${PROJECT_SOURCE_DIR}/src)
 #include_directories(${PROJECT_SOURCE_DIR}/include)
@@ -73,7 +77,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/shared)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/mesh)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/vti)
-# add_subdirectory(${PROJECT_SOURCE_DIR}/src/tti)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/aniso)
 # add_subdirectory(${PROJECT_SOURCE_DIR}/src/multiphysics)
 
 # check build libraries

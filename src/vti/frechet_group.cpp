@@ -3,6 +3,7 @@
 #include "shared/iofunc.hpp"
 
 #include <Eigen/Core>
+
 #include <iostream>
 
 namespace specswd
@@ -74,11 +75,8 @@ compute_group_kl(const Mesh &mesh,
     float c_K = k2;
     float c_E = 1.;
     love_op_matrix(
-        freq,c_M,c_K,c_E,lamb.data(),x.data(),mesh.nspec_el,
-        mesh.nglob_el,mesh.ibool_el.data(),
-        mesh.jaco.data(),mesh.xN.data(),mesh.xL.data(),
-        nullptr,nullptr,frekl.data(),
-        nullptr
+        mesh,c_M,c_K,c_E,lamb.data(),x.data(),
+        frekl.data(),nullptr
     );
 
     // C_M and C_K
@@ -86,13 +84,114 @@ compute_group_kl(const Mesh &mesh,
     c_K = 1.0f/(c * xTMx);
     c_E = 0.;
     love_op_matrix(
-        freq,c_M,c_K,c_E,x.data(),x.data(),mesh.nspec_el,
-        mesh.nglob_el,mesh.ibool_el.data(),
-        mesh.jaco.data(),mesh.xN.data(),mesh.xL.data(),
-        nullptr,nullptr,f_temp.data(),
-        nullptr
+        mesh,c_M,c_K,c_E,x.data(),x.data(),
+        f_temp.data(),nullptr
     );
     f += f_temp;
+}
+
+/**
+ * @brief solve linear system Px = b, P is in lower Hessenberg form with 2x2 and 1x1 blocks
+ * 
+ * @param P linear system,  lower Hessenberg form, shape(n,n)
+ * @param b shape(n)
+ * @return x, shape(n) Eigen::VectorXf 
+ */
+static Eigen::VectorXf 
+solve_hessberg_lower(const Eigen::MatrixXf &P,const Eigen::VectorXf &b)
+{   
+    // threshold
+    const float eps = 1.0e-12;
+
+    // solver lower system
+    int n = P.rows();
+    Eigen::VectorXf x = b * 0.0f;
+    using Eigen::indexing::seq;
+    int i = 0;
+    while (i < n) {
+        auto idx = seq(0,i-1);
+        bool is2x2 = (i + 1 < n) && (std::abs(P(i,i+1)) > eps);
+        if(!is2x2) {
+            float s = P(i,idx) * x(idx);
+            bool SMALL_DIAG = std::abs(P(i,i)) < eps;
+            x[i] = SMALL_DIAG ? 0 : (b[i] - s) / P(i,i);
+
+            // update index
+            i += 1;
+        }
+        else {
+            double rhs1 = b[i] - P(i,idx) * x(idx);
+            double rhs2 = b[i+1] - P(i+1,idx) * x(idx);
+
+            // solve 2x2 system
+            double a11 = P(i,i), a12 = P(i,i+1);
+            double a21 = P(i+1,i), a22 = P(i+1,i+1);
+            double det = a11 * a22 - a12 * a21;
+            if(std::abs(det) > eps) {
+                x[i] = (a22 * rhs1 - a12 * rhs2) / det;
+                x[i+1] = (-a21 * rhs1 + a11 * rhs2) / det;
+            }
+            else {
+                x[i] = 0.;
+                x[i+1] = 0.;
+            }
+            i += 2;
+        }
+    }
+
+    return x;
+}
+
+/**
+ * @brief solve linear system Px = b, P is in upper Hessenberg form with 2x2 and 1x1 blocks
+ * 
+ * @param P linear system,  upper Hessenberg form, shape(n,n)
+ * @param b shape(n)
+ * @return x, shape(n) Eigen::VectorXf 
+ */
+static Eigen::VectorXf 
+solve_hessberg_upper(const Eigen::MatrixXf &P,const Eigen::VectorXf &b)
+{   
+    // threshold
+    const float eps = 1.0e-12;
+
+    // solver quasi-upper triangular system
+    int n = P.rows();
+    Eigen::VectorXf x = b * 0.0f;
+    using Eigen::indexing::seq;
+    int i = n-1;
+    while (i >=0) {
+        auto idx = seq(i+1,n-1);
+        bool is2x2 = (i-1 >=0) && (std::abs(P(i,i-1)) > eps);
+        if(!is2x2) {
+            float s = P(i,idx) * x(idx);
+            bool SMALL_DIAG = std::abs(P(i,i)) < eps;
+            x[i] = SMALL_DIAG ? 0 : (b[i] - s) / P(i,i);
+
+            // update index
+            i -= 1;
+        }
+        else {
+            double b1 = b[i-1] - P(i-1,idx) * x(idx);
+            double b2 = b[i] - P(i,idx) * x(idx);
+
+            // solve 2x2 system
+            double a11 = P(i-1,i-1), a12 = P(i-1,i);
+            double a21 = P(i,i-1), a22 = P(i,i);
+            double det = a11 * a22 - a12 * a21;
+            if(std::abs(det) > eps) {
+                x[i-1] = (a22 * b1 - a12 * b2) / det;
+                x[i] = (-a21 * b1 + a11 * b2) / det;
+            }
+            else {
+                x[i-1] = 0.;
+                x[i] = 0.;
+            }
+            i -= 2;
+        }
+    }
+
+    return x;
 }
 
 /**
@@ -113,29 +212,41 @@ compute_group_kl(const Mesh &mesh,
     Eigen::Map<const Eigen::ArrayXf> x(ur,ng);
     Eigen::Map<const Eigen::ArrayXf> y(ul,ng);
     Eigen::Map<const fmat2> K(Kmat.data(),ng,ng);
+    Eigen::Map<const fmat2> dE(dwdEmat.data(),ng,ng);
     Eigen::Map<const Eigen::ArrayXf> M(Mmat.data(),ng);
 
     // resize kernels
     int size = mesh.ibool.size();
     frekl.resize(6*size); // du_L/d(A/C/L/kappa/rho)
     Eigen::Map<Eigen::ArrayXf> f(frekl.data(),frekl.size());
-    Eigen::ArrayXf f1(frekl.size()); 
+    Eigen::ArrayXf f1(frekl.size());  
+    f1.setZero(); f.setZero();
     
     // compute some coefs
-    // du / alpha = du/dc * dc/dalpha
+    // du / alpha = du/dc * dc/dalpha + du/dk * dk/dalpha
     float freq = mesh.freq;
     double om = 2 * M_PI * freq;
     float k2 = std::pow(om/c,2);
-    float yTKx = (y.transpose().matrix() * K * x.matrix()).sum(), 
+    const float twokinv = 0.5 * c / om;
+    float yTKx = y.transpose().matrix() * K * x.matrix(), 
           yTMx = (y * M * x).sum();
-    float du_dalpha = -yTKx / (c*c * yTMx);
-    du_dalpha *= -0.5f * std::pow(c,3) / (om * om);
+    float yTdEx = y.transpose().matrix() * dE * x.matrix();
+    float denoinv = 1. / (c * yTMx - twokinv * yTdEx);
+    float denoinv_sq = std::pow(denoinv,2); // denominator ^2 
+    float du_dalpha = yTKx * yTMx * denoinv_sq * 0.5f * std::pow(c,3) / (om * om); // du/dc * dc/dalpha
+    du_dalpha += -yTKx * yTdEx * denoinv_sq / k2 * c/om * 0.25f;
 
     // du_dx and du_dy
-    Eigen::VectorXf du_dx = K.transpose().matrix() * y.matrix() / (c * yTMx) - 
-                            yTKx * (M * y).matrix() / (c * yTMx * yTMx);
-    Eigen::VectorXf du_dy = K.matrix() * x.matrix() / (c * yTMx) - 
-                            yTKx * (M * x).matrix() / (c * yTMx * yTMx);
+    Eigen::VectorXf du_dx = K.transpose().matrix() * y.matrix() * denoinv - 
+                            yTKx * denoinv_sq * (
+                                c * (M * y).matrix() - 
+                                twokinv * dE.transpose() * y.matrix()
+                            );
+    Eigen::VectorXf du_dy = K.matrix() * x.matrix() * denoinv - 
+                            yTKx * denoinv_sq * (
+                                c * (M * x).matrix() - 
+                                twokinv * dE * x.matrix()
+                            );
     
     // mapping Q,Z,S,Sp
     Eigen::Map<const Eigen::MatrixXf> Q(Qmat_.data(),ng,ng);
@@ -144,30 +255,21 @@ compute_group_kl(const Mesh &mesh,
     Eigen::Map<const Eigen::MatrixXf> Sp(Spmat_.data(),ng,ng);
 
     // solve  (A- k^2 B).T lam = du_dx
-    using Eigen::seq;
-    du_dx = Z.transpose() * du_dx.matrix();
+    du_dx = Z.transpose() * du_dx;
     Eigen::MatrixXf P = S.transpose() - k2 * Sp.transpose();
-    Eigen::VectorXf lamb = du_dx * 0.0f;
-    for(int i = 0; i < ng; i ++) {
-         // forward substitution
-        float s = (P(i,seq(0,i-1)) * lamb(seq(0,i-1))).sum();
-        bool SMALL_DIAG = std::abs(P(i,i)) < 1.0e-12;
-        lamb[i] = SMALL_DIAG ? 0 : (du_dx[i] - s) / P(i,i);
-    }
+    Eigen::VectorXf lamb = solve_hessberg_lower(P,du_dx);
+    //Eigen::VectorXf lamb = P.colPivHouseholderQr().solve(du_dx);
     lamb = Q * lamb;
+
     // make lambda orthogonal to left eigenvector
     lamb = lamb.array() - (y * lamb.array()).sum() * y;
 
     // solve (A-k^2 B) xi = du_dy
     P = S - k2 * Sp;
     du_dy = Q.transpose() * du_dy.matrix();
-    Eigen::VectorXf xi = du_dy * 0.0f;
-    for(int i = ng-1; i >=0; i --) {
-        float s = (P(i,seq(i+1,ng-1)) * xi(seq(i+1,ng-1))).sum();
-        bool SMALL_DIAG = std::abs(P(i,i)) < 1.0e-12;
-        xi[i] = SMALL_DIAG ? 0 : (du_dy[i] - s) / P(i,i);
-    }
+    Eigen::VectorXf xi = solve_hessberg_upper(P,du_dy);
     xi = Z * xi;
+
     // make xi orthogonal to right eigenvector
     xi = xi.array() - (x * xi.array()).sum() * x;
 
@@ -181,44 +283,24 @@ compute_group_kl(const Mesh &mesh,
     float c_M = -om * om;
     float c_E = 1., c_K = k2;
     rayl_op_matrix(
-        freq,c_M,c_K,c_E,lamb.data(),x.data(),mesh.nspec_el,mesh.nspec_ac,
-        mesh.nspec_el_grl,mesh.nspec_ac_grl,mesh.nglob_el,mesh.nglob_ac,
-        mesh.el_elmnts.data(),mesh.ac_elmnts.data(),
-        mesh.ibool_el.data(),mesh.ibool_ac.data(),
-        mesh.jaco.data(),mesh.xrho_el.data(),mesh.xrho_ac.data(),
-        mesh.xA.data(),mesh.xC.data(),mesh.xL.data(),
-        mesh.xeta.data(),mesh.xQA.data(),mesh.xQC.data(),
-        mesh.xQL.data(),mesh.xkappa_ac.data(),mesh.xQk_ac.data(),
+        mesh,c_M,c_K,c_E,lamb.data(),x.data(),
         f.data(),nullptr
     );
 
     // -(y.T (dA /d_m - k^2 dB / dm) xi)
     rayl_op_matrix(
-        freq,c_M,c_K,c_E,y.data(),xi.data(),mesh.nspec_el,mesh.nspec_ac,
-        mesh.nspec_el_grl,mesh.nspec_ac_grl,mesh.nglob_el,mesh.nglob_ac,
-        mesh.el_elmnts.data(),mesh.ac_elmnts.data(),
-        mesh.ibool_el.data(),mesh.ibool_ac.data(),
-        mesh.jaco.data(),mesh.xrho_el.data(),mesh.xrho_ac.data(),
-        mesh.xA.data(),mesh.xC.data(),mesh.xL.data(),
-        mesh.xeta.data(),mesh.xQA.data(),mesh.xQC.data(),
-        mesh.xQL.data(),mesh.xkappa_ac.data(),mesh.xQk_ac.data(),
+        mesh,c_M,c_K,c_E,y.data(),xi.data(),
         f1.data(),nullptr
     );
     f += f1;
 
     // df/dM and df/dC
-    c_M = -yTKx / (c * yTMx * yTMx);
+    c_M =  -yTKx * denoinv_sq * c;
     c_E = 0.;
-    c_K = 1.0f / (c * yTMx);
+    c_K = denoinv;
+    f1.setZero();
     rayl_op_matrix(
-        freq,c_M,c_K,c_E,y.data(),x.data(),mesh.nspec_el,mesh.nspec_ac,
-        mesh.nspec_el_grl,mesh.nspec_ac_grl,mesh.nglob_el,mesh.nglob_ac,
-        mesh.el_elmnts.data(),mesh.ac_elmnts.data(),
-        mesh.ibool_el.data(),mesh.ibool_ac.data(),
-        mesh.jaco.data(),mesh.xrho_el.data(),mesh.xrho_ac.data(),
-        mesh.xA.data(),mesh.xC.data(),mesh.xL.data(),
-        mesh.xeta.data(),mesh.xQA.data(),mesh.xQC.data(),
-        mesh.xQL.data(),mesh.xkappa_ac.data(),mesh.xQk_ac.data(),
+        mesh,c_M,c_K,c_E,y.data(),x.data(),
         f1.data(),nullptr
     );
     f += f1;
@@ -299,11 +381,8 @@ compute_group_kl_att(const Mesh &mesh,
     // - (lambda + c y) ^H (dA / dm_i - k^2 dB / dm) x
     lamb = lamb.array() + std::conj(c12_conj) * x.conjugate();
     love_op_matrix(
-        freq,c_M,c_K,c_E,lamb.data(),x.data(),mesh.nspec_el,
-        mesh.nglob_el,mesh.ibool_el.data(),
-        mesh.jaco.data(),mesh.xN.data(),mesh.xL.data(),
-        mesh.xQN.data(),mesh.xQL.data(),frekl_u.data(),
-        frekl_q.data()
+        mesh,c_M,c_K,c_E,lamb.data(),x.data(),
+        frekl_u.data(),frekl_q.data()
     );
 
     // (y) ^H (c_M dM / dm_i + c_K dK / dm) x
@@ -312,11 +391,8 @@ compute_group_kl_att(const Mesh &mesh,
     c_E = 0.;
     lamb = x.conjugate();
     love_op_matrix(
-        freq,c_M,c_K,c_E,lamb.data(),x.data(),mesh.nspec_el,
-        mesh.nglob_el,mesh.ibool_el.data(),
-        mesh.jaco.data(),mesh.xN.data(),mesh.xL.data(),
-        mesh.xQN.data(),mesh.xQL.data(),ftemp_r.data(),
-        ftemp_i.data()
+        mesh,c_M,c_K,c_E,lamb.data(),x.data(),
+        ftemp_r.data(),ftemp_i.data()
     );
     f_u += ftemp_r; f_q += ftemp_i;
 
@@ -343,10 +419,12 @@ compute_group_kl_att(const Mesh &mesh,
 {
     int ng = mesh.nglob_el * 2 + mesh.nglob_ac;
     typedef Eigen::Matrix<scmplx,-1,-1,Eigen::RowMajor> cfmat2;
+    typedef Eigen::Matrix<float,-1,-1,Eigen::RowMajor> fmat2;
     Eigen::Map<const Eigen::ArrayXcf> x(ur,ng);
     Eigen::Map<const Eigen::ArrayXcf> y(ul,ng);
     Eigen::Map<const cfmat2> K(CKmat.data(),ng,ng);
     Eigen::Map<const Eigen::ArrayXcf> M(CMmat.data(),ng);
+    Eigen::Map<const fmat2> dE(dwdEmat.data(),ng,ng);
 
     // resize kernels
     int size = mesh.ibool.size();
@@ -355,22 +433,32 @@ compute_group_kl_att(const Mesh &mesh,
     Eigen::ArrayXf f1_r(frekl_u.size()),f1_i(frekl_u.size());
     
     // compute some coefs
-    // du / alpha = du/dc * dc/dalpha
+    // du / alpha = du/dc * dc/dalpha + du/dk dk / dalpha
     float freq = mesh.freq;
     float om = 2 * M_PI * freq;
     float om_sq = om * om;
     scmplx c_sq = c * c;
     scmplx k2 = om_sq / c_sq;
+    scmplx twokinv = 0.5f * c / om;
     scmplx yHKx = (y.matrix().adjoint() * K * x.matrix()).sum(); // y.H @ K @ x
     scmplx yHMx = (y.conjugate() * M * x).sum(); // y.H @ M @ x
-    scmplx du_dalpha = -yHKx / (c*c * yHMx);
-    du_dalpha *= -0.5f * c / k2;
+    scmplx yHdEx = y.matrix().adjoint() * dE * x.matrix();
+    scmplx denoinv = 1.0f / (c * yHMx - twokinv * yHdEx);
+    scmplx denoinv_sq = denoinv * denoinv; // denominator ^2 
+    scmplx du_dalpha = yHKx * yHMx * denoinv_sq * 0.5f * c / k2; // du/dc * dc/dalpha
+    du_dalpha += -yHKx * yHdEx * denoinv_sq / k2 * c/om * 0.25f;// du/dk dk / dalpha
 
     // du_dx and du_dy*
-    Eigen::VectorXcf du_dx = K.transpose().matrix() * y.conjugate().matrix() / (c * yHMx) - 
-                            yHKx * (M * y.conjugate()).matrix() / (c * yHMx * yHMx);
-    Eigen::VectorXcf du_dys = K.matrix() * x.matrix() / (c * yHMx) - 
-                            yHKx * (M * x).matrix() / (c * yHMx * yHMx);
+    Eigen::VectorXcf du_dx = K.transpose().matrix() * y.conjugate().matrix() * denoinv - 
+                            yHKx * denoinv_sq * (
+                                c * (M * y.conjugate()).matrix() - 
+                                twokinv * dE.transpose() * y.conjugate().matrix()
+                            );
+    Eigen::VectorXcf du_dys = K.matrix() * x.matrix() * denoinv - 
+                            yHKx * denoinv_sq * (
+                                c * (M * x).matrix() - 
+                                twokinv * dE * x.matrix()
+                            );
     
     // mapping Q,Z,S,Sp
     Eigen::Map<const Eigen::MatrixXcf> Q(cQmat_.data(),ng,ng);
@@ -390,6 +478,7 @@ compute_group_kl_att(const Mesh &mesh,
         lamb[i] = SMALL_DIAG ? 0 : (du_dx[i] - s) / P(i,i);
     }
     lamb = Q * lamb;
+
     // make lambda orthogonal to left eigenvector
     lamb = lamb.array() - (y.conjugate() * lamb.array()).sum() * y;
 
@@ -403,6 +492,7 @@ compute_group_kl_att(const Mesh &mesh,
         xi[i] = SMALL_DIAG ? 0 : (du_dys[i] - s) / P(i,i);
     }
     xi = Z * xi;
+
     // make xi orthogonal to right eigenvector
     xi = xi.array() - (x.conjugate() * xi.array()).sum() * x;
 
@@ -416,44 +506,23 @@ compute_group_kl_att(const Mesh &mesh,
     scmplx c_M = -om * om;
     scmplx c_E = 1., c_K = k2;
     rayl_op_matrix(
-        freq,c_M,c_K,c_E,lamb.data(),x.data(),mesh.nspec_el,mesh.nspec_ac,
-        mesh.nspec_el_grl,mesh.nspec_ac_grl,mesh.nglob_el,mesh.nglob_ac,
-        mesh.el_elmnts.data(),mesh.ac_elmnts.data(),
-        mesh.ibool_el.data(),mesh.ibool_ac.data(),
-        mesh.jaco.data(),mesh.xrho_el.data(),mesh.xrho_ac.data(),
-        mesh.xA.data(),mesh.xC.data(),mesh.xL.data(),
-        mesh.xeta.data(),mesh.xQA.data(),mesh.xQC.data(),
-        mesh.xQL.data(),mesh.xkappa_ac.data(),mesh.xQk_ac.data(),
+        mesh,c_M,c_K,c_E,lamb.data(),x.data(),
         f_u.data(),f_q.data()
     );
 
     // -(y.T (dA /d_m - k^2 dB / dm) xi)
     rayl_op_matrix(
-        freq,c_M,c_K,c_E,y.data(),xi.data(),mesh.nspec_el,mesh.nspec_ac,
-        mesh.nspec_el_grl,mesh.nspec_ac_grl,mesh.nglob_el,mesh.nglob_ac,
-        mesh.el_elmnts.data(),mesh.ac_elmnts.data(),
-        mesh.ibool_el.data(),mesh.ibool_ac.data(),
-        mesh.jaco.data(),mesh.xrho_el.data(),mesh.xrho_ac.data(),
-        mesh.xA.data(),mesh.xC.data(),mesh.xL.data(),
-        mesh.xeta.data(),mesh.xQA.data(),mesh.xQC.data(),
-        mesh.xQL.data(),mesh.xkappa_ac.data(),mesh.xQk_ac.data(),
+        mesh,c_M,c_K,c_E,y.data(),xi.data(),
         f1_r.data(),f1_i.data()
     );
     f_u += f1_r;  f_q += f1_i;
 
     // df/dM and df/dC
-    c_M = -yHKx / (c * yHMx * yHMx);
+    c_M =  -yHKx * denoinv_sq * c;
     c_E = 0.;
-    c_K = 1.0f / (c * yHMx);
+    c_K = denoinv;
     rayl_op_matrix(
-        freq,c_M,c_K,c_E,y.data(),x.data(),mesh.nspec_el,mesh.nspec_ac,
-        mesh.nspec_el_grl,mesh.nspec_ac_grl,mesh.nglob_el,mesh.nglob_ac,
-        mesh.el_elmnts.data(),mesh.ac_elmnts.data(),
-        mesh.ibool_el.data(),mesh.ibool_ac.data(),
-        mesh.jaco.data(),mesh.xrho_el.data(),mesh.xrho_ac.data(),
-        mesh.xA.data(),mesh.xC.data(),mesh.xL.data(),
-        mesh.xeta.data(),mesh.xQA.data(),mesh.xQC.data(),
-        mesh.xQL.data(),mesh.xkappa_ac.data(),mesh.xQk_ac.data(),
+        mesh,c_M,c_K,c_E,y.data(),x.data(),
         f1_r.data(),f1_i.data()
     );
     f_u += f1_r;  f_q += f1_i;
