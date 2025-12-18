@@ -1,33 +1,61 @@
 from .lib import libswd
 import numpy as np 
 
-def _model_sanity_check(wavetype:str,vph=None,vpv=None,vsh=None,vsv=None,
-                Qa=None,Qc=None,Qn=None,Ql=None,
-                c21=None,nQani=None,Qani=None):
+def _model_sanity_check(
+        wavetype:str,z:np.ndarray,
+        vph=None,vpv=None,
+        vsh=None,vsv=None,
+        eta=None,
+        c21=None):
+    
+    assert wavetype in ['love','rayl','aniso'] ,"wavetype must be one of ['love','rayl','aniso']"
+
+    # get shape of tomo model
+    nz = len(z)
+
     if wavetype == "love":
         if (vsh is None) or (vsv is None):
             print("love wave model mustn't have None vsh/vsv!")
             exit(1)
+        # make sure vsh/vsv has shape (nz,)
+        if vsh.shape[0] != nz or vsv.shape[0] != nz:
+            print("vsh and vsv should be with shape (nz,)!")
+            exit(1)
+        
     elif wavetype == "rayl":
-        if (vsv is None) or (vpv is None) or (vph is None):
-            print("rayleigh wave model mustn't have None vph/vpv/vsv!")
+        if (vsv is None) or (vpv is None) or (vph is None) or (eta is None):
+            print("rayleigh wave model mustn't have None vph/vpv/vsv/eta!")
+            exit(1)
+        # make sure vph/vpv/vsv has shape (nz,)
+        if vph.shape[0] != nz or vpv.shape[0] != nz or vsv.shape[0] != nz or eta.shape[0] != nz:
+            print("vph/vpv/vsv/eta should be with shape (nz,)!")
+            exit(1)
+    else:
+        if (c21 is None):
+            print("full anisotropy model mustn't have None c21/nQani/Qani!")
+            exit(1)
 
-    pass
+        # make sure c21 is with correct shape
+        if c21.shape[0] != 21 or c21.shape[1] != nz:
+            print("c21 should be with shape (21,nz)!")
+            exit(1)
 
 class SpecWorkSpace:
 
-    def __init__(self):
+    def __init__(self,wavetype:str=None,
+                 has_att:bool=False):
         self._max_mode = 0
-        self._has_att = None 
+        self._has_att = has_att
         self._use_qz = None 
-        self._wavetype = None  
+        self._wavetype = wavetype  
 
         pass
 
     def initialize(self,wavetype:str,z:np.ndarray,rho:np.ndarray,
                 vph=None,vpv=None,vsh=None,vsv=None,
                 eta=None,Qa=None,Qc=None,Qn=None,Ql=None,
-                c21=None,nQani=None,Qani=None,
+                c21=None,Qani=None,qfunc_id=1,
+                scale_rho=0.,scale_v=0.,scale_z=0.,
                 disp=False):
         """
         initialize working space for SEM
@@ -68,9 +96,19 @@ class SpecWorkSpace:
 
         # check input models
         _model_sanity_check(
-            wavetype,vph,vpv,vsh,vsv,Qa,
-            Qc,Qn,Ql,c21,nQani,Qani
+            wavetype,z,
+            vph,vpv,
+            vsh,vsv,
+            eta,
+            c21
         )
+
+        # set default params
+        qa = np.zeros((1),dtype='f8')
+        qc = np.zeros((1),dtype='f8')
+        qn = np.zeros((1),dtype='f8')
+        ql = np.zeros((1),dtype='f8')
+        qani = np.zeros((1,1),dtype='f8')
         
         # init work space by calling libswd
         self._has_att = False
@@ -79,12 +117,6 @@ class SpecWorkSpace:
                 self._has_att = True
                 qn = Qn 
                 ql = Ql 
-            else:
-                # avoid pybind11 issue
-                qn = np.zeros((1),dtype='f4')
-                ql = np.zeros((1),dtype='f4')
-            libswd.init_love(z,rho,vsh,vsv,qn,ql,self._has_att,disp)
-            #libswd.init_love1(self._has_att,disp)
 
         elif self._wavetype == 'rayl':
             if (Qn is not None) and (Qa is not None) and (Qc is not None):
@@ -92,16 +124,38 @@ class SpecWorkSpace:
                 qa = Qa 
                 qc = Qc 
                 ql = Ql
-            else:
-                # avoid pybind11 issue
-                qc = np.zeros((1),dtype='f4')
-                qa = np.zeros((1),dtype='f4')
-                ql = np.zeros((1),dtype='f4')
-            libswd.init_rayl(z,rho,vph,vpv,vsv,eta,qa,qc,ql,
-                            self._has_att,disp)
         else:
-            print("not implemented!")
-            assert(0 == 1)
+            if (Qani is not None):
+                self._has_att = True
+                qani = Qani
+                assert(qani.shape[1] == self._nz)
+            
+            # we only support qfunc_id = 1 now
+            if qfunc_id != 1:
+                print("only qfunc_id = 1 is supported now!")
+                exit(1)
+        
+        swd_type_int = 0
+        if self._wavetype == "love":
+            swd_type_int = 0
+        elif self._wavetype == "rayl":
+            swd_type_int = 1
+        else:
+            swd_type_int = 2
+
+        # initialize 
+        libswd.init_mesh(
+            swd_type_int,z,rho,
+            vph,vpv,vsh,vsv,
+            eta,qa,qc,qn,ql,
+            c21,qani,
+            scale_rho=scale_rho,
+            scale_v=scale_v,
+            scale_z=scale_z,
+            HAS_ATT=self._has_att,
+            Qfunc_id=qfunc_id,
+            print_info=disp
+        )
 
     def compute_egn(self,freq:float,ang_in_deg = 0.,only_phase=False) -> np.ndarray:
         """
@@ -137,14 +191,9 @@ class SpecWorkSpace:
 
         return c
 
-    def group_velocity(self,imode:int):
+    def group_velocity(self):
         """
-        compute group velocites at imode-th mode
-
-        Parameters
-        ----------
-        imode: int
-            which index to return
+        compute group velocites for each model at current frequency
 
         Returns
         --------
@@ -156,16 +205,44 @@ class SpecWorkSpace:
         before calling this routine, use_qz should be True in self.compute_egn
         """
         assert self._use_qz ,"please enable use_qz in self.compute_egn"
-        if(imode >= self._max_mode): 
-            print(f"imode should inside [0,{self._max_mode})")
-            exit(1)
-        
+        u_real,u_imag = libswd.group_vel()
         if not self._has_att:
-            u = libswd.group_vel(imode)
+            u = u_real
         else:
-            u = libswd.group_vel_att(imode)
+            u = u_real + 1j * u_imag
 
         return u
+
+    def get_kernel_names(self):
+        """
+        get names for Frechet derivative
+        
+        Returns
+        ---------
+        kl_name: list[str]
+            list of kernel names
+        """
+        if self._wavetype == "love":
+            kl_name = ['vsh','vsv','rho']
+            if self._has_att:
+                kl_name += ['Qn','Ql']
+        elif self._wavetype == "rayl":
+            kl_name = ['vph','vpv','vsv','rho','eta']
+            if self._has_att:
+                kl_name += ['Qa','Qc','Qn','Ql']
+            # acoustic 
+            kl_name += ['vp_ac','rho_ac']
+            if self._has_att:
+                kl_name += ['Qk_ac']
+        else:
+            kl_name = ['c_{i}{j}' for i in range(1,7) for j in range(i,7)] + ['rho']
+            if self._has_att:
+                kl_name += ['Qk','Qm']
+            # acoustic 
+            kl_name += ['kappa_ac','rho_ac']
+            if self._has_att:
+                kl_name += ['Qk_ac']
+        return kl_name
         
     def get_phase_kl(self,imode:int):
         """

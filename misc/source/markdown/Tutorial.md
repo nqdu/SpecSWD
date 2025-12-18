@@ -4,7 +4,14 @@
 **SpecSWD** use a mixture 1-D model (linear variation model with discontinuities). The discontinuities is marked by two group of quantities defined at the same depth. **SpecSWD** currently support 3 type of different models: VTI-Love wave model, VTI-Rayleigh wave model, full-anisotropic model. The format is as below:
 
 ### Love wave model
-In VTI media (or radial anisotropy), only 2 velocities `Vsv,Vsh` and corresponding quality factor `Ql,Qn` are related to love wave. 
+In VTI media (or radial anisotropy), only 2 velocities `Vsv,Vsh` and corresponding quality factor `Ql,Qn` are related to love wave.  Here is a template below:
+```bash
+0 1   # z rho vsh vsv QN QL
+0.000000 2.800000 3.300000 3.000000 220. 200.
+35.000000 2.800000 3.300000 3.000000 220. 200.
+35.000000 3.200000 5.500000 5.000000 330. 300.
+35 3.0  4.5  # scale factors L/density/velocity. This line can be missing
+```
 
 ### Rayleigh (Scholte) wave model
 For Rayleigh wave, generally we need 3 velocities `Vph,Vpv,Vsv`, their corresponding quality factor `Qa,Qc,Ql`, and a ratio factor `eta`. If this model also involves acoutic regions, you should set the `Vsv = 0` and `Vpv=Vph, Qa=Qc` in these regions to make the program know it's acoutic. Also at elastic-acoustic boundary, a discontinuty is required.
@@ -25,6 +32,11 @@ This program use standard linear solids to model attenuation effects. The correc
 
 ![](../static/Qmodel.jpg)
 *Q model estimated by SLS model*
+
+## Scale Units
+This program operates in a dimensionless domain, meaning that all variables are consistently rescaled to a nondimensional form. The scale factors are established during workspace initialization. If not specified by the user, the program will automatically determine these factors based on the depth, maximum phase velocity, and density of the half-space.
+
+
 
 ## Example
 ```python
