@@ -4,23 +4,18 @@
 #include "mesh/mesh.hpp"
 #include "vti/vti.hpp"
 #include "aniso/aniso.hpp"
+#include "numerical.hpp"
 
 #include <memory>
-#include <complex>
-
 // global vars for solver/mesh
 
 namespace specswd_pylib
 {
 
-extern specswd::Mesh mesh;
-extern specswd::SolverLove LoveSol;
-extern specswd::SolverRayl RaylSol;
-extern specswd::SolverAniso AniSol;
-
-// global vars for eigenvalues/eigenvectors 
-extern std::vector<float> egnr_,egnl_,c_,u_;
-extern std::vector<specswd::scmplx> cegnr_,cegnl_,cc_,cu_;
+extern std::shared_ptr<specswd::Mesh> mesh_ptr;
+extern std::shared_ptr<specswd::SolverLove> love_ptr;
+extern std::shared_ptr<specswd::SolverRayl> rayl_ptr;
+extern std::shared_ptr<specswd::SolverAniso> aniso_ptr;
 
 } // namespace specswd_pylib
 

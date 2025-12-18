@@ -111,12 +111,12 @@ read_model_header_(const char *filename)
         nz += 1;
     }
     infile.close();
-
+    
     // allocate model
     this -> allocate_1D_model(nz,dummy[0],dummy[1],dummy[2],dummy[3]);
 
     // allocate depth
-    float z = 0.;
+    real_t z = 0.;
 
     // read depth in file
     infile.open(filename);
@@ -131,7 +131,7 @@ read_model_header_(const char *filename)
             // make sure depth is no descreasing
             if(depth_tomo[i] - z < 0) {
                 printf("depth should not decrease!\n");
-                printf("current/previous depth = %f %f\n",depth_tomo[i],z);
+                printf("current/previous depth = %g %g\n",depth_tomo[i],z);
                 exit(1);
             }
             z = depth_tomo[i];
@@ -152,7 +152,7 @@ read_model_love_(const char *filename)
     // skip header
     std::getline(infile,line);
 
-    float temp;
+    real_t temp;
     for(int i = 0; i < nz_tomo; i ++) {
         std::getline(infile,line);
         std::istringstream info(line);
@@ -162,6 +162,14 @@ read_model_love_(const char *filename)
         }
         info.clear();
     }
+
+    // try to get next line, if exists, then read scale factors
+    if(std::getline(infile,line)) {
+        std::istringstream info(line);
+        info >> SCALE_LENGTH >> SCALE_VELOCITY >> SCALE_DENSITY;
+        info.clear();
+    }
+
     infile.close();
 }
 
@@ -182,7 +190,7 @@ read_model_rayl_(const char *filename)
     for(int i = 0; i < nz_tomo; i ++) {
         std::getline(infile,line);
         std::istringstream info(line);
-        float temp;
+        real_t temp;
         info >> temp >> rho_tomo[i] >> vph_tomo[i] 
              >> vpv_tomo[i] >> vsv_tomo[i] >> eta_tomo[i];
         if(HAS_ATT) {
@@ -190,6 +198,14 @@ read_model_rayl_(const char *filename)
         }
         info.clear();
     }
+
+    // try to get next line, if exists, then read scale factors
+    if(std::getline(infile,line)) {
+        std::istringstream info(line);
+        info >> SCALE_LENGTH >> SCALE_VELOCITY >> SCALE_DENSITY;
+        info.clear();
+    }
+
     infile.close();
 }
 
@@ -223,10 +239,89 @@ read_model_full_aniso_(const char *filename)
         info.clear();
     }
 
+    // try to get next line, if exists, then read scale factors
+    if(std::getline(infile,line)) {
+        std::istringstream info(line);
+        info >> SCALE_LENGTH >> SCALE_VELOCITY >> SCALE_DENSITY;
+        info.clear();
+    }
+
     // close 
     infile.close();
 }
 
+void Mesh::
+compute_scale_units()
+{
+    // set default scale factors
+    SCALE_LENGTH = 1.0; // in km
+    SCALE_VELOCITY = 1.0; // in km/s
+    SCALE_DENSITY = 1.0; // in g/cm^3
+
+    // fin max depth
+    SCALE_LENGTH = std::abs(depth_tomo[nz_tomo - 1]);
+
+    // find density in half space
+    SCALE_DENSITY = rho_tomo[nz_tomo - 1];
+    if(SCALE_DENSITY <= 0.) {
+        SCALE_DENSITY = 1.0;
+    }
+
+    // vmax in half space
+    std::vector<double> vmin,vmax;
+    this -> compute_minmax_veloc_(vmin,vmax);
+    SCALE_VELOCITY = vmax[nregions - 1];
+}
+
+/**
+ * @brief Rescale the model to non-dimensional values
+ * 
+ * @param backward if true, rescale back to dimensional values
+ */
+void Mesh::
+rescale_to_nodim(bool backward)
+{
+    // check if scale <=0 
+    if(SCALE_LENGTH <= 0. || SCALE_VELOCITY <= 0. || SCALE_DENSITY <= 0.) {
+        // printf("\n");
+        // printf("Scale factors are negative numbers !\n");
+        // printf("automatically determine one ...\n");
+        this -> compute_scale_units();
+    }
+
+    real_t scale_length = SCALE_LENGTH;
+    real_t scale_velocity = SCALE_VELOCITY;
+    real_t scale_density = SCALE_DENSITY;
+    if(!backward) {
+        scale_length = 1.0 / SCALE_LENGTH;
+        scale_velocity = 1.0 / SCALE_VELOCITY;
+        scale_density = 1.0 / SCALE_DENSITY;
+    }
+
+    // scale modulous 
+    real_t scale_modulous = scale_density * scale_velocity * scale_velocity;
+
+    // rescale tomography model
+    #define RESCALE_TO_NODIM(vec,scale) \
+        for(auto &val : vec) val *= scale;
+    RESCALE_TO_NODIM(rho_tomo, scale_density);
+
+    // rescale elastic modulous
+    RESCALE_TO_NODIM(vpv_tomo, scale_velocity);
+    RESCALE_TO_NODIM(vph_tomo, scale_velocity);
+    RESCALE_TO_NODIM(vsv_tomo, scale_velocity);
+    RESCALE_TO_NODIM(vsh_tomo, scale_velocity);
+    
+    // for(auto &val : xeta) val *= scale_modulous  I have no dimension!
+
+    // rescale anisotropic c21
+    RESCALE_TO_NODIM(c21_tomo, scale_modulous);
+
+    // rescale  depth
+    RESCALE_TO_NODIM(depth_tomo, scale_length);
+
+    #undef RESCALE_TO_NODIM
+}
 
 /**
  * @brief read 1D model
@@ -255,11 +350,11 @@ read_model(const char *filename)
 }
 
 static bool 
-check_fluid_c21(const float *c21)
+check_fluid_c21(const real_t *c21)
 {
     bool flag = true;
-    const float eps = 1.0e-12;
-    float c0 = c21[0];
+    const real_t eps = 1.0e-12;
+    real_t c0 = c21[0];
     flag = flag & (c0 > 0);
     for(int i = 2; i < 21; i ++) {
         if(i == 1 || i == 2 || i == 6 || i == 7 || i == 11 ) 
@@ -316,7 +411,7 @@ create_model_attributes()
         if(SWD_TYPE == 0) { // Love
             if(vsh_tomo[i] < 1.0e-6 || vsv_tomo[i] < 1.0e-6) {
                 printf("Love wave cannot exist in fluid layers!\n");
-                printf("current velocity  vsv = %f vsh = %f\n",vsv_tomo[i],vsh_tomo[i]);
+                printf("current velocity  vsv = %g vsh = %g\n",vsv_tomo[i],vsh_tomo[i]);
                 exit(1);
             }
         }
@@ -329,14 +424,14 @@ create_model_attributes()
                 if(HAS_ATT) flag = flag &(QC_tomo[i] == QA_tomo[i]);
                 if(!flag) {
                     printf("vpv and vph should be same in fluid layers\n");
-                    printf("current velocity vpv = %f vph = %f\n",vpv_tomo[i],vph_tomo[i]);
-                    printf("current velocity Qvpv = %f Qvph = %f\n",QC_tomo[i],QA_tomo[i]);
+                    printf("current velocity vpv = %g vph = %g\n",vpv_tomo[i],vph_tomo[i]);
+                    printf("current velocity Qvpv = %g Qvph = %g\n",QC_tomo[i],QA_tomo[i]);
                     exit(1);
                 }
             }
         }
         else { // full aniso
-            float temp_c21[21];
+            real_t temp_c21[21];
             for(int j = 0; j < 21; j ++) {
                 temp_c21[j] = c21_tomo[j*nz_tomo+i];
             }
@@ -344,7 +439,7 @@ create_model_attributes()
             
             if(HAS_ATT && flag) { 
                 // all Q should be equal
-                float Q0 = Qani_tomo[i];
+                real_t Q0 = Qani_tomo[i];
                 for(int j = 1; j < nQani; j ++) {
                     if(std::abs(Qani_tomo[j*nQani+i] - Q0) >= 1.0e-6) {
                         printf("in fluid region, all Q should be the same!\n");
@@ -379,6 +474,10 @@ create_model_attributes()
         is_ac_reg[ig] = is_ac_pts[startid];
         is_el_reg[ig] = !is_ac_pts[startid];
     }
+
+
+    // rescale to non-dimensional
+    this -> rescale_to_nodim(false);
 }
 
 /**
@@ -406,12 +505,18 @@ print_model() const
         printf("compute dispersions for %s fully anisotropic wave\n",outinfo.c_str());
     }
 
+    // get scale factors
+    const double L = SCALE_LENGTH;
+    const double V = SCALE_VELOCITY;
+    const double D = SCALE_DENSITY;
+    const double M = D * V * V;
+
     for(int ig = 0; ig < nregions; ig ++) {
         // properties
         std::string mprop = "solid";
         if(is_ac_reg[ig]) mprop = "fluid";
         if(ig == nregions - 1) {
-            printf("\nhalf space begins at depth = %f\n",
+            printf("\nhalf space begins at (normalized) depth = %g\n",
                     depth_tomo[nz_tomo - 1]);
         }
         printf("\nregion %d: %s\n",ig + 1,mprop.data());
@@ -420,13 +525,20 @@ print_model() const
         int iend = region_bdry[ig*2+1];
 
         if(SWD_TYPE == 0) {
-            printf("depth\t rho\t vsh\t vsv (QN QL)\t \n");
+            printf("%8s %8s %8s %8s%s\n",
+                "depth", "rho", "vsh", "vsv",
+                HAS_ATT ? "   QN          QL" : "");
             for(int i = istart; i <= iend; i ++) {
-                printf("%f %f %f %f",
-                        depth_tomo[i],rho_tomo[i], 
-                        vsh_tomo[i],vsv_tomo[i]);
-                if(HAS_ATT) {
-                    printf(" %f %f\n",QN_tomo[i],QL_tomo[i]);
+                printf("%8.5f %8.5f %8.5f %8.5f",
+                    depth_tomo[i] * L,
+                    rho_tomo[i]   * D,
+                    vsh_tomo[i]   * V,
+                    vsv_tomo[i]   * V);
+
+                if (HAS_ATT) {
+                    printf(" %8.5f %8.5f\n",
+                        QN_tomo[i],
+                        QL_tomo[i]);
                 }
                 else {
                     printf("\n");
@@ -434,14 +546,17 @@ print_model() const
             }
         }
         else if (SWD_TYPE == 1) {
-            printf("depth\t rho\t vph\t vpv\t vsv\t eta (Qvph Qvpv Qvsv)\n");
+            printf("%8s %8s %8s %8s %8s %8s%s\n",
+                "depth", "rho", "vph", "vpv", "vsv", "eta",
+                HAS_ATT ? "   QA      QC      QL" : "");
             for(int i = istart; i <= iend; i ++) {
-                printf("%f %f %f %f %f %f",
-                        depth_tomo[i],rho_tomo[i], 
-                        vph_tomo[i],vpv_tomo[i],vsv_tomo[i],
+                
+                printf("%8.5f %8.5f %8.5f %8.5f %8.5f %8.5f",
+                        depth_tomo[i]*L,rho_tomo[i]*D, 
+                        vph_tomo[i]*V,vpv_tomo[i]*V,vsv_tomo[i]*V,
                         eta_tomo[i]);
                 if(HAS_ATT) {
-                    printf(" %f %f %f\n",QA_tomo[i],QC_tomo[i],QL_tomo[i]);
+                    printf(" %8.5f %8.5f %8.5f\n",QA_tomo[i],QC_tomo[i],QL_tomo[i]);
                 }
                 else {
                     printf("\n");
@@ -449,20 +564,23 @@ print_model() const
             }
         }
         else {
-            printf("depth\t rho\t c11\t c22\t c33\t c44\t c55\t c66\t (Qmodel)\t \n");
+            printf("%8s %8s %8s %8s %8s %8s %8s %8s %s\n",
+                    "depth","rho","c11","c22","c33","c44","c55","c66",
+                    HAS_ATT ? "(Qmodel)" : "");
+
             for(int i = istart; i <= iend; i ++) {
-                printf("%f %f %f %f %f %f %f %f ",
-                        depth_tomo[i],rho_tomo[i], 
-                        c21_tomo[0*nz_tomo+i],
-                        c21_tomo[6*nz_tomo+i], // c22
-                        c21_tomo[11*nz_tomo+i], // c33
-                        c21_tomo[15*nz_tomo+i], // c44
-                        c21_tomo[18*nz_tomo+i], // c55
-                        c21_tomo[20*nz_tomo+i] // c66
+                printf("%8.5f %8.5f %8.5f %8.5f %8.5f %8.5f %8.5f %8.5f ",
+                        depth_tomo[i]*L,rho_tomo[i]*D, 
+                        c21_tomo[0*nz_tomo+i] * M,
+                        c21_tomo[6*nz_tomo+i] * M, // c22
+                        c21_tomo[11*nz_tomo+i] * M, // c33
+                        c21_tomo[15*nz_tomo+i] * M, // c44
+                        c21_tomo[18*nz_tomo+i] * M, // c55
+                        c21_tomo[20*nz_tomo+i] * M // c66
                 );
                 if(HAS_ATT) {
                     for(int j = 0; j < nQani; j ++) {
-                        printf("%f ",Qani_tomo[j*nz_tomo+i]);
+                        printf("%8.5f ",Qani_tomo[j*nz_tomo+i]);
                     }
                     
                 }
@@ -470,6 +588,7 @@ print_model() const
             }
         }
     }
+    printf("\n");
 }
 
 void Mesh::
@@ -482,15 +601,15 @@ print_database() const
 
     printf("elements:\n");
     printf("=========================\n");
-    printf("no. of nelemnts = %d\n",nspec + nspec_grl);
-    printf("no. of elastic GLL/GRL nelemnts = %d %d\n",nspec_el,nspec_el_grl);
-    printf("no. of acoustic GLL/GRL nelemnts = %d %d\n",nspec_ac,nspec_ac_grl);
+    printf("no. of elements = %d\n",nspec + nspec_grl);
+    printf("no. of elastic GLL/GRL elements = %d %d\n",nspec_el,nspec_el_grl);
+    printf("no. of acoustic GLL/GRL elements = %d %d\n",nspec_ac,nspec_ac_grl);
     printf("no. of elastic wavefield points = %d\n",nglob_el);
     printf("no. of acoustic wavefield points = %d\n",nglob_ac);
 
     printf("\nSimulation parameters:\n");
     printf("=========================\n");
-    printf("phase velocity min/max = %f %f\n",PHASE_VELOC_MIN,PHASE_VELOC_MAX);
+    printf("phase velocity min/max = %g %g\n",PHASE_VELOC_MIN,PHASE_VELOC_MAX);
 
     printf("\nElastic-Acoustic Boundary:\n");
     printf("=========================\n");
@@ -503,6 +622,20 @@ print_database() const
         int top_is_fluid = bdry_norm_direc[iface];
         printf("top material is fluid = %d\n",top_is_fluid);
     }
+
+    printf("\nSimulation Regions:\n");
+    printf("=========================\n");
+    printf("location of half space (normalized) depth = %g\n",
+            depth_tomo[nz_tomo - 1]);
+    printf("location of max depth (normalized) depth = %g\n",
+            znodes[znodes.size()-1]);
+
+    // scale factors
+    printf("\nScale factors:\n");
+    printf("=========================\n");
+    printf("SCALE_LENGTH = %g\n",SCALE_LENGTH);
+    printf("SCALE_VELOCITY = %g\n",SCALE_VELOCITY);
+    printf("SCALE_DENSITY = %g\n",SCALE_DENSITY);
 
 }
 

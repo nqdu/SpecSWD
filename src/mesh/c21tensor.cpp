@@ -12,7 +12,7 @@ namespace specswd
  * @param c21 c21 tensor, shape(21)
  * @param cphase 3 phase velocities, shape(3)
  */
-void solve_christoffel(float phi, const double *c21,double *cphase)
+void solve_christoffel(double phi, const double *c21,double *cphase)
 {
     // direction
     double direc[3] = {std::cos(phi),std::sin(phi),0.};

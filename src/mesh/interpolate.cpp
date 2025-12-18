@@ -14,7 +14,7 @@ namespace specswd
  * @return int location of z0 in z, satisfies  z0 >= z[i] && z0 < z[i + 1]
  */
 static int 
-find_loc(const float *z,float z0,int nz) 
+find_loc(const real_t *z,real_t z0,int nz) 
 {
 
     int i = 0;
@@ -37,7 +37,7 @@ find_loc(const float *z,float z0,int nz)
  * @param md model required to interpolate, shape(nspec_el*NGLL + nspec_el_grl * NGRL)
  */
 void Mesh:: 
-interp_model(const float *param,const std::vector<int> &elmnts,std::vector<float> &md) const
+interp_model(const real_t *param,const std::vector<int> &elmnts,std::vector<real_t> &md) const
 {
     using GQTable :: NGLL; using GQTable :: NGRL;
     int nel = elmnts.size();
@@ -60,7 +60,7 @@ interp_model(const float *param,const std::vector<int> &elmnts,std::vector<float
             for(int i = 0; i < NGL; i ++) {
                 int id = ispec_md * NGLL + i;
                 
-                float z0 = znodes[ispec * NGLL + i];
+                real_t z0 = znodes[ispec * NGLL + i];
 
                 // find loc in this region
                 int j = find_loc(&depth_tomo[istart],z0,npts) + istart;
@@ -69,7 +69,7 @@ interp_model(const float *param,const std::vector<int> &elmnts,std::vector<float
                     md[id] = param[j];
                 }
                 else {
-                    float dzinv = 1./ (depth_tomo[j + 1] - depth_tomo[j]);
+                    real_t dzinv = 1./ (depth_tomo[j + 1] - depth_tomo[j]);
                     md[id] = param[j] + (param[j+1]-param[j]) * dzinv * (z0-depth_tomo[j]); 
                 }
             
@@ -84,7 +84,7 @@ interp_model(const float *param,const std::vector<int> &elmnts,std::vector<float
  * @param kl_out derivatives on original 1-Dmodel, shape(nz_tomo)
  */
 void Mesh:: 
-project_kl(const float *frekl, float *kl_out) const
+project_kl(const real_t *frekl, real_t *kl_out) const
 {
     using GQTable :: NGLL; using GQTable :: NGRL;
 
@@ -133,8 +133,8 @@ project_kl(const float *frekl, float *kl_out) const
                         kl_out[j] += frekl[id];
                     }
                     else {
-                        float dz = depth_tomo[j + 1] - depth_tomo[j];
-                        float coef = (z0 - depth_tomo[j]) / dz;
+                        real_t dz = depth_tomo[j + 1] - depth_tomo[j];
+                        real_t coef = (z0 - depth_tomo[j]) / dz;
                         kl_out[j] += (1 - coef) * frekl[id];
                         kl_out[j+1] += coef * frekl[id];
                     }

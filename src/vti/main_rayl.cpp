@@ -17,22 +17,23 @@ int main (int argc, char **argv){
 
     // initialize GLL
     GQTable:: initialize();
+    using specswd::real_t;
 
     // read mesh 
     const char *filename = argv[1];
-    specswd::Mesh mesh;
-    mesh.read_model(filename);
-    mesh.create_model_attributes();
-    int nz = mesh.nz_tomo;
+    std::shared_ptr<specswd::Mesh> mesh = std::make_shared<specswd::Mesh>();
+    mesh->read_model(filename);
+    mesh->create_model_attributes();
+    int nz = mesh->nz_tomo;
 
     // check if it's Rayleigh wave
-    if(mesh.SWD_TYPE != 1) {
+    if(mesh->SWD_TYPE != 1) {
         printf("THis module can only handle Rayleigh wave!\n");
         exit(1);
     }
 
     // print info to debug
-    mesh.print_model();
+    mesh->print_model();
 
     // Period
     int nt;
@@ -67,147 +68,160 @@ int main (int argc, char **argv){
     }
     fprintf(fp,"\n");
 
+    // create solver
+    auto sol = std::make_unique<specswd::SolverRayl>();
+    sol->build(mesh);
+
     // write meta data int database
     using specswd::write_binary_f;
-    int nkers = 5,ncomp = 2;
-    write_binary_f(fio,&mesh.SWD_TYPE,1);
-    write_binary_f(fio,&mesh.HAS_ATT,1);
-    if(mesh.HAS_ATT) {
-        nkers = 10;
-    }
+    int ncomp = 2;
+    write_binary_f(fio,&mesh->SWD_TYPE,1);
+    write_binary_f(fio,&mesh->HAS_ATT,1);
     write_binary_f(fio,&nz,1);
+    int nkers_ac = sol->nkers_ac;
+    int nkers_el = sol->nkers_el;
+    int nkers = nkers_el + nkers_ac;
     write_binary_f(fio,&nkers,1);
     write_binary_f(fio,&ncomp,1);
-
-    // initialize solver
-    std::unique_ptr<specswd::SolverRayl> sol(new specswd::SolverRayl);
 
     // compute phase velocity for each frequency
     for(int it = 0; it < nt; it ++) {
         // create database
-        mesh.create_database(freq[it],0.);
+        mesh->create_database(freq[it],0.);
+
+        if(it == 0) mesh->print_database();
 
         // write coordinates
-        write_binary_f(fio,mesh.znodes.data(),mesh.znodes.size());
-
-        // get database dimension
-        int ng = mesh.nglob_el * 2 + mesh.nglob_ac;
+        std::vector<real_t> zcoord = mesh->znodes;
+        for(auto &zz : zcoord) {
+            zz *= mesh->SCALE_LENGTH;
+        }
+        write_binary_f(fio,zcoord.data(),zcoord.size());
 
         // prepare all matrices
-        sol -> prepare_matrices(mesh);
+        sol -> prepare_matrices();
 
-        if(!mesh.HAS_ATT) {
-            std::vector<float> c,ur,ul,u,frekl;
-            std::vector<float> frekl_tomo;
-            std::vector<float> displ;
+        // compute eigenvalue
+        sol -> compute_egn(true);
 
-            // compute eigenvalue
-            sol -> compute_egn(mesh,c,ur,ul,true);
+        // compute group velocity
+        sol-> compute_group_vel();
+
+        if(!mesh->HAS_ATT) {
+            std::vector<real_t> c,ur,ul,u;
+            std::vector<real_t> frekl_el,frekl_ac;
+            std::vector<real_t> frekl_el_tmp,frekl_ac_tmp;
+            std::vector<real_t> frekl_tomo;
+            std::vector<real_t> displ;
+            std::vector<specswd::complex_t> displ_tmp;
 
             // allocate group velocity
-            int nc = c.size();
+            int nc = sol->c_phase.size();
+            c.resize(nc);
             u.resize(nc);
 
             for(int ic = 0; ic < nc; ic ++) {
-                u[ic] = sol -> group_vel(mesh,c[ic],&ur[ic*ng],&ul[ic*ng]);
-                switch (KERNEL_TYPE) {
-                    case 0:
-                        sol -> compute_phase_kl(
-                            mesh,c[ic],&ur[ic*ng],
-                            &ul[ic*ng],frekl
-                        );
-                        break;
-                    case 1:
-                        sol -> compute_group_kl(
-                            mesh,c[ic],&ur[ic*ng],
-                            &ul[ic*ng],frekl
-                        );
-                        break;
-                    default: {
-                        printf("KERNEL_TYPE = %d is not implemented!\n",KERNEL_TYPE);
-                        exit(1);
-                        break;
-                    }
-                }
+                real_t temp;
+                sol->get_phase_vel(ic,c[ic],temp);
+                sol->get_group_vel(ic,u[ic],temp);
+                sol->compute_kernels(
+                    ic,
+                    KERNEL_TYPE,
+                    frekl_el,
+                    frekl_el_tmp,
+                    frekl_ac,
+                    frekl_ac_tmp
+                );
 
                 // write T,c,u,mode
                 fprintf(fp,"%d %g %g %d\n",it,c[ic],u[ic],ic);
 
                 // write displ
-                int npts = mesh.ibool.size();
-                displ.resize(npts*ncomp);
-                sol->egn2displ(mesh,c[ic],&ur[ic*ng],displ.data());
+                displ.resize(mesh->ibool.size() * 2);
+                displ_tmp.resize(displ.size());
+                sol->egn2displ(ic, displ_tmp.data());
+                for(size_t i = 0; i < displ.size(); i ++) {
+                    displ[i] = displ_tmp[i].real();
+                }
                 write_binary_f(fio,displ.data(),displ.size());
 
-                // transform kernels
-                sol -> transform_kernels(mesh,frekl);
-                frekl_tomo.resize(nkers*nz);
+                // transform elastic kernels 
+                int npts = mesh->ibool.size();
+                frekl_tomo.resize(nkers_el*nz);
                 
-                for(int iker = 0; iker < nkers; iker ++) {
-                    mesh.project_kl(&frekl[iker*npts],&frekl_tomo[iker*nz]);
+                for(int iker = 0; iker < nkers_el; iker ++) {
+                    mesh->project_kl(&frekl_el[iker*npts],&frekl_tomo[iker*nz]);
+                }
+                write_binary_f(fio,frekl_tomo.data(),frekl_tomo.size());
+
+                // transform acoustic kernels
+                frekl_tomo.resize(nkers_ac*nz);
+                for(int iker = 0; iker < nkers_ac; iker ++) {
+                    mesh->project_kl(&frekl_ac[iker*npts],&frekl_tomo[iker*nz]);
                 }
                 write_binary_f(fio,frekl_tomo.data(),frekl_tomo.size());
             }
         }
         else {
-            using specswd::scmplx;
-            std::vector<scmplx> c,ur,ul,u;
-            std::vector<float> frekl_c,frekl_q;
-            std::vector<float> frekl_tomo;
-            std::vector<scmplx> displ;
+            using specswd::complex_t;
+            std::vector<complex_t> c,ur,ul,u;
+            std::vector<real_t> frekl_el_c,frekl_el_q;
+            std::vector<real_t> frekl_ac_c,frekl_ac_q;
+            std::vector<real_t> frekl_tomo;
+            std::vector<complex_t> displ;
 
-            // compute eigenvalues
-            sol -> compute_egn_att(mesh,c,ur,ul,true);
-            
             // allocate group velocity
-            int nc = c.size();
+            int nc = sol->c_phase.size();
+            c.resize(nc);
             u.resize(nc);
 
             for(int ic = 0; ic < nc; ic ++) {
-                u[ic] = sol -> group_vel_att(mesh,c[ic],&ur[ic*ng],&ul[ic*ng]);
-                switch (KERNEL_TYPE) {
-                    case 0:
-                        sol -> compute_phase_kl_att (
-                            mesh,c[ic],&ur[ic*ng],
-                            &ul[ic*ng],
-                            frekl_c,frekl_q
-                        );
-                        break;
-                    case 1:
-                        sol -> compute_group_kl_att(
-                            mesh,c[ic],u[ic],
-                            &ur[ic*ng],&ul[ic*ng],
-                            frekl_c,frekl_q
-                        );
-                        break;
-                    default: {
-                        printf("KERNEL_TYPE = %d is not implemented!\n",KERNEL_TYPE);
-                        exit(1);
-                        break;
-                    }
-                }
+                real_t val_r,val_i;
+                sol->get_phase_vel(ic,val_r,val_i);
+                c[ic] = complex_t{val_r,val_i};
+                sol->get_group_vel(ic,val_r,val_i);
+                u[ic] = complex_t{val_r,val_i};
+
+                sol->compute_kernels(
+                    ic,
+                    KERNEL_TYPE,
+                    frekl_el_c,
+                    frekl_el_q,
+                    frekl_ac_c,
+                    frekl_ac_q
+                );
 
                 // write T,c,u,mode
                 fprintf(fp,"%d %g %g %g %g %d\n",it,c[ic].real(),u[ic].real(),
                                                 c[ic].imag(),u[ic].imag(),ic);
 
                 // write displ
-                int npts = mesh.ibool.size();
+                int npts = mesh->ibool.size();
                 displ.resize(npts * 2);
-                sol -> egn2displ_att(mesh,c[ic],&ur[ic*ng],displ.data());
+                sol -> egn2displ(ic,displ.data());
                 write_binary_f(fio,displ.data(),displ.size());
 
-                // write kernels
-                sol -> transform_kernels(mesh,frekl_c);
-                sol -> transform_kernels(mesh,frekl_q);
-                frekl_tomo.resize(nkers*nz);
-                for(int iker = 0; iker < nkers; iker ++) {
-                    mesh.project_kl(&frekl_c[iker*npts],&frekl_tomo[iker*nz]);
+                // transform elastic kernels
+                frekl_tomo.resize(nkers_el*nz);
+                for(int iker = 0; iker < nkers_el; iker ++) {
+                    mesh->project_kl(&frekl_el_c[iker*npts],&frekl_tomo[iker*nz]);
                 }
                 write_binary_f(fio,frekl_tomo.data(),frekl_tomo.size());
 
-                for(int iker = 0; iker < nkers; iker ++) {
-                    mesh.project_kl(&frekl_q[iker*npts],&frekl_tomo[iker*nz]);
+                for(int iker = 0; iker < nkers_el; iker ++) {
+                    mesh->project_kl(&frekl_el_q[iker*npts],&frekl_tomo[iker*nz]);
+                }
+                write_binary_f(fio,frekl_tomo.data(),frekl_tomo.size());
+
+                // transform acoustic kernels
+                frekl_tomo.resize(nkers_ac*nz);
+                for(int iker = 0; iker < nkers_ac; iker ++) {
+                    mesh->project_kl(&frekl_ac_c[iker*npts],&frekl_tomo[iker*nz]);
+                }
+                write_binary_f(fio,frekl_tomo.data(),frekl_tomo.size());
+
+                for(int iker = 0; iker < nkers_ac; iker ++) {
+                    mesh->project_kl(&frekl_ac_q[iker*npts],&frekl_tomo[iker*nz]);
                 }
                 write_binary_f(fio,frekl_tomo.data(),frekl_tomo.size());
             }

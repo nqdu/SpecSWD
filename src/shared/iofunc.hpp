@@ -22,16 +22,16 @@ void
 write_binary_f(FILE *fp, const T *data, size_t n)
 {
     // write integers of the size 
-    int size = (int)(n * sizeof(T));
+    uint size = (int)(n * sizeof(T));
 
     // integer front
-    __myfwrite(&size,sizeof(int),1,fp);
+    __myfwrite(&size,sizeof(uint),1,fp);
 
     // data
     __myfwrite(data,sizeof(T),n,fp);
 
     // integer back
-    __myfwrite(&size,sizeof(int),1,fp); 
+    __myfwrite(&size,sizeof(uint),1,fp); 
 }
     
 } // namespace specswd

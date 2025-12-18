@@ -1,105 +1,113 @@
 #include "vti/vti.hpp"
 #include "shared/GQTable.hpp"
-#include "vti/frechet_op.hpp"
 
 #include <Eigen/Core>
 
 namespace specswd
 {
 
-template <typename T>  T
-get_love_group_vel(int ng,T c, const T *egn, 
-                    const float *Mmat,
-                    const T *Kmat)
+/**
+ * @brief compute group velocity of love wave
+ * 
+ * @tparam T real_t/complex_t
+ * @return T group velocity
+ */
+void SolverLove::
+compute_group_vel()
 {
-    Eigen::Map<const Eigen::ArrayX<T>> x(egn,ng);
-    Eigen::Map<const Eigen::ArrayX<T>> K(Kmat,ng);
-    Eigen::Map<const Eigen::ArrayX<float>> M(Mmat,ng);
+    // map matrices
+    Eigen::Map<const Eigen::ArrayX<real_t>> M(Mmat.data(),ndof);
+    Eigen::Map<const Eigen::ArrayX<complex_t>> K(Kmat.data(),ndof);
 
-    T u = (x * K * x).sum() / (c * (x * M * x).sum());
+    // loop over modes
+    int nmodes = c_phase.size();
+    c_group.resize(nmodes);
+    for(int imode = 0; imode < nmodes; imode ++) {
+        complex_t c = c_phase[imode];
 
-    return u;
+        // map eigenfunction
+        Eigen::Map<const Eigen::ArrayX<complex_t>> x(&egn[imode*ndof],ndof);
+        complex_t u = (x * K * x).sum() / (c * (x * M * x).sum());  
+
+        // set value in c_group
+        c_group[imode] = u;
+    }
 }
 
 /**
- * @brief compute velocity of love wave, elastic case
+ * @brief Get the group velocity for given mode
+ * 
+ * @param imode mode index
+ * @param u_r real part of group velocity
+ * @param u_i imaginary part of group velocity
  */
-float SolverLove:: 
-group_vel(const Mesh &M,
-          float c,const float *egn) const
+void SolverLove::
+get_group_vel(int imode, real_t &u_r, real_t &u_i) const
 {
-    return  get_love_group_vel(M.nglob_el,c,egn,Mmat.data(),Kmat.data());
+    if(imode < 0 || imode >= c_group.size()) {
+        throw std::runtime_error("SolverLove::get_group_vel(): invalid mode index");
+    }
+    complex_t u = c_group[imode] * mesh_->SCALE_VELOCITY;
+    u_r = u.real();
+    u_i = u.imag();
 }
 
 /**
- * @brief compute velocity of love wave, anelastic case
+ * @brief compute group velocity of Rayleigh wave
+ * 
  */
-scmplx SolverLove:: 
-group_vel_att(const Mesh &M,
-          scmplx c,const scmplx *egn) const
+void SolverRayl::
+compute_group_vel()
 {
-    return get_love_group_vel(M.nglob_el,c,egn,Mmat.data(),CKmat.data());
-}
+    // map matrices
+    typedef Eigen::Matrix<complex_t,-1,-1,Eigen::RowMajor> mat2;
+    typedef Eigen::Matrix<real_t,-1,-1,Eigen::RowMajor> rmat2;
+    Eigen::Map<const rmat2> dwdE(dwdEmat.data(),ndof,ndof);
+    Eigen::Map<const mat2> K(Kmat.data(),ndof,ndof);
+    Eigen::Map<const Eigen::VectorX<complex_t>> M(Mmat.data(),ndof);
 
+    // loop over modes
+    int nmodes = c_phase.size();
+    c_group.resize(nmodes);
+    for(int imode = 0; imode < nmodes; imode ++) {
+        complex_t c = c_phase[imode];
 
-template <typename T = float >  T
-get_rayl_group_vel(
-    const Mesh &mesh,T c,
-    const T *ur,
-    const T *ul,
-    const T *Mmat,
-    const T *Kmat,
-    const float *dwdEmat
-)
-{
-    int nglob_el = mesh.nglob_el;
-    int ng = nglob_el*2 + mesh.nglob_ac;
-    typedef Eigen::Matrix<T,-1,-1,Eigen::RowMajor> mat2;
-    typedef Eigen::Matrix<float,-1,-1,Eigen::RowMajor> fmat2;
-    Eigen::Map<const Eigen::VectorX<T>> x(ur,ng),y(ul,ng);
-    Eigen::Map<const mat2> K(Kmat,ng,ng);
-    Eigen::Map<const Eigen::VectorX<T>> M(Mmat,ng);
-    Eigen::Map<const fmat2> dwdE(dwdEmat,ng,ng);
+        // map eigenfunctions
+        Eigen::Map<const Eigen::VectorX<complex_t>> x(&egn_r[imode*ndof],ndof);
+        Eigen::Map<const Eigen::VectorX<complex_t>> y(&egn_l[imode*ndof],ndof);
 
-    // add fluid contribution
-    using GQTable::NGLL;
-    float om = M_PI * 2 * mesh.freq;
-    T twokinv = 0.5f * c / om;
-    T dwde = -twokinv *  y.adjoint() * dwdE.cast<T>() * x;
+        using GQTable::NGLL;
+        real_t om = M_PI * 2 * mesh_->freq;
+        complex_t twokinv = (real_t)0.5 * c / om;
+        complex_t dwde = -twokinv *  y.adjoint() * dwdE.cast<complex_t>() * x;
 
-    T u_nume = (y.adjoint() * K * x);
-    T u_deno = c * (y.array().conjugate() * M.array() * x.array()).sum();
-    u_deno += dwde;
+        complex_t  u_nume, u_deno;
+        u_nume = (y.adjoint() * K * x).sum();
+        u_deno = c * (y.array().conjugate() * M.array() * x.array()).sum();
+        u_deno += dwde;
 
-    T u = u_nume / u_deno;
-
-    return u;
+        complex_t u = u_nume / u_deno;
+        c_group[imode] = u;
+    }
 }
 
 /**
- * @brief compute velocity of love wave, elastic case
+ * @brief Get the group vel object
+ * 
+ * @param imode mode index
+ * @param u_r real part of group velocity
+ * @param u_i imaginary part of group velocit
  */
-float SolverRayl:: 
-group_vel(const Mesh &M,
-          float c,const float *ur,
-          const float *ul) const
+void SolverRayl::
+get_group_vel(int imode, real_t &u_r, real_t &u_i) const
 {
-    return get_rayl_group_vel(
-        M,c,ur,ul,Mmat.data(),Kmat.data(),dwdEmat.data()
-    );
+    if(imode < 0 || imode >= c_group.size()) {
+        throw std::runtime_error("SolverRayl::get_group_vel(): invalid mode index");
+    }
+    complex_t u = c_group[imode] * mesh_->SCALE_VELOCITY;
+    u_r = u.real();
+    u_i = u.imag();
 }
 
-/**
- * @brief compute velocity of love wave, visco-elastic case
- */
-scmplx SolverRayl:: 
-group_vel_att(const Mesh &M,
-             scmplx c,const scmplx *ur,
-             const scmplx *ul) const
-{
-    return get_rayl_group_vel(
-        M,c,ur,ul,CMmat.data(),CKmat.data(),dwdEmat.data()
-    );
-}
 
 } // namespace specswd

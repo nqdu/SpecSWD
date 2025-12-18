@@ -17,14 +17,10 @@ specswd_init_GQTable() {
 // global vars for solver/mesh
 namespace specswd_pylib
 {
-specswd::Mesh mesh;
-specswd::SolverLove LoveSol;
-specswd::SolverRayl RaylSol;
-specswd::SolverAniso AniSol;
-
-// global vars for eigenvalues/eigenvectors 
-std::vector<float> egnr_,egnl_,c_,u_;
-std::vector<specswd::scmplx> cegnr_,cegnl_,cc_,cu_;
+std::shared_ptr<specswd::Mesh> mesh_ptr;
+std::shared_ptr<specswd::SolverLove> love_ptr;
+std::shared_ptr<specswd::SolverRayl> rayl_ptr;
+std::shared_ptr<specswd::SolverAniso> aniso_ptr;
 }
 
 /**
@@ -37,23 +33,22 @@ extern "C" void
 specswd_const(int *nz_tomo, int *sem_size, int *nglob)
 {
     using namespace specswd_pylib;
-    *nz_tomo = mesh.nz_tomo;
-    *sem_size = mesh.ibool.size();
+    *nz_tomo = mesh_ptr->nz_tomo;
+    *sem_size = mesh_ptr->ibool.size();
 
     // get consts
-    int SWD_TYPE = mesh.SWD_TYPE;
-
+    int SWD_TYPE = mesh_ptr->SWD_TYPE;
     // case by case
     switch (SWD_TYPE)
     {
     case 0:
-        *nglob = mesh.nglob_el;  
+        *nglob = mesh_ptr->nglob_el;  
         break;
     case 1:
-        *nglob = mesh.nglob_el * 2 + mesh.nglob_ac;
+        *nglob = mesh_ptr->nglob_el * 2 + mesh_ptr->nglob_ac;
         break;
     default:
-        *nglob = mesh.nglob_el * 3 + mesh.nglob_ac;
+        *nglob = mesh_ptr->nglob_el * 3 + mesh_ptr->nglob_ac;
         break;
     }
 }
@@ -73,7 +68,7 @@ extern "C" int
 specswd_egn_size()
 {
     using namespace specswd_pylib;
-    int ncomp = mesh.SWD_TYPE + 1;
+    int ncomp = mesh_ptr->SWD_TYPE + 1;
 
     return ncomp;
 }
@@ -82,32 +77,25 @@ specswd_egn_size()
  * @brief get kernel size for each model
  * 
  */
-extern "C" int 
-specswd_kernel_size() 
+extern "C" void 
+specswd_kernel_size(int *nkers, int *nkers_el, int *nkers_ac)
 {
     using namespace specswd_pylib;
-    bool HAS_ATT = mesh.HAS_ATT;
-    int SWD_TYPE = mesh.SWD_TYPE; 
-    int nker{};
+    int SWD_TYPE = mesh_ptr->SWD_TYPE; 
 
     if(SWD_TYPE == 0) {
-        nker = 3;
-        if (HAS_ATT) {
-            nker = 5;
-        }
+        *nkers = love_ptr->nkers;
+        *nkers_el = love_ptr->nkers;
+        *nkers_ac = 0;
     }
     else if (SWD_TYPE == 1) {
-        nker = 6;
-        if (HAS_ATT) {
-            nker = 10;
-        }
+        *nkers = rayl_ptr->nkers_el + rayl_ptr->nkers_ac;
+        *nkers_el = rayl_ptr->nkers_el;
+        *nkers_ac = rayl_ptr->nkers_ac;
     }
     else {
-        nker = 22;
-        if(HAS_ATT) {
-            nker += mesh.nQani;
-        }
+        *nkers = aniso_ptr->nkers_el + aniso_ptr->nkers_ac;
+        *nkers_el = aniso_ptr->nkers_el;
+        *nkers_ac = aniso_ptr->nkers_ac;
     }
-
-    return nker;
 }

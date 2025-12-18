@@ -6,9 +6,14 @@
 namespace specswd
 {
 
-void solve_christoffel(float phi, const double *c21,double *cphase);
+void solve_christoffel(double phi, const double *c21,double *cphase);
 
-
+/**
+ * @brief find min/max phase velocity (body wave) in each region
+ * 
+ * @param vmin vmin, shape(nregions)
+ * @param vmax vmax, shape(nregions)
+ */
 void Mesh:: 
 compute_minmax_veloc_(std::vector<double> &vmin,std::vector<double> &vmax)
 {
@@ -69,10 +74,10 @@ compute_minmax_veloc_(std::vector<double> &vmin,std::vector<double> &vmax)
  * @param phi0 directional angle,in deg
  */
 void Mesh::
-create_database(float freq0,float phi0)
+create_database(real_t freq0,real_t phi0)
 {
     // copy constants
-    this -> freq = freq0;
+    this -> freq = freq0 * SCALE_LENGTH / SCALE_VELOCITY; // nondim frequency
     this -> phi = phi0 * M_PI / 180.;
 
     using namespace GQTable;
@@ -88,7 +93,6 @@ create_database(float freq0,float phi0)
         PHASE_VELOC_MIN = std::min(vmin[i],(double)PHASE_VELOC_MIN);
     }
     PHASE_VELOC_MIN *= 0.85;
-    //std::cout << PHASE_VELOC_MIN << " " << PHASE_VELOC_MAX << "\n";
     
     // loop every region to find best element size
     nspec = 0;
@@ -97,7 +101,7 @@ create_database(float freq0,float phi0)
         int istart = region_bdry[ig*2+0];
         int iend = region_bdry[ig*2+1];
         
-        float maxdepth = depth_tomo[iend] - depth_tomo[istart];
+        real_t maxdepth = depth_tomo[iend] - depth_tomo[istart];
         nel[ig] = 1.5 * (maxdepth *  freq) / vmin[ig] + 1;
         if(nel[ig] <=0) nel[ig] = 1;
         nspec += nel[ig];
@@ -107,7 +111,7 @@ create_database(float freq0,float phi0)
     // allocate space
     size_t size = nspec * NGLL + NGRL;
     ibool.resize(size); znodes.resize(size);
-    jaco.resize(nspec+1); iregion_flag.resize(nspec+1);
+    jacodet.resize(nspec+1); iregion_flag.resize(nspec+1);
     skel.resize(nspec*2+2);
 
     // connectivity matrix
@@ -133,7 +137,7 @@ create_database(float freq0,float phi0)
     for(int ig = 0; ig < nregions - 1; ig ++) {
         int istart = region_bdry[ig*2+0];
         int iend = region_bdry[ig*2+1];
-        float h = (depth_tomo[iend] - depth_tomo[istart]) / nel[ig];
+        real_t h = (depth_tomo[iend] - depth_tomo[istart]) / nel[ig];
         for(int j = 0; j < nel[ig]; j ++) {
             skel[id * 2 + 0] = depth_tomo[istart] + h * j;
             skel[id * 2 + 1] = depth_tomo[istart] + h * (j + 1.);
@@ -151,11 +155,11 @@ create_database(float freq0,float phi0)
 
     // half space skeleton
     nspec_el_grl = 0; nspec_ac_grl = 0;
-    float max_lambda_in_bottom = 20;
+    real_t max_lambda_in_bottom = 20;
     if (HAS_ATT) {
         max_lambda_in_bottom = 5;
     }
-    float scale = vmax[nregions-1] / freq / xgrl[NGRL-1] * max_lambda_in_bottom;  // up to 50 wavelength
+    real_t scale = vmax[nregions-1] / freq / xgrl[NGRL-1] * max_lambda_in_bottom;  // up to 50 wavelength
     skel[nspec * 2 + 0] = depth_tomo[nz_tomo-1];
     skel[nspec * 2 + 1] = depth_tomo[nz_tomo-1] + xgrl[NGRL-1] * scale;
     iregion_flag[nspec] = nregions - 1;
@@ -168,18 +172,18 @@ create_database(float freq0,float phi0)
 
     // jacobians and coordinates
     for(int ispec = 0; ispec < nspec; ispec ++) {
-        float h = skel[ispec*2+1] - skel[ispec*2+0];
-        jaco[ispec] = h / 2.;
+        real_t h = skel[ispec*2+1] - skel[ispec*2+0];
+        jacodet[ispec] = h / 2.;
         for(int i = 0; i < NGLL; i ++) {
-            float xi = xgll[i];
+            real_t xi = xgll[i];
             znodes[ispec * NGLL + i] = skel[ispec*2] + h * 0.5 * (xi + 1);
         }
     }
     // compute coordinates and jaco in GRL layer
     for(int ispec = nspec; ispec < nspec + 1; ispec ++) {
-        jaco[ispec] = scale;
+        jacodet[ispec] = scale;
         for(int i = 0; i < NGRL; i ++) {
-            float xi = xgrl[i];
+            real_t xi = xgrl[i];
             znodes[ispec*NGLL+i] = skel[ispec*2] + xi * scale;
         }
     }
@@ -226,7 +230,7 @@ create_db_love_()
     this -> interp_model(vsh_tomo.data(),el_elmnts,xN);
     this -> interp_model(vsv_tomo.data(),el_elmnts,xL);
     for(size_t i = 0; i < size; i ++) {
-        float r = xrho_el[i];
+        real_t r = xrho_el[i];
         xN[i] = std::pow(xN[i],2) * r;
         xL[i] = std::pow(xL[i],2) * r;
     }
@@ -315,7 +319,7 @@ create_db_aniso_()
     this -> interp_model(rho_tomo.data(),ac_elmnts,xrho_ac);
 
     // allocate elastic model
-    std::vector<float> xtemp_el(size_el);
+    std::vector<real_t> xtemp_el(size_el);
     xC21.resize(21*size_el);
     xkappa_ac.resize(size_ac);
     for(int i = 0; i < 21; i ++) {
@@ -336,6 +340,32 @@ create_db_aniso_()
             }
         }
         this -> interp_model(&Qani_tomo[0],ac_elmnts,xQk_ac);
+    }
+}
+
+/**
+ * @brief Get dimension info for eigenfunction, shape(ncomp,ndof)
+ * 
+ * @param ncomp no. of components
+ * @param ndof number of degrees of freedom
+ */
+void Mesh::
+get_egnfunc_dim(int &ncomp,int &ndof) const
+{
+    if (SWD_TYPE == 0) {
+        // love wave
+        ncomp = 1;
+        ndof = nglob_el;
+    }
+    else if (SWD_TYPE == 1) {
+        // rayleigh wave
+        ncomp = 2;
+        ndof = nglob_el * 2 + nglob_ac;
+    }
+    else {
+        // full anisotropy
+        ncomp = 3;
+        ndof = nglob_el * 3 + nglob_ac;
     }
 }
 

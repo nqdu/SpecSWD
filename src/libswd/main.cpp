@@ -14,81 +14,58 @@ using namespace py::literals;
 using py::arg;
 
 const auto FCST = (py::array::c_style | py::array::forcecast) ;
-typedef py::array_t<float,FCST> vec;
-typedef py::array_t<std::complex<float>,FCST> cvec;
+typedef py::array_t<double,FCST> vec;
+typedef py::array_t<std::complex<double>,FCST> cvec;
 
-void init_love(const vec &z,const vec &rho,
-             const vec &vsh, const vec &vsv,
-             const vec &QN, const vec &QL,
-             bool HAS_ATT,bool print_info)
-{
-    // init GQtable
-    specswd_init_GQTable();
-
-    // get pointer
-    const float *qn = nullptr, *ql = nullptr;
-    if(HAS_ATT) {
-        qn = QN.data();
-        ql = QL.data();
-    }
-    int nz = z.size();
-    specswd_init_mesh_love(
-        nz,z.data(),rho.data(),vsh.data(),vsv.data(),
-        qn,ql,HAS_ATT,print_info
-    );
-}
-
-void init_rayl(const vec &z,const vec &rho,
-             const vec &vph, const vec &vpv,
-             const vec &vsv,const vec &eta,
-             const vec &QA,const vec &QC, 
-             const vec &QL,bool HAS_ATT,
-             bool print_info)
-{
-    // init GQtable
-    specswd_init_GQTable();
-
-    // get pointer
-    const float *qa = nullptr, 
-                *ql = nullptr,
-                *qc = nullptr;
-    if(HAS_ATT) {
-        qa = QA.data();
-        ql = QL.data();
-        qc = QC.data();
-    }
-
-    int nz = z.size();
-    specswd_init_mesh_rayl(
-        nz,z.data(),rho.data(),vph.data(),vpv.data(),
-        vsv.data(),eta.data(),qa,qc,ql,HAS_ATT,print_info
-    );
-}
-
-void init_aniso(const vec &z,const vec &rho,
-             const vec &c21, const vec &Qani,
-             bool HAS_ATT, 
-             int Qfunc_id,
-             bool print_info)
+void init_mesh(
+    int swd_type,
+    const vec &z,const vec &rho,
+    const vec &vph, const vec &vpv,
+    const vec &vsh,const vec &vsv,
+    const vec &eta,const vec &QA,const vec &QC,
+    const vec &QN,const vec &QL,
+    const vec &c21, const vec &Qani,
+    double scale_rho,double scale_v,
+    double scale_z,
+    bool HAS_ATT, 
+    int Qfunc_id,
+    bool print_info
+)
 {
     // init GQtable
     specswd_init_GQTable(); 
 
-    // q 
-    const float *q = nullptr;
-    if(HAS_ATT) q = Qani.data();
+    // get pointer for attenuation
+    const double *qa = nullptr, 
+                 *ql = nullptr,
+                 *qc = nullptr,
+                 *qn = nullptr,
+                 *qani = nullptr;
+    if(HAS_ATT) {
+        qa = QA.data();
+        ql = QL.data();
+        qc = QC.data();
+        qn = QN.data();
+        qani = Qani.data();
+    }
 
     int nz = z.size();
     int nQani = Qani.size() / nz;
-    specswd_init_mesh_aniso(
-        nz,z.data(),rho.data(),c21.data(),
-        q,HAS_ATT,nQani,Qfunc_id,
-        print_info
+    specswd_init_mesh(
+        swd_type,nz,z.data(),rho.data(),
+        vph.data(),vpv.data(),
+        vsh.data(),vsv.data(),
+        eta.data(),qa,qc,qn,ql,
+        c21.data(),qani,
+        nQani,Qfunc_id,
+        scale_rho,scale_v,scale_z,
+        HAS_ATT,print_info
     );
 }
 
+
 template <typename T> py::array_t<T> 
-compute_swd(float freq,float phi_in_deg,bool use_qz) 
+compute_swd(real_t freq, real_t phi_in_deg,bool use_qz) 
 {
     using namespace specswd_pylib;
     py::array_t<T> c_out;
@@ -98,59 +75,113 @@ compute_swd(float freq,float phi_in_deg,bool use_qz)
 
     // allocate space
     int nc;
-    const T *c_glob = nullptr;
-    if constexpr (std::is_same_v<T,float>) {
-        c_glob = c_.data();
-        nc = c_.size();
+    if(mesh_ptr->SWD_TYPE == 0) {
+        nc = love_ptr->c_phase.size();
+    }
+    else if (mesh_ptr->SWD_TYPE == 1) {
+        nc = rayl_ptr->c_phase.size();
     }
     else {
-        c_glob = cc_.data();
-        nc = cc_.size();
+        nc = rayl_ptr->c_phase.size();
     }
     c_out.resize({nc});
 
     // copy phase velocity to c_out
     auto c0 = c_out.template mutable_unchecked<1>();
     for(int ic = 0; ic < nc; ic ++) {
-        c0(ic) = c_glob[ic];
+        double val_r,val_i; 
+        if(mesh_ptr->SWD_TYPE == 0) {
+            love_ptr->get_phase_vel(ic,val_r,val_i);
+        }
+        else if (mesh_ptr->SWD_TYPE == 1) {
+            rayl_ptr->get_phase_vel(ic,val_r,val_i);
+        }
+        else {
+            aniso_ptr->get_phase_vel(ic,val_r,val_i);
+        }
+        if constexpr (std::is_same_v<T,double>) {
+            c0(ic) = val_r;
+        }
+        else {
+            c0(ic) = std::complex<double>(val_r,val_i);
+        }
     }
 
     return c_out;
 }
 
-template <typename T> T
-compute_group_vel(int imode)
+std::tuple<vec,vec>
+compute_group_vel()
 {
     using namespace specswd_pylib;
-    const int SWD_TYPE = mesh.SWD_TYPE;
+    const bool HAS_ATT = mesh_ptr->HAS_ATT;
 
-    // get group velocities
-    switch (SWD_TYPE)
-    {
-    case 0:
-        specswd_group_love(imode);
-        break;
-    case 1:
-        specswd_group_rayl(imode);
-        break;
-    default:
-        break;
-    }
+    // compute velocities
+    specswd_compute_group();
 
     // allocate space
-    if constexpr (std::is_same_v<T,float>) {
-        return u_[imode];
+    int nc;
+    vec u_r,u_i;
+    if(mesh_ptr->SWD_TYPE == 0) {
+        nc = love_ptr->c_phase.size();
+        u_r.resize({nc});
+        if(HAS_ATT) {
+            u_i.resize({nc});
+        }
+
+        for(int ic = 0; ic < nc; ic ++) {
+            double val_r,val_i; 
+            love_ptr->get_group_vel(ic,val_r,val_i);
+            u_r.mutable_data()[ic] = val_r;
+            if(HAS_ATT) {
+                u_i.mutable_data()[ic] = val_i;
+            }
+        }
+    }
+    else if (mesh_ptr->SWD_TYPE == 1) {
+        nc = rayl_ptr->c_phase.size();
+        u_r.resize({nc});
+        if(HAS_ATT) {
+            u_i.resize({nc});
+        }
+
+        for(int ic = 0; ic < nc; ic ++) {
+            double val_r,val_i; 
+            rayl_ptr->get_group_vel(ic,val_r,val_i);
+            u_r.mutable_data()[ic] = val_r;
+            if(HAS_ATT) {
+                u_i.mutable_data()[ic] = val_i;
+            }
+        }
     }
     else {
-        return cu_[imode];
+        nc = rayl_ptr->c_phase.size();
+        u_r.resize({2,nc});
+        if(HAS_ATT) {
+            u_i.resize({2,nc});
+        }
+
+        for(int ic = 0; ic < nc; ic ++) {
+            double ux_r,ux_i,uz_r,uz_i; 
+            aniso_ptr->get_group_vel(ic,ux_r,ux_i,uz_r,uz_i);
+            u_r.mutable_data()[2*ic]   = ux_r;
+            u_r.mutable_data()[2*ic+1] = uz_r;
+            if(HAS_ATT) {
+                u_i.mutable_data()[2*ic]   = ux_i;
+                u_i.mutable_data()[2*ic+1] = uz_i;
+            }
+        }
     }
+
+    return std::make_tuple(u_r,u_i);
 }
 
 std::tuple<vec,vec>
 compute_phase_kl(int imode,bool HAS_ATT) 
 {
     int nz,nsize,nglob;
-    int nkers = specswd_kernel_size();
+    int nkers,nkers_el,nkers_ac;
+    specswd_kernel_size(&nkers,&nkers_el,&nkers_ac);
     specswd_const(&nz,&nsize,&nglob);
 
     vec frekl_c({nkers,nz}),frekl_q;
@@ -175,7 +206,8 @@ std::tuple<vec,vec>
 compute_group_kl(int imode,bool HAS_ATT) 
 {
     int nz,nsize,nglob;
-    int nkers = specswd_kernel_size();
+    int nkers,nkers_el,nkers_ac;
+    specswd_kernel_size(&nkers,&nkers_el,&nkers_ac);
     specswd_const(&nz,&nsize,&nglob);
 
     vec frekl_c({nkers,nz}),frekl_q;
@@ -206,9 +238,9 @@ get_znodes()
     auto zcords = z.mutable_unchecked<1>();
 
     // copy coordinates
-    using specswd_pylib::mesh;
+    using specswd_pylib::mesh_ptr;
     for(int i = 0; i < nsize; i ++) {
-        zcords(i) = mesh.znodes[i];
+        zcords(i) = mesh_ptr->znodes[i] * mesh_ptr->SCALE_LENGTH;
     }
     
     return z;
@@ -252,54 +284,40 @@ get_eigen(int imode,int return_left,int return_displ,
 
 PYBIND11_MODULE(libswd,m){
     m.doc() = "Surface wave dispersion and sensivity kernel\n";
-    m.def(
-        "init_love",&init_love,arg("z"),arg("rho"),
-        arg("vsh"),arg("vsv"),arg("QN"),
-        arg("QL"),
-        arg("HAS_ATT") = false,
-        arg("print_info") = false,
-        "initialize global vars for love wave"
-    );
-        
-    m.def("init_rayl",&init_rayl,arg("z"),
-          arg("rho"),arg("vph"),
-          arg("vpv"),arg("vsv"), arg("eta"),
-          arg("QA"),arg("QC"),
-          arg("QL"),arg("HAS_ATT") = false,
-          arg("print_info") = false,
-          "initialize global vars for rayleigh wave"
-    );
-    
-    m.def("init_aniso",&init_aniso,arg("z"),
-          arg("rho"),arg("c21"),arg("Qani"),
+    m.def("init_mesh",&init_mesh,
+          arg("swd_type"),
+          arg("z"),arg("rho"),
+          arg("vph"), arg("vpv"),
+          arg("vsh"), arg("vsv"),
+          arg("eta"), arg("QA"),
+          arg("QC"), arg("QN"),
+          arg("QL"),
+          arg("c21"), arg("Qani"),
+            arg("scale_rho") = 0,
+            arg("scale_v") = 0,
+            arg("scale_z") = 0,
           arg("HAS_ATT") = false,
           arg("Qfunc_id") = 1,
           arg("print_info") = false,
-          "initialize global vars for anisotropic wave"
+          "initialize global vars for SWD"
     );
     
-    m.def("compute_egn",&compute_swd<float>,
+    m.def("compute_egn",&compute_swd<double>,
           arg("freq"),
           arg("phi_in_deg") = 0.,
           arg("use_qz")=true,
           "compute dispersions for elastic wave"
     );
 
-    m.def("compute_egn_att",&compute_swd<std::complex<float>>,
+    m.def("compute_egn_att",&compute_swd<std::complex<double>>,
           arg("freq"),
           arg("phi_in_deg") = 0.,
           arg("use_qz")=true,
           "compute dispersions for visco-elastic wave"
     );
-
-    m.def("group_vel",&compute_group_vel<float>,
-            arg("imode"),
+ 
+    m.def("group_vel",&compute_group_vel,
          "compute group velocity for elastic wave"
-    );
-
-    m.def("group_vel_att",&compute_group_vel<std::complex<float>>,
-            arg("imode"),
-         "compute group velocity for visco-elastic wave"
     );
     
     m.def(
