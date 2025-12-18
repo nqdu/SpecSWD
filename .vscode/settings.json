@@ -116,6 +116,4 @@
         "eigenvalues": "cpp",
         "*.bak": "cpp"
     },
-    //"C_Cpp.errorSquiggles": "disabled"
-    "fortran.linter.includePaths": ["/opt/homebrew/Cellar/open-mpi/5.0.7/include"]
 }

@@ -2,7 +2,7 @@ name: Build and Deploy Docs
 
 on:
   push:
-    branches: [devel]
+    branches: [main]
 
 jobs:
   deploy:
@@ -20,13 +20,14 @@ jobs:
       - name: Build libaries
         run: |
           sudo apt install cmake build-essential gfortran liblapack-dev liblapacke-dev 
-          wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
-          tar -xvf eigen-3.4.0.tar.gz
+          wget https://gitlab.com/libeigen/eigen/-/archive/5.0.0/eigen-5.0.0.tar.gz
+          tar -xvf eigen-5.0.0.tar.gz
           pip install pybind11-global
           mkdir -p build
           cd build 
-          cmake .. -DCXX=g++ -DFC=gfortran -DEIGEN_INC=./eigen-3.4.0/  -DBUILD_LIBS=ON  -DPython3_EXECUTABLE=`which python`
-          make -j4 
+          cmake .. -DCXX=g++ -DFC=gfortran -DEIGEN_INC=./eigen-5.0.0/  -DBUILD_LIBS=ON
+          make -j4
+          make test
           make install
           cd ..
           

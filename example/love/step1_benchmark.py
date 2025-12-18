@@ -3,6 +3,7 @@ import h5py
 import sys
 import matplotlib.pyplot as plt
 from numba import jit
+from specd import SpecWorkSpace
 
 import matplotlib as mpl
 mpl.rcParams['lines.linewidth'] = 1.5
@@ -133,12 +134,13 @@ def transform_kernel(dcc_dcL1,dcc_dcL2,dcc_dcN1,dcc_dcN2,dcc_dr1,dcc_dr2,
     D[:,0,1] = get_cQ_kl(dcc_dL2,c)
     D[:,1,0] = get_cQ_kl(dcc_dN1,c)
     D[:,1,1] = get_cQ_kl(dcc_dN2,c)
-    D[:,2,0] = get_cQ_kl(dcc_dQin1,c)
-    D[:,2,1] = get_cQ_kl(dcc_dQin2,c)
-    D[:,3,0] = get_cQ_kl(dcc_dQil1,c)
-    D[:,3,1] = get_cQ_kl(dcc_dQil2,c)
-    D[:,4,0] = get_cQ_kl(dcc_dr1,c)
-    D[:,4,1] = get_cQ_kl(dcc_dr2,c)
+    D[:,2,0] = get_cQ_kl(dcc_dr1,c)
+    D[:,2,1] = get_cQ_kl(dcc_dr2,c)
+    D[:,3,0] = get_cQ_kl(dcc_dQin1,c)
+    D[:,3,1] = get_cQ_kl(dcc_dQin2,c)
+    D[:,4,0] = get_cQ_kl(dcc_dQil1,c)
+    D[:,4,1] = get_cQ_kl(dcc_dQil2,c)
+
     if keep_modulus:
         temp = D[:,0,:] * 1. 
         D[:,0,:] = D[:,1,:] * 1.
@@ -158,13 +160,13 @@ def transform_kernel(dcc_dcL1,dcc_dcL2,dcc_dcN1,dcc_dcN2,dcc_dr1,dcc_dr2,
     vsv_kl[:,1] = D[:,0,1] * 2. * rho2 * bv2 
     vsh_kl[:,0] = D[:,1,0] * 2. * rho1 * bh1 
     vsh_kl[:,1] = D[:,1,1] * 2. * rho2 * bh2 
-    rho_kl[:,0] = D[:,4,0] + bv1**2 * D[:,0,0] + bh1**2 * D[:,1,0]
-    rho_kl[:,1] = D[:,4,1] + bv2**2 * D[:,0,1] + bh2**2 * D[:,1,1]
+    rho_kl[:,0] = D[:,2,0] + bv1**2 * D[:,0,0] + bh1**2 * D[:,1,0]
+    rho_kl[:,1] = D[:,2,1] + bv2**2 * D[:,0,1] + bh2**2 * D[:,1,1]
 
     # copy back
     D[:,0,:] = vsh_kl[:,:]
     D[:,1,:] = vsv_kl[:,:]
-    D[:,4,:] = rho_kl[:,:]
+    D[:,2,:] = rho_kl[:,:]
 
     return D
 
@@ -247,15 +249,16 @@ def love_func(c,r1,r2,bev1,bev2,beh1,beh2,Qv1,Qv2,Qh1,Qh2,H,om,HAS_ATT,phase_kl=
     
     if not HAS_ATT:
         D1 = np.zeros((2,3,2))
-        D1[:,:,:] = D[:,[0,1,4],:]
+        D1[:,:,:] = D[:,[0,1,2],:]
     else:
         D1 = D * 1.
 
     return f,fd,D1
 
 def get_deriv_2layer_h5(fio:h5py,HAS_ATT:bool,gname:str):
+    ws = SpecWorkSpace(wavetype='love',has_att=HAS_ATT)
     if not HAS_ATT:
-        kl_name = ['vsh','vsv','rho']
+        kl_name = ws.get_kernel_names()
         D = np.zeros((2,3,2))
 
         for iker in range(len(kl_name)):
@@ -268,7 +271,7 @@ def get_deriv_2layer_h5(fio:h5py,HAS_ATT:bool,gname:str):
         return D 
     else:
         D = np.zeros((2,5,2))
-        kl_name = ['vsh','vsv','Qvsh','Qvsv','rho']
+        kl_name = ws.get_kernel_names()
         for iker in range(len(kl_name)):
             a = fio[f"{gname}/C_{kl_name[iker]}"][:]
             q = fio[f"{gname}/Q_{kl_name[iker]}"][:]
@@ -502,8 +505,8 @@ def main():
                     # ax2[i,j].plot(1./T,a1,color=cmap(imode))
                     # ax2[i,j].scatter(1./T,a2,color='k',s=10,label=label4)
 
-                    a1 = phase_sem[0,i+2,j,:]
-                    a2 = phase_deriv[0,i+2,j,:]
+                    a1 = phase_sem[0,i+3,j,:]
+                    a2 = phase_deriv[0,i+3,j,:]
                     ax3[i,j].plot(1./T,a1,color=cmap(imode))
                     ax3[i,j].scatter(1./T,a2,color='k',s=5,label=label4)
 

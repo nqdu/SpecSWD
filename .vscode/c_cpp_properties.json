@@ -4,15 +4,14 @@
             "name": "macOS",
             "includePath": [
                 "${workspaceFolder}/**",
-                "~/software/eigen-3.4.0",
-                "/opt/homebrew/Cellar/open-mpi/5.0.8/include",
+                "~/software/eigen-5.0.0",
                 "/Users/nqdu/software/miniconda3/include/python3.12",
                 "/Users/nqdu/software/miniconda3/lib/python3.12/site-packages/pybind11/include"
             ],
             "compilerPath": "/usr/bin/g++",
             "cStandard": "gnu17",
             "cppStandard": "gnu++17",
-            "intelliSenseMode": "linux-gcc-x64"
+            "intelliSenseMode": "macos-gcc-x64"
         }
     ],
     "version": 4

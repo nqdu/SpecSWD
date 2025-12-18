@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import matplotlib as mpl
 import h5py 
-from step0_database import test_fluid
+from step0_database import test_fluid,cps2spec
 
 mpl.rcParams['lines.linewidth'] = 1.5
 mpl.rcParams['font.size'] = 10
@@ -18,6 +18,10 @@ def main():
 
     # open h5file
     fio = h5py.File("kernels.h5","r")
+    kltype = fio.attrs['kernel_type']
+    cps_flag = 'Rc'
+    if kltype == 1:
+        cps_flag = 'Rg'
 
     # get period
     T = fio['T'][:]
@@ -42,14 +46,14 @@ def main():
             sol = THSolver(thk,x[0,:],x[1,:],x[2,:])
             c1 = np.zeros((nt))
             for it in range(nt):
-                c1[it:it+1] = sol.compute_swd('Rg',0,T[it:it+1])
+                c1[it:it+1] = sol.compute_swd(cps_flag,0,T[it:it+1])
             #del sol 
 
             c2 = np.zeros((nt))
             x[i,iz] = x0 * (1 - dx)
             sol = THSolver(thk,x[0,:],x[1,:],x[2,:])
             for it in range(nt):
-                c2[it:it+1] = sol.compute_swd('Rg',0,T[it:it+1])
+                c2[it:it+1] = sol.compute_swd(cps_flag,0,T[it:it+1])
             #del sol 
 
             kl[i,iz,:] = (c1 - c2) / (x0 * dx * 2)
@@ -62,7 +66,7 @@ def main():
     for it in range(nt):
         vpv_kl = fio[f"kernels/{it}/mode0/C_vpv"][:]
         vph_kl = fio[f"kernels/{it}/mode0/C_vph"][:]
-        vp_kl = fio[f"kernels/{it}/mode0/C_vp"][:]
+        vp_kl = fio[f"kernels/{it}/mode0/C_vp_ac"][:]
         vs_kl = fio[f"kernels/{it}/mode0/C_vsv"][:]
         rho_kl = fio[f"kernels/{it}/mode0/C_rho"][:]
         nz_tomo = len(vpv_kl)
@@ -82,7 +86,7 @@ def main():
         #print(kl_sem[0,:,:])
 
     fig,ax = plt.subplots(1,2,figsize=(15,6))
-    idx = [0,2]
+    idx = [0,1]
     for i in range(2):
         for iz in range(nz):
             m = np.max(abs(kl[idx[i],iz,:]))
@@ -100,13 +104,22 @@ def main():
 
     for i in range(2):
         ax[i].set_yticks([i for i in range(nz)])  # positions
-    ax[0].set_yticklabels([rf'$\frac{{\partial{{u}}}}{{\partial{{\alpha_{{{i+1}}}}}}}$' for i in range(nz)])  # labels
-    ax[1].set_yticklabels([rf'$\frac{{\partial{{u}}}}{{\partial{{\beta_{{{i+1}}}}}}}$' for i in range(nz)])  # labels
+    
+    if kltype == 0:
+        ax[0].set_yticklabels([rf'$\frac{{\partial{{c}}}}{{\partial{{\alpha_{{{i+1}}}}}}}$' for i in range(nz)])  # labels
+        ax[1].set_yticklabels([rf'$\frac{{\partial{{c}}}}{{\partial{{\beta_{{{i+1}}}}}}}$' for i in range(nz)])  # labels
+    else:
+        ax[0].set_yticklabels([rf'$\frac{{\partial{{u}}}}{{\partial{{\alpha_{{{i+1}}}}}}}$' for i in range(nz)])  # labels
+        ax[1].set_yticklabels([rf'$\frac{{\partial{{u}}}}{{\partial{{\beta_{{{i+1}}}}}}}$' for i in range(nz)])  # labels
     ax[0].set_xlabel("Frequency, Hz")
     ax[1].set_xlabel("Frequency, Hz")
     ax[0].legend()
     ax[1].legend()
-    fig.savefig("group_deriv.jpg",dpi=300)
+
+    if kltype == 0:
+        fig.savefig("phase_deriv.jpg",dpi=300)
+    else:
+        fig.savefig("group_deriv.jpg",dpi=300)
 
 if __name__ == "__main__":
     main()

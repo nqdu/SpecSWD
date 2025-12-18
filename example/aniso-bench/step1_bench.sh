@@ -15,7 +15,8 @@ sourcedir=../../
 
 #     mv out/swd.txt out/swd.$i.txt 
 # done
-$sourcedir/bin/surftti modeltti.txt 0 0.01 0.5 100 0
+$sourcedir/bin/surfani model.txt 0.01 1 100 18 0
+
 
 # bin2h5
 echo "converting to hdf5..."

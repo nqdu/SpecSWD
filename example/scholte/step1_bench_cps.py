@@ -51,13 +51,15 @@ def main():
 
         # plot 
         label = None
+        label_sem = None
         if imode == 0:
-            label = 'T-H'
+            label = 'T-H Method'
+            label_sem = 'SEM'
         freqs = 1. / T0 
-        ax[0].plot(freqs,c,color=cmap(imode))
+        ax[0].plot(freqs,c,color=cmap(imode),label=label_sem)
         idx = c_cps > 0
         ax[0].scatter(freqs[idx],c_cps[idx],s=10,color='k',label=label)
-        ax[1].plot(freqs,u,color=cmap(imode))
+        ax[1].plot(freqs,u,color=cmap(imode),label=label_sem)
         ax[1].scatter(freqs[idx],u_cps[idx],s=10,color='k',label=label)
     
     ax[0].legend()
