@@ -76,28 +76,55 @@
 <span></span><span class="kn">from</span> <span class="nn">.lib</span> <span class="kn">import</span> <span class="n">libswd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
 
-<span class="k">def</span> <span class="nf">_model_sanity_check</span><span class="p">(</span><span class="n">wavetype</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">vph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vpv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vsh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vsv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">Qa</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Ql</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">c21</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">nQani</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qani</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_model_sanity_check</span><span class="p">(</span>
+        <span class="n">wavetype</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">z</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">vph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vpv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">vsh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vsv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">eta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">c21</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    
+    <span class="k">assert</span> <span class="n">wavetype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;love&#39;</span><span class="p">,</span><span class="s1">&#39;rayl&#39;</span><span class="p">,</span><span class="s1">&#39;aniso&#39;</span><span class="p">]</span> <span class="p">,</span><span class="s2">&quot;wavetype must be one of [&#39;love&#39;,&#39;rayl&#39;,&#39;aniso&#39;]&quot;</span>
+
+    <span class="c1"># get shape of tomo model</span>
+    <span class="n">nz</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">wavetype</span> <span class="o">==</span> <span class="s2">&quot;love&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">vsh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">vsv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;love wave model mustn&#39;t have None vsh/vsv!&quot;</span><span class="p">)</span>
             <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># make sure vsh/vsv has shape (nz,)</span>
+        <span class="k">if</span> <span class="n">vsh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">nz</span> <span class="ow">or</span> <span class="n">vsv</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">nz</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;vsh and vsv should be with shape (nz,)!&quot;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        
     <span class="k">elif</span> <span class="n">wavetype</span> <span class="o">==</span> <span class="s2">&quot;rayl&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">vsv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">vpv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">vph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;rayleigh wave model mustn&#39;t have None vph/vpv/vsv!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">vsv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">vpv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">vph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">eta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;rayleigh wave model mustn&#39;t have None vph/vpv/vsv/eta!&quot;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># make sure vph/vpv/vsv has shape (nz,)</span>
+        <span class="k">if</span> <span class="n">vph</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">nz</span> <span class="ow">or</span> <span class="n">vpv</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">nz</span> <span class="ow">or</span> <span class="n">vsv</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">nz</span> <span class="ow">or</span> <span class="n">eta</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">nz</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;vph/vpv/vsv/eta should be with shape (nz,)!&quot;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">c21</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;full anisotropy model mustn&#39;t have None c21/nQani/Qani!&quot;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="k">pass</span>
+        <span class="c1"># make sure c21 is with correct shape</span>
+        <span class="k">if</span> <span class="n">c21</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">21</span> <span class="ow">or</span> <span class="n">c21</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">nz</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;c21 should be with shape (21,nz)!&quot;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SpecWorkSpace">
 <a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace">[docs]</a>
 <span class="k">class</span> <span class="nc">SpecWorkSpace</span><span class="p">:</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">wavetype</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">has_att</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_max_mode</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span> <span class="o">=</span> <span class="kc">None</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span> <span class="o">=</span> <span class="n">has_att</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_use_qz</span> <span class="o">=</span> <span class="kc">None</span> 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="o">=</span> <span class="kc">None</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="o">=</span> <span class="n">wavetype</span>  
 
         <span class="k">pass</span>
 
@@ -106,7 +133,8 @@
     <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">wavetype</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">z</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">rho</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                 <span class="n">vph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vpv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vsh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vsv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">eta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qa</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Ql</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">c21</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">nQani</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qani</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">c21</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qani</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">qfunc_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">scale_rho</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span><span class="n">scale_v</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span><span class="n">scale_z</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
                 <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        initialize working space for SEM</span>
@@ -147,9 +175,19 @@
 
         <span class="c1"># check input models</span>
         <span class="n">_model_sanity_check</span><span class="p">(</span>
-            <span class="n">wavetype</span><span class="p">,</span><span class="n">vph</span><span class="p">,</span><span class="n">vpv</span><span class="p">,</span><span class="n">vsh</span><span class="p">,</span><span class="n">vsv</span><span class="p">,</span><span class="n">Qa</span><span class="p">,</span>
-            <span class="n">Qc</span><span class="p">,</span><span class="n">Qn</span><span class="p">,</span><span class="n">Ql</span><span class="p">,</span><span class="n">c21</span><span class="p">,</span><span class="n">nQani</span><span class="p">,</span><span class="n">Qani</span>
+            <span class="n">wavetype</span><span class="p">,</span><span class="n">z</span><span class="p">,</span>
+            <span class="n">vph</span><span class="p">,</span><span class="n">vpv</span><span class="p">,</span>
+            <span class="n">vsh</span><span class="p">,</span><span class="n">vsv</span><span class="p">,</span>
+            <span class="n">eta</span><span class="p">,</span>
+            <span class="n">c21</span>
         <span class="p">)</span>
+
+        <span class="c1"># set default params</span>
+        <span class="n">qa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;f8&#39;</span><span class="p">)</span>
+        <span class="n">qc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;f8&#39;</span><span class="p">)</span>
+        <span class="n">qn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;f8&#39;</span><span class="p">)</span>
+        <span class="n">ql</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;f8&#39;</span><span class="p">)</span>
+        <span class="n">qani</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;f8&#39;</span><span class="p">)</span>
         
         <span class="c1"># init work space by calling libswd</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span> <span class="o">=</span> <span class="kc">False</span>
@@ -158,12 +196,6 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">qn</span> <span class="o">=</span> <span class="n">Qn</span> 
                 <span class="n">ql</span> <span class="o">=</span> <span class="n">Ql</span> 
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># avoid pybind11 issue</span>
-                <span class="n">qn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;f4&#39;</span><span class="p">)</span>
-                <span class="n">ql</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;f4&#39;</span><span class="p">)</span>
-            <span class="n">libswd</span><span class="o">.</span><span class="n">init_love</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">rho</span><span class="p">,</span><span class="n">vsh</span><span class="p">,</span><span class="n">vsv</span><span class="p">,</span><span class="n">qn</span><span class="p">,</span><span class="n">ql</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">,</span><span class="n">disp</span><span class="p">)</span>
-            <span class="c1">#libswd.init_love1(self._has_att,disp)</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="o">==</span> <span class="s1">&#39;rayl&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">Qn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">Qa</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">Qc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
@@ -171,16 +203,38 @@
                 <span class="n">qa</span> <span class="o">=</span> <span class="n">Qa</span> 
                 <span class="n">qc</span> <span class="o">=</span> <span class="n">Qc</span> 
                 <span class="n">ql</span> <span class="o">=</span> <span class="n">Ql</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># avoid pybind11 issue</span>
-                <span class="n">qc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;f4&#39;</span><span class="p">)</span>
-                <span class="n">qa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;f4&#39;</span><span class="p">)</span>
-                <span class="n">ql</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;f4&#39;</span><span class="p">)</span>
-            <span class="n">libswd</span><span class="o">.</span><span class="n">init_rayl</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">rho</span><span class="p">,</span><span class="n">vph</span><span class="p">,</span><span class="n">vpv</span><span class="p">,</span><span class="n">vsv</span><span class="p">,</span><span class="n">eta</span><span class="p">,</span><span class="n">qa</span><span class="p">,</span><span class="n">qc</span><span class="p">,</span><span class="n">ql</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">,</span><span class="n">disp</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;not implemented!&quot;</span><span class="p">)</span>
-            <span class="k">assert</span><span class="p">(</span><span class="mi">0</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span></div>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Qani</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">qani</span> <span class="o">=</span> <span class="n">Qani</span>
+                <span class="k">assert</span><span class="p">(</span><span class="n">qani</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nz</span><span class="p">)</span>
+            
+            <span class="c1"># we only support qfunc_id = 1 now</span>
+            <span class="k">if</span> <span class="n">qfunc_id</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;only qfunc_id = 1 is supported now!&quot;</span><span class="p">)</span>
+                <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="n">swd_type_int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="o">==</span> <span class="s2">&quot;love&quot;</span><span class="p">:</span>
+            <span class="n">swd_type_int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="o">==</span> <span class="s2">&quot;rayl&quot;</span><span class="p">:</span>
+            <span class="n">swd_type_int</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">swd_type_int</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="c1"># initialize </span>
+        <span class="n">libswd</span><span class="o">.</span><span class="n">init_mesh</span><span class="p">(</span>
+            <span class="n">swd_type_int</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">rho</span><span class="p">,</span>
+            <span class="n">vph</span><span class="p">,</span><span class="n">vpv</span><span class="p">,</span><span class="n">vsh</span><span class="p">,</span><span class="n">vsv</span><span class="p">,</span>
+            <span class="n">eta</span><span class="p">,</span><span class="n">qa</span><span class="p">,</span><span class="n">qc</span><span class="p">,</span><span class="n">qn</span><span class="p">,</span><span class="n">ql</span><span class="p">,</span>
+            <span class="n">c21</span><span class="p">,</span><span class="n">qani</span><span class="p">,</span>
+            <span class="n">scale_rho</span><span class="o">=</span><span class="n">scale_rho</span><span class="p">,</span>
+            <span class="n">scale_v</span><span class="o">=</span><span class="n">scale_v</span><span class="p">,</span>
+            <span class="n">scale_z</span><span class="o">=</span><span class="n">scale_z</span><span class="p">,</span>
+            <span class="n">HAS_ATT</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">,</span>
+            <span class="n">Qfunc_id</span><span class="o">=</span><span class="n">qfunc_id</span><span class="p">,</span>
+            <span class="n">print_info</span><span class="o">=</span><span class="n">disp</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SpecWorkSpace.compute_egn">
@@ -222,14 +276,9 @@
 
 <div class="viewcode-block" id="SpecWorkSpace.group_velocity">
 <a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.group_velocity">[docs]</a>
-    <span class="k">def</span> <span class="nf">group_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">imode</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">group_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        compute group velocites at imode-th mode</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        imode: int</span>
-<span class="sd">            which index to return</span>
+<span class="sd">        compute group velocites for each model at current frequency</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        --------</span>
@@ -241,16 +290,47 @@
 <span class="sd">        before calling this routine, use_qz should be True in self.compute_egn</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_qz</span> <span class="p">,</span><span class="s2">&quot;please enable use_qz in self.compute_egn&quot;</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">imode</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_mode</span><span class="p">):</span> 
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;imode should inside [0,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_mode</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-            <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        
+        <span class="n">u_real</span><span class="p">,</span><span class="n">u_imag</span> <span class="o">=</span> <span class="n">libswd</span><span class="o">.</span><span class="n">group_vel</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">:</span>
-            <span class="n">u</span> <span class="o">=</span> <span class="n">libswd</span><span class="o">.</span><span class="n">group_vel</span><span class="p">(</span><span class="n">imode</span><span class="p">)</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">u_real</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">u</span> <span class="o">=</span> <span class="n">libswd</span><span class="o">.</span><span class="n">group_vel_att</span><span class="p">(</span><span class="n">imode</span><span class="p">)</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">u_real</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">u_imag</span>
 
         <span class="k">return</span> <span class="n">u</span></div>
+
+
+<div class="viewcode-block" id="SpecWorkSpace.get_kernel_names">
+<a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.get_kernel_names">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_kernel_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        get names for Frechet derivative</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        ---------</span>
+<span class="sd">        kl_name: list[str]</span>
+<span class="sd">            list of kernel names</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="o">==</span> <span class="s2">&quot;love&quot;</span><span class="p">:</span>
+            <span class="n">kl_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;vsh&#39;</span><span class="p">,</span><span class="s1">&#39;vsv&#39;</span><span class="p">,</span><span class="s1">&#39;rho&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">:</span>
+                <span class="n">kl_name</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;Qn&#39;</span><span class="p">,</span><span class="s1">&#39;Ql&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="o">==</span> <span class="s2">&quot;rayl&quot;</span><span class="p">:</span>
+            <span class="n">kl_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;vph&#39;</span><span class="p">,</span><span class="s1">&#39;vpv&#39;</span><span class="p">,</span><span class="s1">&#39;vsv&#39;</span><span class="p">,</span><span class="s1">&#39;rho&#39;</span><span class="p">,</span><span class="s1">&#39;eta&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">:</span>
+                <span class="n">kl_name</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;Qa&#39;</span><span class="p">,</span><span class="s1">&#39;Qc&#39;</span><span class="p">,</span><span class="s1">&#39;Qn&#39;</span><span class="p">,</span><span class="s1">&#39;Ql&#39;</span><span class="p">]</span>
+            <span class="c1"># acoustic </span>
+            <span class="n">kl_name</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;vp_ac&#39;</span><span class="p">,</span><span class="s1">&#39;rho_ac&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">:</span>
+                <span class="n">kl_name</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;Qk_ac&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kl_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;c_</span><span class="si">{i}{j}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">7</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;rho&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">:</span>
+                <span class="n">kl_name</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;Qk&#39;</span><span class="p">,</span><span class="s1">&#39;Qm&#39;</span><span class="p">]</span>
+            <span class="c1"># acoustic </span>
+            <span class="n">kl_name</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;kappa_ac&#39;</span><span class="p">,</span><span class="s1">&#39;rho_ac&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">:</span>
+                <span class="n">kl_name</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;Qk_ac&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">kl_name</span></div>
 
         
 <div class="viewcode-block" id="SpecWorkSpace.get_phase_kl">

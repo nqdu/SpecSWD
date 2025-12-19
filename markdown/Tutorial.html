@@ -54,6 +54,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#q-model">Q model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scale-units">Scale Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
 </ul>
 </li>
@@ -92,7 +93,14 @@
 <p><strong>SpecSWD</strong> use a mixture 1-D model (linear variation model with discontinuities). The discontinuities is marked by two group of quantities defined at the same depth. <strong>SpecSWD</strong> currently support 3 type of different models: VTI-Love wave model, VTI-Rayleigh wave model, full-anisotropic model. The format is as below:</p>
 <section id="love-wave-model">
 <h3>Love wave model<a class="headerlink" href="#love-wave-model" title="Link to this heading"></a></h3>
-<p>In VTI media (or radial anisotropy), only 2 velocities <code class="docutils literal notranslate"><span class="pre">Vsv,Vsh</span></code> and corresponding quality factor <code class="docutils literal notranslate"><span class="pre">Ql,Qn</span></code> are related to love wave.</p>
+<p>In VTI media (or radial anisotropy), only 2 velocities <code class="docutils literal notranslate"><span class="pre">Vsv,Vsh</span></code> and corresponding quality factor <code class="docutils literal notranslate"><span class="pre">Ql,Qn</span></code> are related to love wave.  Here is a template below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="m">0</span><span class="w"> </span><span class="m">1</span><span class="w">   </span><span class="c1"># z rho vsh vsv QN QL</span>
+<span class="m">0</span>.000000<span class="w"> </span><span class="m">2</span>.800000<span class="w"> </span><span class="m">3</span>.300000<span class="w"> </span><span class="m">3</span>.000000<span class="w"> </span><span class="m">220</span>.<span class="w"> </span><span class="m">200</span>.
+<span class="m">35</span>.000000<span class="w"> </span><span class="m">2</span>.800000<span class="w"> </span><span class="m">3</span>.300000<span class="w"> </span><span class="m">3</span>.000000<span class="w"> </span><span class="m">220</span>.<span class="w"> </span><span class="m">200</span>.
+<span class="m">35</span>.000000<span class="w"> </span><span class="m">3</span>.200000<span class="w"> </span><span class="m">5</span>.500000<span class="w"> </span><span class="m">5</span>.000000<span class="w"> </span><span class="m">330</span>.<span class="w"> </span><span class="m">300</span>.
+<span class="m">35</span><span class="w"> </span><span class="m">3</span>.0<span class="w">  </span><span class="m">4</span>.5<span class="w">  </span><span class="c1"># scale factors L/density/velocity. This line can be missing</span>
+</pre></div>
+</div>
 </section>
 <section id="rayleigh-scholte-wave-model">
 <h3>Rayleigh (Scholte) wave model<a class="headerlink" href="#rayleigh-scholte-wave-model" title="Link to this heading"></a></h3>
@@ -116,6 +124,10 @@
 <p>This program use standard linear solids to model attenuation effects. The correction method (<a class="reference external" href="https://academic.oup.com/gji/article/199/2/1078/624157?login=true">van Driel et al, 2014</a>) make us only do one non-linear inversion to get coefficients that can be used for many Qs. The current coefficients in this program only be valid for 0.01-100 Hz (see figure below). If your application requires Q at different frequency domain, you can use <code class="docutils literal notranslate"><span class="pre">scripts/attenuation.py</span></code> to compute your coefficients, and paste to <code class="docutils literal notranslate"><span class="pre">src/attenuation.cpp</span></code>.</p>
 <p><img alt="" src="../_images/Qmodel.jpg" />
 <em>Q model estimated by SLS model</em></p>
+</section>
+<section id="scale-units">
+<h2>Scale Units<a class="headerlink" href="#scale-units" title="Link to this heading"></a></h2>
+<p>This program operates in a dimensionless domain, meaning that all variables are consistently rescaled to a nondimensional form. The scale factors are established during workspace initialization. If not specified by the user, the program will automatically determine these factors based on the depth, maximum phase velocity, and density of the half-space.</p>
 </section>
 <section id="example">
 <h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>

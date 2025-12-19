@@ -9,7 +9,7 @@
 1. **Compilers:** C++/Fortran compilers which support c++17 (tested on `GCC >=7.5`), `cmake >= 3.12`
 
 2. packages:
-* [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) >= 3.4.0
+* [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) >= 5.0.0
 * [MKL](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html) or [OpenBLAS](http://www.openmathlib.org/OpenBLAS/)
 * [doxygen](https://www.doxygen.nl/) for api document generation
 
