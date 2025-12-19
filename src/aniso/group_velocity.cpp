@@ -72,7 +72,7 @@ void SolverAniso::
 get_group_vel(int imode, real_t &ux_r, real_t &ux_i,
                 real_t &uy_r, real_t &uy_i) const
 {
-    if(imode < 0 || imode >= c_group_x.size()) {
+    if(imode < 0 || imode >= (int)c_group_x.size()) {
         throw std::runtime_error("SolverAniso::get_group_vel(): invalid mode index");
     }
     complex_t ux = c_group_x[imode] * mesh_->SCALE_VELOCITY;

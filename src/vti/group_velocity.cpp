@@ -44,7 +44,7 @@ compute_group_vel()
 void SolverLove::
 get_group_vel(int imode, real_t &u_r, real_t &u_i) const
 {
-    if(imode < 0 || imode >= c_group.size()) {
+    if(imode < 0 || imode >= (int)c_group.size()) {
         throw std::runtime_error("SolverLove::get_group_vel(): invalid mode index");
     }
     complex_t u = c_group[imode] * mesh_->SCALE_VELOCITY;
@@ -101,7 +101,7 @@ compute_group_vel()
 void SolverRayl::
 get_group_vel(int imode, real_t &u_r, real_t &u_i) const
 {
-    if(imode < 0 || imode >= c_group.size()) {
+    if(imode < 0 || imode >= (int)c_group.size()) {
         throw std::runtime_error("SolverRayl::get_group_vel(): invalid mode index");
     }
     complex_t u = c_group[imode] * mesh_->SCALE_VELOCITY;

@@ -18,7 +18,6 @@ compute_egn(bool use_qz)
     // define matrices used
     using rmat2 = Eigen::MatrixX<schur_realw>;
     using crmat2 = Eigen::MatrixX<schur_crealw>;
-    using Eigen::indexing::all;
 
     // frequency
     real_t freq = mesh_->freq;
@@ -154,7 +153,7 @@ compute_egn(bool use_qz)
 void SolverLove::
 get_phase_vel(int imode, real_t &c_r, real_t &c_i) const
 {
-    if(imode < 0 || imode >= c_phase.size()) {
+    if(imode < 0 || imode >= (int)c_phase.size()) {
         throw std::runtime_error("SolverLove::get_phase_vel(): invalid mode index");
     }
 
@@ -251,7 +250,6 @@ compute_egn(
     }
 
     // filter SWD 
-    using Eigen::indexing::all;
     c_all = om / k_all;
     schur_realw factor = 10.;
     if(mesh_->HAS_ATT) {
@@ -313,7 +311,7 @@ compute_egn(
 void SolverRayl::
 get_phase_vel(int imode, real_t &c_r, real_t &c_i) const
 {
-    if(imode < 0 || imode >= c_phase.size()) {
+    if(imode < 0 || imode >= (int)c_phase.size()) {
         throw std::runtime_error("SolverRayl::get_phase_vel(): invalid mode index");
     }
 

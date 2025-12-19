@@ -130,7 +130,7 @@ compute_kernels(
 ) const
 {
     // sanity check
-    if(imode < 0 || imode >= c_phase.size()) {
+    if(imode < 0 || imode >= (int)c_phase.size()) {
         throw std::runtime_error("SolverAniso::compute_kernels(), invalid mode number");
     }
 
@@ -260,7 +260,7 @@ compute_kernels(
         } else { // QN
             scale = scale_v;
         }
-        for(size_t i = 0; i < f_ac_r.size(); i ++) {
+        for(size_t i = 0; i < (size_t)f_ac_r.size(); i ++) {
             f_ac_r[iker * size + i] *= scale;
             if(nker_ac_real == nkers_ac_imag) {
                 f_ac_i[iker * size + i] *= scale;

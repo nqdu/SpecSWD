@@ -528,7 +528,7 @@ compute_kernels(
 ) const
 {
     // sanity check
-    if(imode < 0 || imode >= c_phase.size()) {
+    if(imode < 0 || imode >= (int)c_phase.size()) {
         throw std::runtime_error("SolverRayl::compute_kernels(), invalid mode number");
     }
 

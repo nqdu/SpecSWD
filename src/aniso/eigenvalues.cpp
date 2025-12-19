@@ -16,7 +16,6 @@ void SolverAniso::
 compute_egn(bool use_qz)
 {
     typedef Eigen::MatrixX<schur_crealw> crmat2;
-    using Eigen::indexing::all; 
     using Eigen::indexing::seq;
 
     // mapping M,K,E to matrix
@@ -154,7 +153,7 @@ compute_egn(bool use_qz)
 void SolverAniso::
 get_phase_vel(int imode, real_t &c_r, real_t &c_i) const
 {
-    if(imode < 0 || imode >= c_phase.size()) {
+    if(imode < 0 || imode >= (int)c_phase.size()) {
         throw std::runtime_error("SolverAniso::get_phase_vel(): invalid mode index");
     }
     complex_t c = c_phase[imode] * mesh_->SCALE_VELOCITY;

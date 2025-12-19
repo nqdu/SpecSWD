@@ -472,7 +472,7 @@ specswd_eigen(int imode, real_t *egn_r, real_t *egn_i,
     if(mesh_ptr->SWD_TYPE == 0) {
         // love wave
         // sanity check 
-        if(imode >= love_ptr->c_phase.size()) {
+        if(imode >= (int)love_ptr->c_phase.size()) {
             printf("Error: imode = %d exceeds the number of computed modes = %d\n",
                    imode,(int)love_ptr->c_phase.size());
             exit(1);
@@ -493,7 +493,7 @@ specswd_eigen(int imode, real_t *egn_r, real_t *egn_i,
     else if (mesh_ptr->SWD_TYPE == 1) {
         // rayleigh wave
         // sanity check 
-        if(imode >= rayl_ptr->c_phase.size()) {
+        if(imode >= (int)rayl_ptr->c_phase.size()) {
             printf("Error: imode = %d exceeds the number of computed modes = %d\n",
                    imode,(int)rayl_ptr->c_phase.size());
             exit(1);
@@ -512,7 +512,7 @@ specswd_eigen(int imode, real_t *egn_r, real_t *egn_i,
     else {
         // anisotropic wave
         // sanity check 
-        if(imode >= aniso_ptr->c_phase.size()) {
+        if(imode >= (int)aniso_ptr->c_phase.size()) {
             printf("Error: imode = %d exceeds the number of computed modes = %d\n",
                    imode,(int)aniso_ptr->c_phase.size());
             exit(1);
