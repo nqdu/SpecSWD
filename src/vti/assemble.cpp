@@ -10,7 +10,7 @@ namespace specswd
  * 
  * @param mesh shared pointer to mesh class
  */
-void SolverLove::build(std::shared_ptr<Mesh> mesh)
+void SolverLove::build(const Mesh *mesh)
 {
     // set value
     mesh_ = mesh;
@@ -28,7 +28,7 @@ void SolverLove::build(std::shared_ptr<Mesh> mesh)
  * 
  * @param mesh shared pointer to mesh class
  */
-void SolverRayl::build(std::shared_ptr<Mesh> mesh)
+void SolverRayl::build(const Mesh *mesh)
 {
     // set value
     mesh_ = mesh;

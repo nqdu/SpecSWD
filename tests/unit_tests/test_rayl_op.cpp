@@ -13,7 +13,7 @@ class RayleighOperatorTest : public ::testing::Test {
 protected:
 
 // mesh and solver instances
-std::shared_ptr<specswd::Mesh> mesh_;
+std::unique_ptr<specswd::Mesh> mesh_;
 std::unique_ptr<specswd::SolverRayl> solver_;
 
     void SetUp() override {
@@ -21,7 +21,7 @@ std::unique_ptr<specswd::SolverRayl> solver_;
         GQTable::initialize();
 
         // Initialize a simple mesh for testing
-        mesh_ = std::make_shared<specswd::Mesh>();
+        mesh_ = std::make_unique<specswd::Mesh>();
         mesh_->SWD_TYPE = 1; // Rayleigh wave
 
         // 5 layer model 
@@ -78,7 +78,7 @@ TEST_F(RayleighOperatorTest, CHECK_OP_CORRECTNESS) {
 
     // Test building the solver with the mesh
     solver_ = std::make_unique<specswd::SolverRayl>();
-    solver_->build(mesh_);
+    solver_->build(mesh_.get());
 
     // define a intermediate frequency and angle
     real_t test_freq = 1. / 10.; // 100s period

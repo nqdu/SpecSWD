@@ -2,8 +2,8 @@
 #define SPECSWD_LIB_UTILS_H_
 
 #include "numerical.hpp"
-
 using specswd::real_t;
+using specswd::complex_t;
 
 #ifdef __cplusplus
 extern "C" {

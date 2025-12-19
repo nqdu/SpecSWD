@@ -17,10 +17,10 @@ specswd_init_GQTable() {
 // global vars for solver/mesh
 namespace specswd_pylib
 {
-std::shared_ptr<specswd::Mesh> mesh_ptr;
-std::shared_ptr<specswd::SolverLove> love_ptr;
-std::shared_ptr<specswd::SolverRayl> rayl_ptr;
-std::shared_ptr<specswd::SolverAniso> aniso_ptr;
+std::unique_ptr<specswd::Mesh> mesh_ptr;
+std::unique_ptr<specswd::SolverLove> love_ptr;
+std::unique_ptr<specswd::SolverRayl> rayl_ptr;
+std::unique_ptr<specswd::SolverAniso> aniso_ptr;
 }
 
 /**

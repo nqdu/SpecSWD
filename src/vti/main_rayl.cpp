@@ -21,7 +21,7 @@ int main (int argc, char **argv){
 
     // read mesh 
     const char *filename = argv[1];
-    std::shared_ptr<specswd::Mesh> mesh = std::make_shared<specswd::Mesh>();
+    auto mesh = std::make_unique<specswd::Mesh>();
     mesh->read_model(filename);
     mesh->create_model_attributes();
     int nz = mesh->nz_tomo;
@@ -70,7 +70,7 @@ int main (int argc, char **argv){
 
     // create solver
     auto sol = std::make_unique<specswd::SolverRayl>();
-    sol->build(mesh);
+    sol->build(mesh.get());
 
     // write meta data int database
     using specswd::write_binary_f;

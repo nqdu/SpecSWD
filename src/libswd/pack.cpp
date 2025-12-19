@@ -42,8 +42,8 @@ specswd_init_mesh_love(
 
     // create solver 
     love_ptr.reset();
-    love_ptr = std::make_shared<specswd::SolverLove>();
-    love_ptr->build(mesh_ptr);
+    love_ptr = std::make_unique<specswd::SolverLove>();
+    love_ptr->build(mesh_ptr.get());
 }
 
 static void 
@@ -80,8 +80,8 @@ specswd_init_mesh_rayl(
 
     // create solver 
     rayl_ptr.reset();
-    rayl_ptr = std::make_shared<specswd::SolverRayl>();
-    rayl_ptr -> build(mesh_ptr);
+    rayl_ptr = std::make_unique<specswd::SolverRayl>();
+    rayl_ptr -> build(mesh_ptr.get());
 }
 
 
@@ -118,8 +118,8 @@ specswd_init_mesh_aniso(
 
     // create solver 
     aniso_ptr.reset();
-    aniso_ptr =  std::make_shared<specswd::SolverAniso>();
-    aniso_ptr->build(mesh_ptr);
+    aniso_ptr =  std::make_unique<specswd::SolverAniso>();
+    aniso_ptr->build(mesh_ptr.get());
 }
 
 /**
@@ -162,7 +162,7 @@ specswd_init_mesh(
 
     // create mesh pointer
     mesh_ptr.reset();
-    mesh_ptr = std::make_shared<specswd::Mesh>();
+    mesh_ptr = std::make_unique<specswd::Mesh>();
     mesh_ptr->SCALE_DENSITY = scale_rho;
     mesh_ptr->SCALE_VELOCITY = scale_v;
     mesh_ptr->SCALE_LENGTH = scale_z;

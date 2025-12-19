@@ -59,19 +59,17 @@ public:
     ) const;
 
     // set mesh
-    void build(std::shared_ptr<Mesh> mesh);
     SolverLove() = default;
     ~SolverLove() = default;
+    void build(const Mesh *mesh);
 
 private:
     
     // mesh class
-    std::shared_ptr<Mesh> mesh_;
+    const Mesh *mesh_;
 
     // QZ matrix all are column major
     std::vector<complex_t> Qmat,Zmat,Smat,Spmat; // column major!
-
-
 
     void prepare_adjoint_(
         int imode,
@@ -175,13 +173,13 @@ public:
         complex_t * __restrict displ
     ) const;
 
-    void build(std::shared_ptr<Mesh> mesh);
+    void build(const Mesh *mesh);
     SolverRayl() = default;
     ~SolverRayl() = default;
 
 private:
     // mesh class
-    std::shared_ptr<Mesh> mesh_;
+    const Mesh *mesh_;
 
     // QZ matrix all are column major
     std::vector<complex_t> Qmat,Zmat,Smat,Spmat; // column major!

@@ -60,13 +60,15 @@ frechet_op(
         constexpr int NGL = ConstNGL;
         std::array<complex_t,NGL> rW, lW;
 
+        auto &ibool_el = Me.ibool_el;
+
         for(int ispec = starid; ispec < endid; ispec ++) {
             int id = ispec * NGLL;
             real_t J = Me.jacodet[ispec];
 
             // cache temporary arrays
             for(int i = 0; i < NGL; i ++) {
-                int iglob = Me.ibool_el[id + i];
+                int iglob = ibool_el[id + i];
                 rW[i] = x[iglob];
                 lW[i] = std::conj(y[iglob]);
             }

@@ -12,10 +12,10 @@
 namespace specswd_pylib
 {
 
-extern std::shared_ptr<specswd::Mesh> mesh_ptr;
-extern std::shared_ptr<specswd::SolverLove> love_ptr;
-extern std::shared_ptr<specswd::SolverRayl> rayl_ptr;
-extern std::shared_ptr<specswd::SolverAniso> aniso_ptr;
+extern std::unique_ptr<specswd::Mesh> mesh_ptr;
+extern std::unique_ptr<specswd::SolverLove> love_ptr;
+extern std::unique_ptr<specswd::SolverRayl> rayl_ptr;
+extern std::unique_ptr<specswd::SolverAniso> aniso_ptr;
 
 } // namespace specswd_pylib
 

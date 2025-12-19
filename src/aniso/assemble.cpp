@@ -14,7 +14,7 @@ namespace specswd
  * @param mesh mesh class
  */
 void SolverAniso::
-build(std::shared_ptr<Mesh> mesh)
+build(const Mesh *mesh)
 {
     // set value
     mesh_ = mesh;

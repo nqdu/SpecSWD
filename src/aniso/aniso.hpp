@@ -70,7 +70,7 @@ public:
         complex_t * __restrict displ
     ) const;
 
-    void build(std::shared_ptr<Mesh> mesh);
+    void build(const Mesh *mesh);
 
     SolverAniso() = default;
     ~SolverAniso() = default;
@@ -78,7 +78,7 @@ public:
 
 private:
     // mesh class
-    std::shared_ptr<Mesh> mesh_;
+    const Mesh *mesh_;
 
     // derivative matrix
     std::vector<real_t> dwdEmat; // dE / dw , shape(ndof,ndof)
