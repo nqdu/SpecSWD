@@ -114,15 +114,16 @@ def compute_database(freqs:np.ndarray,kltype:int,z:np.ndarray,
     fio = h5py.File("kernels.h5","w")
     fio.create_group("swd/")
     fio.attrs['HAS_ATT'] = has_att
+    fio.attrs['kernel_type'] = kltype
     fio.create_group("kernels/")
 
     # kl names
+    kl_name = ws.get_kernel_names()
     if has_att:
         dname = ['C','Q']
-        kl_name = ['vph','vpv','vsv','eta','Qvph','Qvpv','Qvsv','vp','Qvp','rho']
+        
     else:
         dname = ['C']
-        kl_name = ['vph','vpv','vsv','eta','vp','rho']
 
     # save period vector
     T = 1. / freqs 
@@ -134,6 +135,7 @@ def compute_database(freqs:np.ndarray,kltype:int,z:np.ndarray,
     max_m = -1
     for it in range(nt):
         c = ws.compute_egn(freqs[it],0.,only_phase=False)
+        u0 = ws.group_velocity()
 
         # save coordinates
         z = ws.get_znodes()
@@ -159,7 +161,7 @@ def compute_database(freqs:np.ndarray,kltype:int,z:np.ndarray,
                     fio.create_dataset(f"{gname}/uQ",shape=(nt,),dtype='f4',fillvalue=0.)
 
             # save c/u
-            u = ws.group_velocity(imode)
+            u = u0[imode]
             fio[f"{gname}/T"][it] = T[it]
             if not has_att:
                 fio[f"{gname}/c"][it] = c[imode]

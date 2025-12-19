@@ -2,27 +2,45 @@
 #ifndef SPECSWD_ATT_TABLE_H_
 #define SPECSWD_ATT_TABLE_H_
 
-#include <complex>
+#include "numerical.hpp"
 
 namespace specswd
 {
     
 const int NSLS = 5;
 
-std::complex<float> get_sls_modulus_factor(float freq,float Q);
+complex_t get_sls_modulus_factor(real_t freq,real_t Q);
 void 
-get_sls_Q_derivative(float freq,float Qm,std::complex<float> &s,
-                    std::complex<float> &dsdqi);
+get_sls_Q_derivative(real_t freq,real_t Qm,complex_t &s,
+                    complex_t &dsdqi);
 
 void 
 reset_ref_Q_model(const double *w_sls, const double *y_sls);
 
 
 void
-get_fQ_kl(int npts,std::complex<float> f_cmplx,
-          const float *frekl_r,
-          float *__restrict frekl_i);
+get_fQ_kl(size_t npts, complex_t f_cmplx,
+          const real_t *frekl_r,
+          real_t *__restrict frekl_i);
 
-}
+void 
+get_cmplx_c21(
+    real_t freq,const real_t *Qm,
+    complex_t * __restrict c21,
+    int nQani,int Qani_funcid
+);
+
+void 
+get_cmplx_c21_deriv(
+    real_t freq,
+    const real_t *Qm,
+    int nQani,
+    int Qani_funcid,
+    const real_t *C21,
+    complex_t * __restrict dCC21_dc,
+    complex_t * __restrict dCC21_dQi
+);
+
+} // namespace specswd
 
 #endif

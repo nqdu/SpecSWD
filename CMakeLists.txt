@@ -15,7 +15,7 @@ set(CMAKE_CXX_FLAGS             ${CXXFLAGS})
 set(EIGEN_INC                 ${EIGEN_INC})
 
 option(BUILD_LIBS "BUILD_LIBS" OFF)
-
+option(BUILD_TESTS "BUILD_TESTS" ON)
 
 # set default values
 macro(setDefault var val)
@@ -23,10 +23,10 @@ if(NOT DEFINED ${var})
 set(${var} ${val})
 endif()
 endmacro()
-setDefault(EIGEN_INC   "~/software/eigen-3.4.0")
+setDefault(EIGEN_INC   "~/software/eigen-5.0.0")
 
 # project
-project(SWDTTI LANGUAGES CXX Fortran)
+project(specswd LANGUAGES CXX Fortran)
 
 # build type 
 set(CMAKE_BUILD_TYPE RELEASE)
@@ -50,7 +50,7 @@ else ()
   #set(CMAKE_CXX_FLAGS_RELEASE  "-O0 -D_GLIBCXX_DEBUG")
 endif()
 
-set(CMAKE_VERBOSE_MAKEFILE on)
+set(CMAKE_VERBOSE_MAKEFILE off)
 
 ################# find packages #################
 # eigen
@@ -69,16 +69,32 @@ if (OPENMP_FOUND)
     include_directories(${OpenMP_CXX_INCLUDE_DIRS})
 endif()
 
+# google test if required
+if(BUILD_TESTS)
+  include(FetchContent)
+  enable_testing()
+  set(INSTALL_GTEST OFF CACHE BOOL "Disable installation rules for GTest." FORCE)
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        main 
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/external/googletest 
+  )
+  FetchContent_MakeAvailable(googletest)
+endif()
+
 ################# include paths #################
 include_directories(${PROJECT_SOURCE_DIR}/src)
-#include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/include)
 
 # subs
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/shared)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/mesh)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/vti)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/aniso)
-# add_subdirectory(${PROJECT_SOURCE_DIR}/src/multiphysics)
+if(BUILD_TESTS)
+  add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
+endif()
 
 # check build libraries
 if(BUILD_LIBS) 

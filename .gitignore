@@ -34,6 +34,7 @@
 /lib/
 /CMakeFiles/
 /cmake-build-*/
+/external/
 
 /EXAMPLES/*/OUTPUT_FILES/
 
@@ -45,6 +46,12 @@ cmake_install.cmake
 CTestTestfile.cmake
 install_manifest.txt
 
+# python cache files
+__pycache__/
+*.pyo
+*.pyd
+*.egg-info/
+
 # IDE files
 *.swp
 *.swo
@@ -52,7 +59,7 @@ install_manifest.txt
 *.workspace
 *.project
 *.idea/
-.vscode/
+#.vscode/
 
 # Logs
 *.log

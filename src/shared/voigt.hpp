@@ -1,10 +1,11 @@
 #ifndef SPECSWD_VOIGT_H_
 #define SPECSWD_VOIGT_H_
 
+
 namespace specswd
 {
 
-const int _VOIGT_LOOKUP[3][3] = {
+constexpr int _VOIGT_LOOKUP[3][3] = {
     {0, 5, 4},
     {5, 1, 3},
     {4, 3, 2}

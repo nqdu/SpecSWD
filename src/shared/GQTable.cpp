@@ -15,10 +15,10 @@ double laguerre_func(size_t n, double x);
 namespace GQTable
 {
 
-std::array<float,NGLL> xgll,wgll;
-std::array<float,NGRL> xgrl,wgrl;
-std::array<float,NGLL*NGLL> hprimeT,hprime; // hprimeT(i,j) = l'_i(xi_j)
-std::array<float,NGRL*NGRL> hprimeT_grl,hprime_grl;
+std::array<double,NGLL> xgll,wgll;
+std::array<double,NGRL> xgrl,wgrl;
+std::array<double,NGLL*NGLL> hprimeT,hprime; // hprimeT(i,j) = l'_i(xi_j)
+std::array<double,NGRL*NGRL> hprimeT_grl,hprime_grl;
 
 /**
  * @brief initialize GLL/GRL nodes/weights

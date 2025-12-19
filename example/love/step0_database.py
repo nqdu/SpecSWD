@@ -21,7 +21,7 @@ def compute_database(model:np.ndarray,freqs:np.ndarray,kltype:int):
     fio.create_group("swd/")
     fio.attrs['HAS_ATT'] = False
 
-    kl_name = ['vsh','vsv','rho']
+    kl_name = ws.get_kernel_names()
 
     # save period vector
     T = 1. / freqs 
@@ -32,7 +32,7 @@ def compute_database(model:np.ndarray,freqs:np.ndarray,kltype:int):
     # compute phase velocity,group velocity
     for it in range(nt):
         c = ws.compute_egn(freqs[it],0.,only_phase=False)
-        u = c * 0.
+        u = ws.group_velocity()
 
         # create 
         max_mode = len(c)
@@ -45,12 +45,11 @@ def compute_database(model:np.ndarray,freqs:np.ndarray,kltype:int):
                 fio.create_dataset(f"{gname}/u",shape=(nt,),dtype='f4',fillvalue=0.)
 
             # save c/u
-            u = ws.group_velocity(imode)
             fio[f"{gname}/T"][it] = T[it]
             fio[f"{gname}/c"][it] = c[imode]
-            fio[f"{gname}/u"][it] = u
-            if np.isnan(u):
-                print(T[it],imode,c[imode],u)
+            fio[f"{gname}/u"][it] = u[imode]
+            if np.isnan(u[imode]):
+                print(T[it],imode,c[imode],u[imode])
 
             # compute kernels
             if kltype == 0:
@@ -84,7 +83,7 @@ def compute_database_att(model:np.ndarray,freqs:np.ndarray,kltype:int):
     fio.create_group("swd/")
     fio.attrs['HAS_ATT'] = True
 
-    kl_name = ['vsh','vsv','Qvsh','Qvsv','rho']
+    kl_name = ws.get_kernel_names()
 
     # save period vector
     T = 1. / freqs 
@@ -95,7 +94,7 @@ def compute_database_att(model:np.ndarray,freqs:np.ndarray,kltype:int):
     # compute phase velocity,group velocity
     for it in range(nt):
         c = ws.compute_egn(freqs[it],0.,only_phase=False)
-        u = c * 0.
+        u = ws.group_velocity()
 
         # create 
         max_mode = len(c)
@@ -110,12 +109,11 @@ def compute_database_att(model:np.ndarray,freqs:np.ndarray,kltype:int):
                 fio.create_dataset(f"{gname}/uQ",shape=(nt,),dtype='f4',fillvalue=0.)
 
             # save c/u
-            u = ws.group_velocity(imode)
             fio[f"{gname}/T"][it] = T[it]
             fio[f"{gname}/c"][it] = np.real(c[imode])
             fio[f"{gname}/cQ"][it] = 0.5 * c[imode].real / c[imode].imag
-            fio[f"{gname}/u"][it] = u.real
-            fio[f"{gname}/uQ"][it] = 0.5 * u.real / u.imag
+            fio[f"{gname}/u"][it] = u[imode].real
+            fio[f"{gname}/uQ"][it] = 0.5 * u[imode].real / u[imode].imag
 
             # compute kernels
             if kltype == 0:

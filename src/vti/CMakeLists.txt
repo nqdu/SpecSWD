@@ -1,5 +1,6 @@
 file(GLOB SOURCE "*.cpp" )
-list(FILTER SOURCE EXCLUDE REGEX "main*.cpp")
+list(FILTER SOURCE EXCLUDE REGEX "main_love.cpp")
+list(FILTER SOURCE EXCLUDE REGEX "main_rayl.cpp")
 
 add_library(vti ${SOURCE})
 
