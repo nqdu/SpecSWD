@@ -1,22 +1,36 @@
+#include <Eigen/Dense>
 
 #include <cmath>
 #include <vector>
-#include <unsupported/Eigen/Polynomials>
 
 /**
- * @brief Laguerre polynomials coefs
+ * @brief compute gauss integration knots and weights for orthogonal polynomials using the Golub-Welsch algorithm: 
+ *           x L_n(x) = beta_n L_{n+1}(x) + alpha_n L_n(x) + beta_{n-1} L_{n-1}(x)
+ * @param n number of knots and weights
+ * @param xgl output array for knots, shape(n)
+ * @param wgl output array for weights, shape(n)
+ * @param alpha alpha coefs for orthogonal polynomials, shape(n+1)
+ * @param beta beta coefs for orthogonal polynomials, shape(n-1)
+ * @param mu0 the zero-th moment of the weight function, i.e., \int w(x) dx
  * 
- * @param p order of polynomails
- * @param coefs shape(p+1)  P_n(x) = sum_{i=0}^p coefs[i] * x^i
  */
-static void
-laguerre_poly(double *coefs,size_t p) {
-    for(size_t k = 0; k <=p; k ++) {
-        double s = 1.;
-        for(size_t i = 0; i< k; i ++ ){
-            s *= (p - i + 0.0) / std::pow((k * 1. - i),2);
+static void 
+golub_welsch(const double *alpha, const double *beta, double *xgl, double *wgl, double mu0, size_t n) {
+    Eigen::MatrixXd J = Eigen::MatrixXd::Zero(n,n);
+    for(size_t i = 0; i < n; i ++) {
+        J(i,i) = alpha[i];
+        if (i > 0) {
+            J(i,i-1) = beta[i-1];
+            J(i-1,i) = beta[i-1];
         }
-        coefs[k] = s * std::pow(-1,k);;
+    }
+    Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> es(n);
+    es.compute(J);
+    Eigen::VectorXd x = es.eigenvalues();
+    Eigen::MatrixXd V = es.eigenvectors();
+    for(size_t i = 0; i < n; i ++) {
+        xgl[i] = x(i);
+        wgl[i] = mu0 * std::pow(V(0,i),2);
     }
 }
 
@@ -28,76 +42,44 @@ laguerre_poly(double *coefs,size_t p) {
  */
 double
 laguerre_func(size_t n, double x) {
-    std::vector<double> coefs(n+1);
-    laguerre_poly(coefs.data(),n);
-    double s = 0.;
-    double x0 = 1.;
-    for(size_t i = 0; i < n + 1; i ++) {
-        s += x0 * coefs[i];
-        x0 *= x;
-    }
-    s = s * std::exp(-x * 0.5);
-
-    return s;
+    return std::laguerre(n,x) * std::exp(-x/2.);
 }
 
 /**
  * @brief compute gauss radau laguerre knots and weights
  * 
- * @param xgrl 
- * @param wgrl 
+ * @param xgrl output array for knots, shape(length)
+ * @param wgrl output array for weights, shape(length)
  * @param length size of xgrl
- * @warning length should <= 30
  */
 void gauss_radau_laguerre(double *xgrl,double *wgrl,size_t length) 
 {
-    // special length
-    if (length == 20) {
-        double  xx[20] = {0.,                  0.1836651730961082,  0.6168163821266257,
-                1.3007994029666046,  2.239949399008818,   3.4404719428812083,
-                4.910645879674723,   6.661160612058037,   8.70559717712797,
-                11.061108683576073,  13.74939412009166,   16.798123005945243,
-                20.243084963302437,  24.131567267602627,  28.527947971314145,
-                33.52361761728886,   39.25629429078257,   45.95295064863841,
-                54.047093024701944,  64.64971243781604};
-       double ww[20] = {
-            0.05               , 0.3087051288288945  ,0.5579967647079931,
-            0.8106921971976067 , 1.068638425565268   ,1.333780906686964,
-            1.608340646098338  , 1.8949411986015714  ,2.1967749086342163,
-            2.5178414711577393 , 2.863306272240217   ,3.240062283392964,
-            3.6576540837679574 , 4.129885111104641   ,4.677813187132266,
-            5.335849599667416  , 6.165741520073857   ,7.294555062758996,
-            9.049660483553179  ,12.76854717545136};
-
-        for(size_t i = 0; i < length; i ++) {
-            xgrl[i] = xx[i];
-            wgrl[i] = ww[i];
-        }
-
-        return;
+    if(length <  2) {
+        printf("length should be >= 2\n");
+        exit(1);
     }
-    
+
+    // compute golub-welsch for n = length - 1, and then add the end point 0
     size_t n = length - 1;
-    std::vector<double> coefs(n+2),coefs_deriv(n+1);
-    laguerre_poly(coefs.data(),n+1); // l_{n+1}(x)
-
-    // derivative l_{n+1}'(x)
-    for(size_t i = 0; i < n+1 ;i ++) {
-        coefs_deriv[i] =  (double)(i + 1) * coefs[i+1];
-    }
-
-    // construct a polynomial
-    Eigen::PolynomialSolver<double,-1> sol;
-    Eigen::Map<Eigen::VectorXd> poly(coefs_deriv.data(),n+1);
-    sol.compute(poly);
-    Eigen::VectorXd z = sol.roots().real();
-    std::sort(z.begin(),z.end());
-
     xgrl[0] = 0.;
-    for(size_t i = 0; i < n; i ++ ) {
-        xgrl[i+1] = z[i];
+    wgrl[0] = 1. / (n + 1.); // the end point has weight 1/n
+    std::vector<double> alpha(n);
+    std::vector<double> beta(n-1);
+    for(size_t i = 0; i < n; i ++) {
+        alpha[i] = 2. * i + 2; 
+
+        if(i < n - 1) {
+            double fac = (i + 1.) * (i + 2.);
+            beta[i] = std::sqrt(fac);
+        }
     }
-    for(size_t i = 0; i < n + 1; i ++) {
-        wgrl[i] = 1. / (n + 1) / std::pow(laguerre_func(n,xgrl[i]),2);
+
+    // the weight function is w(x) = x * exp(-x), so the zero-th moment is mu0 = \int_0^\infty x * exp(-x) dx = 1
+    double mu0 = 1.;
+    golub_welsch(alpha.data(), beta.data(), xgrl + 1, wgrl + 1, mu0, n);
+
+    // we don't believe the weights from golub-welsch are accurate enough, so we recompute the weights using the formula w_i = mu0 / (L'_{n+1}(x_i) * L_n(x_i)) = 1 / ((n + 1) * L_n(x_i)^2)
+    for(size_t i = 1; i < n + 1; i ++) {
+        wgrl[i] = 1. /((n +1.) * std::pow(laguerre_func(n,xgrl[i]),2));
     }
 }

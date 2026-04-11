@@ -1,16 +1,14 @@
-add_executable(unit_tests
-    unit_tests/test_love_op.cpp 
-    unit_tests/test_rayl_op.cpp
-    unit_tests/test_aniso_op.cpp
-    unit_tests/test_att_aniso.cpp 
+set(UNIT_TESTS
+    love_op
+    rayl_op
+    aniso_op
+    att_aniso
+    gqtable
 )
 
-target_link_libraries(
-    unit_tests  aniso vti mesh shared 
-    ${LAPACKE_LIBRARIES} GTest::gtest_main
-)
-
-add_test(
-    NAME unit_tests
-    COMMAND unit_tests
-)
+foreach(TEST_NAME ${UNIT_TESTS})
+    add_executable(${TEST_NAME} unit_tests/${TEST_NAME}.cpp)
+    target_link_libraries(${TEST_NAME} aniso vti mesh shared
+        ${LAPACKE_LIBRARIES} GTest::gtest_main)
+    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+endforeach()

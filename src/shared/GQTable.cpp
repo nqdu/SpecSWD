@@ -29,7 +29,7 @@ void initialize()
 
     // CHECK NGLL and NGRL range 
     static_assert(NGLL >=5 && NGLL <= 10,"Best NGLL range is [5,10]");
-    static_assert(NGRL >=15 && NGLL <= 30,"Best NGRL range is [15,30]");
+    static_assert(NGRL >=15 && NGRL <= 30,"Best NGRL range is [15,30]");
 
     // GLL nodes/weights
     std::array<double,NGRL> x_temp,w_temp;
