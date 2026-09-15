@@ -1,202 +1,184 @@
 #include "vti/vti.hpp"
-#include "shared/iofunc.hpp"
 #include "shared/GQTable.hpp"
+#include "shared/io.hpp"
 
-#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
 #include <filesystem>
+#include <iostream>
 #include <memory>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
+namespace
+{
 
-int main (int argc, char **argv){
-    // read model name
-    if(argc != 5 &&  argc != 6) {
-        printf("Usage: ./surflove modelfile f1 f2 nt [KERNEL_TYPE = 0]\n");
-        printf("freqs = logspace(log10(f1),log10(f2),nt)\n");
-        exit(1);
+using specswd::Complex;
+using specswd::Real;
+
+std::vector<Real> logarithmic_frequencies(Real first, Real last, int count)
+{
+    if(!std::isfinite(first) || !std::isfinite(last) || first<=0. || last<=0.) {
+        throw std::invalid_argument("frequencies must be finite and positive");
     }
-
-    // initialize GLL
-    GQTable:: initialize();
-    using specswd::real_t;
-
-    // read mesh 
-    const char *filename = argv[1];
-    auto mesh = std::make_unique<specswd::Mesh>();
-    mesh->read_model(filename);
-    mesh->create_model_attributes();
-    int nz = mesh->nz_tomo;
-    // check if it's love wave
-    if(mesh->SWD_TYPE != 0) {
-        printf("THis module can only handle love wave!\n");
-        exit(1);
+    if(count<=0) throw std::invalid_argument("nt must be positive");
+    if(first>last) std::swap(first,last);
+    std::vector<Real> values(static_cast<std::size_t>(count));
+    const Real start = std::log10(first);
+    const Real stop = std::log10(last);
+    const Real denominator = count==1 ? 1. : static_cast<Real>(count-1);
+    for(int i=0;i<count;++i) {
+        values[static_cast<std::size_t>(i)] =
+            std::pow(10.,start+(stop-start)*i/denominator);
     }
+    return values;
+}
 
-    // print info to debug
-    mesh->print_model();
-
-    // Period
-    int nt;
-    float f1,f2;
-    sscanf(argv[2],"%g",&f1); sscanf(argv[3],"%g",&f2);
-    sscanf(argv[4],"%d",&nt);
-    f1 = std::log10(f1); f2 = std::log10(f2);
-    if(f1 > f2) std::swap(f1,f2);
-    std::vector<double> freq(nt);
-    for(int it = 0; it < nt; it ++) {
-        double coef = (nt - 1);
-        if(coef == 0.) coef = 1.;
-        coef = 1. / coef;
-        double f = f1 + (f2 - f1) * coef * it;
-        freq[it] = std::pow(10,f);
+void append_physical_depth(
+    specswd::io::SolverOutput &output,
+    const specswd::Mesh &mesh
+)
+{
+    for(const Real depth:mesh.znodes) {
+        output.sem_depth_values.push_back(depth*mesh.SCALE_LENGTH);
     }
+    output.sem_depth_indptr.push_back(output.sem_depth_values.size());
+}
 
-    int KERNEL_TYPE = 1;
-    if(argc == 6) {
-        sscanf(argv[5],"%d",&KERNEL_TYPE);
+void append_eigenfunction(
+    specswd::io::RaggedComplexField &field,
+    const std::vector<Complex> &values
+)
+{
+    field.values.insert(field.values.end(),values.begin(),values.end());
+    field.indptr.push_back(field.npoint());
+}
+
+void append_projected(
+    const specswd::Mesh &mesh,
+    const std::vector<Real> &sem,
+    int nparameter,
+    std::vector<Real> &destination
+)
+{
+    const std::size_t npoint = mesh.ibool_el.size();
+    if(sem.size()!=static_cast<std::size_t>(nparameter)*npoint) {
+        throw std::runtime_error("Love-wave kernel has an inconsistent SEM shape");
     }
-
-    // create output dir
-    if(!std::filesystem::exists("out/"))
-        std::filesystem::create_directory("out/");
-    
-    // open file to write out meta data
-    FILE *fp = fopen("out/swd.txt","w");
-    FILE *fio = fopen("out/database.bin","wb");
-    for(int it = 0; it < nt; it ++) {
-        fprintf(fp,"%g ",1. / freq[it]);
+    const std::size_t offset = destination.size();
+    destination.resize(offset+static_cast<std::size_t>(nparameter)*mesh.nz_tomo);
+    for(int parameter=0;parameter<nparameter;++parameter) {
+        mesh.project_kl(sem.data()+static_cast<std::size_t>(parameter)*npoint,
+                        destination.data()+offset+
+                            static_cast<std::size_t>(parameter)*mesh.nz_tomo);
     }
-    fprintf(fp,"\n");
+}
 
-    // initialize solver
-    auto sol = std::make_unique<specswd::SolverLove>();
-    sol -> build(mesh.get());
+} // namespace
 
-    // write meta data int database
-    using specswd::write_binary_f;
-    int nkers = sol->nkers,ncomp = 1;
-    write_binary_f(fio,&mesh->SWD_TYPE,1);
-    write_binary_f(fio,&mesh->HAS_ATT,1);
-    write_binary_f(fio,&nz,1);
-    write_binary_f(fio,&nkers,1);
-    write_binary_f(fio,&ncomp,1);
-
-    // compute phase velocity for each frequency
-    for(int it = 0; it < nt; it ++) {
-        // create database
-        mesh->create_database(freq[it],0.);
-
-        // write coordinates
-        std::vector<real_t> zcoord = mesh->znodes;
-        for(auto &zz : zcoord) {
-            zz *= mesh->SCALE_LENGTH;
+int main(int argc, char **argv)
+{
+    try {
+        if(argc!=5 && argc!=6) {
+            throw std::invalid_argument(
+                "usage: surflove modelfile f1 f2 nt [KERNEL_TYPE=1]");
         }
-        write_binary_f(fio,zcoord.data(),zcoord.size());
+        GQTable::initialize();
 
-        // prepare all matrices
-        sol -> prepare_matrices();
+        auto mesh = std::make_unique<specswd::Mesh>();
+        mesh->read_model(argv[1]);
+        mesh->create_model_attributes();
+        if(mesh->SWD_TYPE!=0) {
+            throw std::invalid_argument("surflove requires a Love-wave model");
+        }
+        mesh->print_model();
 
-        // compute eigenvalue
-        sol -> compute_egn(true);
+        const auto frequencies = logarithmic_frequencies(
+            std::stod(argv[2]),std::stod(argv[3]),std::stoi(argv[4])
+        );
+        const int kernel_type = argc==6 ? std::stoi(argv[5]):1;
+        if(kernel_type!=0 && kernel_type!=1) {
+            throw std::invalid_argument("KERNEL_TYPE must be 0 (phase) or 1 (group)");
+        }
 
-        // compute group velocity
-        sol-> compute_group_vel();
+        auto solver = std::make_unique<specswd::SolverLove>();
+        solver->build(mesh.get());
 
-        if(!mesh->HAS_ATT) {
-            std::vector<real_t> c,egn,u,frekl,frekl_tmp;
-            std::vector<real_t> frekl_tomo;
-            std::vector<real_t> displ;
-            std::vector<specswd::complex_t> displ_tmp;
+        specswd::io::SolverOutput output;
+        output.wave_type = mesh->SWD_TYPE;
+        output.attenuation = mesh->HAS_ATT;
+        output.kernel_type = kernel_type;
+        output.kernel_observable = kernel_type==0 ?
+            "phase_velocity":"radial_group_velocity";
+        output.dispersion.frequency_hz = frequencies;
+        output.dispersion.azimuth_deg = {0.};
+        output.dispersion.phase_velocity.component_names = {"phase"};
+        output.dispersion.phase_velocity.indptr = {0};
+        output.dispersion.group_velocity.component_names = {"radial"};
+        output.dispersion.group_velocity.indptr = {0};
+        output.sem_depth_indptr = {0};
+        output.eigenfunctions.component_names = {"transverse"};
+        output.eigenfunctions.units = "normalized";
+        output.eigenfunctions.indptr = {0};
+        output.elastic_kernels.parameter_names = {"vsh","vsv","rho"};
+        if(mesh->HAS_ATT) {
+            output.elastic_kernels.parameter_names.insert(
+                output.elastic_kernels.parameter_names.end(),{"Qn","Ql"}
+            );
+        }
+        output.model_depth.reserve(mesh->depth_tomo.size());
+        for(const Real depth:mesh->depth_tomo) {
+            output.model_depth.push_back(depth*mesh->SCALE_LENGTH);
+        }
 
-            // loop over modes
-            int nc = sol->c_phase.size();
-            u.resize(nc);
-            c.resize(nc);
-            for(int ic = 0; ic < nc; ic ++) {
-                real_t temp;
-                sol->get_phase_vel(ic,c[ic],temp);
-                sol->get_group_vel(ic,u[ic],temp);
+        for(const Real frequency:frequencies) {
+            mesh->create_database(frequency,0.);
+            append_physical_depth(output,*mesh);
+            solver->prepare_matrices();
+            solver->compute_egn(true);
+            solver->compute_group_vel();
 
-                sol->compute_kernels(
-                    ic,
-                    KERNEL_TYPE,
-                    frekl,
-                    frekl_tmp // dummy
-                );
+            const int mode_count = static_cast<int>(solver->c_phase.size());
+            for(int mode=0;mode<mode_count;++mode) {
+                Real real{},imag{};
+                solver->get_phase_vel(mode,real,imag);
+                output.dispersion.phase_velocity.mode_index.push_back(mode);
+                output.dispersion.phase_velocity.values.emplace_back(real,imag);
+                solver->get_group_vel(mode,real,imag);
+                output.dispersion.group_velocity.mode_index.push_back(mode);
+                output.dispersion.group_velocity.values.emplace_back(real,imag);
 
-                // write T,c,u,mode
-                fprintf(fp,"%d %g %g %d\n",it,c[ic],u[ic],ic);
+                std::vector<Complex> displacement(mesh->ibool_el.size());
+                solver->egn2displ(mode,displacement.data());
+                append_eigenfunction(output.eigenfunctions,displacement);
 
-                // write displ
-                displ.resize(mesh->ibool_el.size());
-                displ_tmp.resize(displ.size());
-                sol->egn2displ(ic, displ_tmp.data());
-                for(size_t i = 0; i < displ.size(); i ++) {
-                    displ[i] = displ_tmp[i].real();
+                std::vector<Real> velocity_kernel,quality_kernel;
+                solver->compute_kernels(mode,kernel_type,velocity_kernel,
+                                        quality_kernel);
+                append_projected(*mesh,velocity_kernel,solver->nkers,
+                                 output.elastic_kernels.velocity);
+                if(mesh->HAS_ATT) {
+                    append_projected(
+                        *mesh,quality_kernel,solver->nkers,
+                        output.elastic_kernels.propagation_q_inverse
+                    );
                 }
-                write_binary_f(fio,displ.data(),displ.size());
-
-                // project kernels to tomographic grid and write
-                frekl_tomo.resize(nkers*nz);
-                int npts = mesh->ibool_el.size();
-                for(int iker = 0; iker < nkers; iker ++) {
-                    mesh->project_kl(&frekl[iker*npts],&frekl_tomo[iker*nz]);
-                }
-                write_binary_f(fio,frekl_tomo.data(),frekl_tomo.size());
             }
+            output.dispersion.phase_velocity.indptr.push_back(
+                output.dispersion.phase_velocity.mode_index.size());
+            output.dispersion.group_velocity.indptr.push_back(
+                output.dispersion.group_velocity.mode_index.size());
         }
-        else {
-            using specswd::complex_t;
-            std::vector<complex_t> c,egn,legn,u;
-            std::vector<real_t> frekl_c,frekl_q;
-            std::vector<real_t> frekl_tomo;
-            std::vector<complex_t> displ;
 
-            // loop over modes
-            int nc = sol->c_phase.size();
-            u.resize(nc);
-            c.resize(nc);
-            for(int ic = 0; ic < nc; ic ++) {
-                real_t val_r,val_i;
-                sol->get_phase_vel(ic,val_r,val_i);
-                c[ic] = complex_t{val_r,val_i};
-                sol->get_group_vel(ic,val_r,val_i);
-                u[ic] = complex_t{val_r,val_i};
-                sol->compute_kernels(
-                    ic,
-                    KERNEL_TYPE,
-                    frekl_c,
-                    frekl_q
-                );
-
-                // write T,c,u,mode
-                fprintf(fp,"%d %g %g %g %g %d\n",it,c[ic].real(),u[ic].real(),
-                                                c[ic].imag(),u[ic].imag(),ic);
-
-                // write displ
-                displ.resize(mesh->ibool_el.size());
-                sol -> egn2displ(ic,displ.data());
-                write_binary_f(fio,displ.data(),displ.size());
-
-                // write kernels c kernel 
-                frekl_tomo.resize(nkers*nz);
-                int npts = mesh->ibool_el.size();
-                for(int iker = 0; iker < nkers; iker ++) {
-                    mesh->project_kl(&frekl_c[iker*npts],&frekl_tomo[iker*nz]);
-                }
-                write_binary_f(fio,frekl_tomo.data(),frekl_tomo.size());
-
-                // write kernels q kernel
-                for(int iker = 0; iker < nkers; iker ++) {
-                    mesh->project_kl(&frekl_q[iker*npts],&frekl_tomo[iker*nz]);
-                }
-                write_binary_f(fio,frekl_tomo.data(),frekl_tomo.size());
-            }
-        }
+        std::filesystem::create_directories("out");
+        specswd::io::write_hdf5("out/specswd.h5",output);
+        std::cout << "Wrote out/specswd.h5\n";
+        return 0;
     }
-
-    // close file
-    fclose(fio);
-    fclose(fp);
-    
-    return 0;
+    catch(const std::exception &error) {
+        std::cerr << "surflove: " << error.what() << '\n';
+        return 1;
+    }
 }
