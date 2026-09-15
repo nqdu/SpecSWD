@@ -39,13 +39,16 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/readme.html">SpecSWD</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../markdown/readme.html#installation">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../markdown/io.html">NumPy and HDF5 output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/gallery.html">Gallery</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Library API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python API reference</a></li>
 </ul>
 
         </div>
@@ -116,7 +119,7 @@
             <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SpecWorkSpace">
-<a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace">[docs]</a>
+<a class="viewcode-back" href="../../python/specd.html#specd.SpecWorkSpace">[docs]</a>
 <span class="k">class</span> <span class="nc">SpecWorkSpace</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">wavetype</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -129,13 +132,14 @@
         <span class="k">pass</span>
 
 <div class="viewcode-block" id="SpecWorkSpace.initialize">
-<a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.initialize">[docs]</a>
+<a class="viewcode-back" href="../../python/specd.html#specd.SpecWorkSpace.initialize">[docs]</a>
     <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">wavetype</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">z</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">rho</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                 <span class="n">vph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vpv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vsh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vsv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">eta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qa</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Ql</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">c21</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Qani</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">qfunc_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                 <span class="n">scale_rho</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span><span class="n">scale_v</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span><span class="n">scale_z</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
-                <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">reference_frequency</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        initialize working space for SEM</span>
 
@@ -150,7 +154,7 @@
 <span class="sd">        vph/vpv/vsh/vsv: np.ndarray</span>
 <span class="sd">            VTI parameters, shape_like(z)</span>
 <span class="sd">        Qa/Qc/Qn/Ql: np.ndarray</span>
-<span class="sd">            VTI quality factors, shape_like(z)</span>
+<span class="sd">            VTI constant quality factors, shape_like(z)</span>
 <span class="sd">        c21: np.ndarray</span>
 <span class="sd">            21 elastic tensor, shape(21,nz)</span>
 <span class="sd">        nQani: int</span>
@@ -159,6 +163,9 @@
 <span class="sd">            quality factors, shape(nQnai,nz)</span>
 <span class="sd">        disp: bool</span>
 <span class="sd">            if True print model information</span>
+<span class="sd">        reference_frequency: float</span>
+<span class="sd">            frequency in Hz at which the input storage moduli (and therefore</span>
+<span class="sd">            the real input velocities) are defined; default is 1 Hz</span>
 <span class="sd">        </span>
 <span class="sd">        Note</span>
 <span class="sd">        ------------</span>
@@ -172,6 +179,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_use_qz</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nz</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
         <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;love&#39;</span><span class="p">,</span><span class="s1">&#39;rayl&#39;</span><span class="p">,</span><span class="s1">&#39;aniso&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">reference_frequency</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;reference_frequency must be positive&quot;</span><span class="p">)</span>
 
         <span class="c1"># check input models</span>
         <span class="n">_model_sanity_check</span><span class="p">(</span>
@@ -198,7 +207,7 @@
                 <span class="n">ql</span> <span class="o">=</span> <span class="n">Ql</span> 
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="o">==</span> <span class="s1">&#39;rayl&#39;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">Qn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">Qa</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">Qc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Qa</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">Qc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">Ql</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">qa</span> <span class="o">=</span> <span class="n">Qa</span> 
                 <span class="n">qc</span> <span class="o">=</span> <span class="n">Qc</span> 
@@ -231,6 +240,7 @@
             <span class="n">scale_rho</span><span class="o">=</span><span class="n">scale_rho</span><span class="p">,</span>
             <span class="n">scale_v</span><span class="o">=</span><span class="n">scale_v</span><span class="p">,</span>
             <span class="n">scale_z</span><span class="o">=</span><span class="n">scale_z</span><span class="p">,</span>
+            <span class="n">reference_frequency</span><span class="o">=</span><span class="n">reference_frequency</span><span class="p">,</span>
             <span class="n">HAS_ATT</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">,</span>
             <span class="n">Qfunc_id</span><span class="o">=</span><span class="n">qfunc_id</span><span class="p">,</span>
             <span class="n">print_info</span><span class="o">=</span><span class="n">disp</span>
@@ -238,7 +248,7 @@
 
 
 <div class="viewcode-block" id="SpecWorkSpace.compute_egn">
-<a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.compute_egn">[docs]</a>
+<a class="viewcode-back" href="../../python/specd.html#specd.SpecWorkSpace.compute_egn">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_egn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">freq</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">ang_in_deg</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span><span class="n">only_phase</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        compute eigenvalues/eigenvectors</span>
@@ -275,7 +285,7 @@
 
 
 <div class="viewcode-block" id="SpecWorkSpace.group_velocity">
-<a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.group_velocity">[docs]</a>
+<a class="viewcode-back" href="../../python/specd.html#specd.SpecWorkSpace.group_velocity">[docs]</a>
     <span class="k">def</span> <span class="nf">group_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        compute group velocites for each model at current frequency</span>
@@ -283,7 +293,8 @@
 <span class="sd">        Returns</span>
 <span class="sd">        --------</span>
 <span class="sd">        u: float/complex</span>
-<span class="sd">            group velocities at current frequency</span>
+<span class="sd">            group velocities at current frequency. For general anisotropy,</span>
+<span class="sd">            shape is ``(2, nmodes)`` with x and y components by row.</span>
 
 <span class="sd">        Note</span>
 <span class="sd">        ----------</span>
@@ -299,8 +310,58 @@
         <span class="k">return</span> <span class="n">u</span></div>
 
 
+<div class="viewcode-block" id="SpecWorkSpace.compute_dispersion">
+<a class="viewcode-back" href="../../python/specd.html#specd.SpecWorkSpace.compute_dispersion">[docs]</a>
+    <span class="k">def</span> <span class="nf">compute_dispersion</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">frequencies_hz</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+            <span class="n">azimuths_deg</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+            <span class="n">include_group</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute a frequency/azimuth grid as a CSR dispersion table.</span>
+
+<span class="sd">        Mode counts may vary between solve points. Rows use frequency-major,</span>
+<span class="sd">        azimuth-minor order and remain ordinary NumPy arrays.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">.io</span> <span class="kn">import</span> <span class="n">DispersionTable</span>
+
+        <span class="n">frequencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">frequencies_hz</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">azimuths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">azimuths_deg</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">frequencies</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">frequencies</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;frequencies_hz must be a nonempty 1-D array&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">azimuths</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">azimuths</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;azimuths_deg must be a nonempty 1-D array&quot;</span><span class="p">)</span>
+
+        <span class="n">phase_rows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">group_rows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="n">frequencies</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">azimuth</span> <span class="ow">in</span> <span class="n">azimuths</span><span class="p">:</span>
+                <span class="n">phase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_egn</span><span class="p">(</span>
+                    <span class="nb">float</span><span class="p">(</span><span class="n">frequency</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="n">azimuth</span><span class="p">),</span><span class="n">only_phase</span><span class="o">=</span><span class="ow">not</span> <span class="n">include_group</span>
+                <span class="p">)</span>
+                <span class="n">phase_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">include_group</span><span class="p">:</span>
+                    <span class="n">group</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_velocity</span><span class="p">(),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="o">==</span> <span class="s2">&quot;aniso&quot;</span><span class="p">:</span>
+                        <span class="n">group</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">T</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">group</span> <span class="o">=</span> <span class="n">group</span><span class="p">[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+                    <span class="n">group_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="o">==</span> <span class="s2">&quot;aniso&quot;</span><span class="p">:</span>
+            <span class="n">group_components</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">group_components</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;radial&quot;</span><span class="p">,)</span>
+        <span class="k">return</span> <span class="n">DispersionTable</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span>
+            <span class="n">frequencies</span><span class="p">,</span>
+            <span class="n">phase_rows</span><span class="p">,</span>
+            <span class="n">azimuth_deg</span><span class="o">=</span><span class="n">azimuths</span><span class="p">,</span>
+            <span class="n">group_rows</span><span class="o">=</span><span class="n">group_rows</span> <span class="k">if</span> <span class="n">include_group</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">group_components</span><span class="o">=</span><span class="n">group_components</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="SpecWorkSpace.get_kernel_names">
-<a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.get_kernel_names">[docs]</a>
+<a class="viewcode-back" href="../../python/specd.html#specd.SpecWorkSpace.get_kernel_names">[docs]</a>
     <span class="k">def</span> <span class="nf">get_kernel_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        get names for Frechet derivative</span>
@@ -317,7 +378,7 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wavetype</span> <span class="o">==</span> <span class="s2">&quot;rayl&quot;</span><span class="p">:</span>
             <span class="n">kl_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;vph&#39;</span><span class="p">,</span><span class="s1">&#39;vpv&#39;</span><span class="p">,</span><span class="s1">&#39;vsv&#39;</span><span class="p">,</span><span class="s1">&#39;rho&#39;</span><span class="p">,</span><span class="s1">&#39;eta&#39;</span><span class="p">]</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">:</span>
-                <span class="n">kl_name</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;Qa&#39;</span><span class="p">,</span><span class="s1">&#39;Qc&#39;</span><span class="p">,</span><span class="s1">&#39;Qn&#39;</span><span class="p">,</span><span class="s1">&#39;Ql&#39;</span><span class="p">]</span>
+                <span class="n">kl_name</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;Qa&#39;</span><span class="p">,</span><span class="s1">&#39;Qc&#39;</span><span class="p">,</span><span class="s1">&#39;Ql&#39;</span><span class="p">]</span>
             <span class="c1"># acoustic </span>
             <span class="n">kl_name</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;vp_ac&#39;</span><span class="p">,</span><span class="s1">&#39;rho_ac&#39;</span><span class="p">]</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_att</span><span class="p">:</span>
@@ -334,7 +395,7 @@
 
         
 <div class="viewcode-block" id="SpecWorkSpace.get_phase_kl">
-<a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.get_phase_kl">[docs]</a>
+<a class="viewcode-back" href="../../python/specd.html#specd.SpecWorkSpace.get_phase_kl">[docs]</a>
     <span class="k">def</span> <span class="nf">get_phase_kl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">imode</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        compute phase velocity sensitivity kernels for mode {imode}</span>
@@ -363,7 +424,7 @@
 
         
 <div class="viewcode-block" id="SpecWorkSpace.get_group_kl">
-<a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.get_group_kl">[docs]</a>
+<a class="viewcode-back" href="../../python/specd.html#specd.SpecWorkSpace.get_group_kl">[docs]</a>
     <span class="k">def</span> <span class="nf">get_group_kl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">imode</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        compute group velocity sensitivity kernels for mode {imode}</span>
@@ -392,7 +453,7 @@
 
         
 <div class="viewcode-block" id="SpecWorkSpace.get_egnfunc">
-<a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.get_egnfunc">[docs]</a>
+<a class="viewcode-back" href="../../python/specd.html#specd.SpecWorkSpace.get_egnfunc">[docs]</a>
     <span class="k">def</span> <span class="nf">get_egnfunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">imode</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span>
                     <span class="n">return_displ</span><span class="p">:</span><span class="nb">bool</span><span class="p">,</span>
                     <span class="n">return_left</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
@@ -407,8 +468,11 @@
 <span class="sd">            if true, return left eigenvectors</span>
 <span class="sd">            else return right eigenvectors</span>
 <span class="sd">        return_displ: bool</span>
-<span class="sd">            if true return displacement instead of eigenvectors</span>
-<span class="sd">            e.g. in scholte wave, eigenvectors = [u,v^{\bar},chi^{\bar}]</span>
+<span class="sd">            if true, return displacement polarization amplitudes instead of</span>
+<span class="sd">            eigenvectors. For VTI Rayleigh/Scholte waves, the horizontal and</span>
+<span class="sd">            vertical amplitudes retain a real convention; the physical pi/2</span>
+<span class="sd">            phase offset of the vertical component is implicit. For example,</span>
+<span class="sd">            the corresponding eigenvector is [u,v^{\bar},chi^{\bar}].</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">egntp</span> <span class="o">=</span> <span class="n">libswd</span><span class="o">.</span><span class="n">get_egn</span><span class="p">(</span>
                 <span class="n">imode</span><span class="p">,</span>
@@ -422,7 +486,7 @@
 
         
 <div class="viewcode-block" id="SpecWorkSpace.get_znodes">
-<a class="viewcode-back" href="../../python/specd.html#specd.specd.SpecWorkSpace.get_znodes">[docs]</a>
+<a class="viewcode-back" href="../../python/specd.html#specd.SpecWorkSpace.get_znodes">[docs]</a>
     <span class="k">def</span> <span class="nf">get_znodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        get mesh coordiantes, shape(nspec*NGLL+NGRL)</span>
@@ -439,7 +503,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright .</p>
+    <p>&#169; Copyright Nanqiao Du.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

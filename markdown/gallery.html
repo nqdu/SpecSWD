@@ -16,11 +16,13 @@
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Python Library API Reference" href="../python/index.html" />
-    <link rel="prev" title="Tutorial" href="Tutorial.html" /> 
+    <link rel="next" title="Python API reference" href="../python/index.html" />
+    <link rel="prev" title="NumPy and HDF5 output" href="io.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,17 +44,20 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="readme.html">SpecSWD</a></li>
-<li class="toctree-l1"><a class="reference internal" href="readme.html#installation">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="io.html">NumPy and HDF5 output</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Gallery</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#two-layer-love-wave-model">Two layer Love wave Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scholte-wave-example">Scholte Wave example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#two-layer-attenuating-love-wave-model">Two-layer attenuating Love-wave model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coupled-fluid-solid-scholte-wave-model">Coupled fluid/solid Scholte-wave model</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python Library API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python API reference</a></li>
 </ul>
 
         </div>
@@ -79,117 +84,113 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="gallery">
+  <section class="tex2jax_ignore mathjax_ignore" id="gallery">
 <h1>Gallery<a class="headerlink" href="#gallery" title="Link to this heading"></a></h1>
-<section id="two-layer-love-wave-model">
-<h2>Two layer Love wave Model<a class="headerlink" href="#two-layer-love-wave-model" title="Link to this heading"></a></h2>
+<section id="two-layer-attenuating-love-wave-model">
+<h2>Two-layer attenuating Love-wave model<a class="headerlink" href="#two-layer-attenuating-love-wave-model" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Layer Number</p></th>
-<th class="head"><p>h</p></th>
-<th class="head"><p>$\rho$</p></th>
-<th class="head"><p>$\beta_{v}$</p></th>
-<th class="head"><p>$\beta_{h}$</p></th>
-<th class="head"><p>$Q_L$</p></th>
-<th class="head"><p>$Q_N$</p></th>
+<tr class="row-odd"><th class="head text-right"><p>Layer</p></th>
+<th class="head text-right"><p>Thickness (km)</p></th>
+<th class="head text-right"><p><span class="math notranslate nohighlight">\(\rho\)</span> (g/cm³)</p></th>
+<th class="head text-right"><p><span class="math notranslate nohighlight">\(V_{SV}\)</span> (km/s)</p></th>
+<th class="head text-right"><p><span class="math notranslate nohighlight">\(V_{SH}\)</span> (km/s)</p></th>
+<th class="head text-right"><p><span class="math notranslate nohighlight">\(Q_L\)</span></p></th>
+<th class="head text-right"><p><span class="math notranslate nohighlight">\(Q_N\)</span></p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>1</p></td>
-<td><p>35</p></td>
-<td><p>2.8</p></td>
-<td><p>3.0</p></td>
-<td><p>3.3</p></td>
-<td><p>220</p></td>
-<td><p>200</p></td>
+<tr class="row-even"><td class="text-right"><p>1</p></td>
+<td class="text-right"><p>35</p></td>
+<td class="text-right"><p>2.8</p></td>
+<td class="text-right"><p>3.0</p></td>
+<td class="text-right"><p>3.3</p></td>
+<td class="text-right"><p>200</p></td>
+<td class="text-right"><p>220</p></td>
 </tr>
-<tr class="row-odd"><td><p>2</p></td>
-<td><p>$\infty$</p></td>
-<td><p>3.2</p></td>
-<td><p>5.0</p></td>
-<td><p>5.5</p></td>
-<td><p>330</p></td>
-<td><p>300</p></td>
+<tr class="row-odd"><td class="text-right"><p>Half-space</p></td>
+<td class="text-right"><p><span class="math notranslate nohighlight">\(\infty\)</span></p></td>
+<td class="text-right"><p>3.2</p></td>
+<td class="text-right"><p>5.0</p></td>
+<td class="text-right"><p>5.5</p></td>
+<td class="text-right"><p>300</p></td>
+<td class="text-right"><p>330</p></td>
 </tr>
 </tbody>
 </table>
-<p><img alt="image" src="../_images/eigenvalues_att.jpg" />
-<em>Benchmark of phase/group/group Q ith Analytical Solution</em></p>
-<p><img alt="image" src="../_images/phase_deriv_veloc_att.jpg" />
-<em>Benchmark of phase velocity sensitivity kernels ith Analytical Solution</em></p>
-<p><img alt="image" src="../_images/group_deriv_veloc_att.jpg" />
-<em>Benchmark of group velocity sensitivity kernels ith Analytical Solution</em></p>
+<p><img alt="Love-wave dispersion benchmark" src="../_images/eigenvalues_att.jpg" /></p>
+<p>Phase velocity, group velocity, and propagation-Q benchmark against the
+analytical solution.</p>
+<p><img alt="Love-wave phase kernels" src="../_images/phase_deriv_veloc_att.jpg" /></p>
+<p>Phase-velocity sensitivity kernels compared with the analytical solution.</p>
+<p><img alt="Love-wave group kernels" src="../_images/group_deriv_veloc_att.jpg" /></p>
+<p>Group-velocity sensitivity kernels compared with the analytical solution.</p>
 </section>
-<section id="scholte-wave-example">
-<h2>Scholte Wave example<a class="headerlink" href="#scholte-wave-example" title="Link to this heading"></a></h2>
+<section id="coupled-fluid-solid-scholte-wave-model">
+<h2>Coupled fluid/solid Scholte-wave model<a class="headerlink" href="#coupled-fluid-solid-scholte-wave-model" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Layer Number</p></th>
-<th class="head"><p>h</p></th>
-<th class="head"><p>$\rho$</p></th>
-<th class="head"><p>$\alpha$</p></th>
-<th class="head"><p>$\beta$</p></th>
+<tr class="row-odd"><th class="head text-right"><p>Layer</p></th>
+<th class="head text-right"><p>Thickness (km)</p></th>
+<th class="head text-right"><p><span class="math notranslate nohighlight">\(\rho\)</span> (g/cm³)</p></th>
+<th class="head text-right"><p><span class="math notranslate nohighlight">\(V_P\)</span> (km/s)</p></th>
+<th class="head text-right"><p><span class="math notranslate nohighlight">\(V_S\)</span> (km/s)</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>1</p></td>
-<td><p>5</p></td>
-<td><p>1.0</p></td>
-<td><p>1.5</p></td>
-<td><p>0</p></td>
+<tr class="row-even"><td class="text-right"><p>Fluid</p></td>
+<td class="text-right"><p>5</p></td>
+<td class="text-right"><p>1.00</p></td>
+<td class="text-right"><p>1.50</p></td>
+<td class="text-right"><p>0.00</p></td>
 </tr>
-<tr class="row-odd"><td><p>2</p></td>
-<td><p>45</p></td>
-<td><p>2.57</p></td>
-<td><p>5.22</p></td>
-<td><p>3.1</p></td>
+<tr class="row-odd"><td class="text-right"><p>Solid 1</p></td>
+<td class="text-right"><p>45</p></td>
+<td class="text-right"><p>2.57</p></td>
+<td class="text-right"><p>5.22</p></td>
+<td class="text-right"><p>3.10</p></td>
 </tr>
-<tr class="row-even"><td><p>3</p></td>
-<td><p>50</p></td>
-<td><p>2.95</p></td>
-<td><p>6.94</p></td>
-<td><p>4.0</p></td>
+<tr class="row-even"><td class="text-right"><p>Solid 2</p></td>
+<td class="text-right"><p>50</p></td>
+<td class="text-right"><p>2.95</p></td>
+<td class="text-right"><p>6.94</p></td>
+<td class="text-right"><p>4.00</p></td>
 </tr>
-<tr class="row-odd"><td><p>2</p></td>
-<td><p>$\infty$</p></td>
-<td><p>3.57</p></td>
-<td><p>5.0</p></td>
-<td><p>8.75</p></td>
+<tr class="row-odd"><td class="text-right"><p>Half-space</p></td>
+<td class="text-right"><p><span class="math notranslate nohighlight">\(\infty\)</span></p></td>
+<td class="text-right"><p>3.57</p></td>
+<td class="text-right"><p>8.75</p></td>
+<td class="text-right"><p>5.00</p></td>
 </tr>
 </tbody>
 </table>
-<p><img alt="image" src="../_images/eigenvalues.jpg" />
-<em>Benchmark of phase/group/ velocities with CPS330.</em></p>
-<p><img alt="image" src="../_images/eigenvecs.jpg" />
-<em>Normalized eigenfunctions</em></p>
-<p><img alt="image" src="../_images/phase_deriv.jpg" />
-<em>Benchmark of phase velocity derivativates with FD approximation</em></p>
-<p><img alt="image" src="../_images/group_deriv.jpg" />
-<em>Benchmark of group velocity derivativates with FD approximation</em></p>
-<!-- # Gallery
-### Benchmark: SWDTTI with CPS330
-![image](example//rayleigh/phase.jpg)
-### HTI model: Phase velocity vs. Azimuthal angle
-![image](example/tti/group-direc.jpg)
-
-### Fluid-Elastic Coupling phase and group velocity
-![image](example/ac/phase.jpg)
-![image](example/ac/group.jpg)
-### Acoustic  --></section>
+<p><img alt="Scholte-wave dispersion" src="../_images/eigenvalues.jpg" /></p>
+<p>Phase and group velocity benchmark against CPS330.</p>
+<p><img alt="Scholte-wave eigenfunctions" src="../_images/eigenvecs.jpg" /></p>
+<p>Normalized coupled solid displacement and acoustic-potential eigenfunctions.</p>
+<p><img alt="Scholte-wave phase kernels" src="../_images/phase_deriv.jpg" /></p>
+<p>Phase kernels compared with centred finite differences.</p>
+<p><img alt="Scholte-wave group kernels" src="../_images/group_deriv.jpg" /></p>
+<p>Group kernels compared with centred finite differences.</p>
+<p>The test suite also covers attenuating fully anisotropic group velocity,
+radial/x/y group-kernel consistency, and coupled acoustic bulk-modulus group
+kernels. These checks use the same analytic frequency and model derivatives as
+the production solver.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Tutorial.html" class="btn btn-neutral float-left" title="Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../python/index.html" class="btn btn-neutral float-right" title="Python Library API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="io.html" class="btn btn-neutral float-left" title="NumPy and HDF5 output" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../python/index.html" class="btn btn-neutral float-right" title="Python API reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright .</p>
+    <p>&#169; Copyright Nanqiao Du.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

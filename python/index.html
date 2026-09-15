@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Python Library API Reference &mdash; SpecSWD  documentation</title>
+  <title>Python API reference &mdash; SpecSWD  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
@@ -19,7 +19,6 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="specd" href="modules.html" />
     <link rel="prev" title="Gallery" href="../markdown/gallery.html" /> 
 </head>
 
@@ -42,14 +41,111 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../markdown/readme.html">SpecSWD</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown/readme.html#installation">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../markdown/Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown/io.html">NumPy and HDF5 output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../markdown/gallery.html">Gallery</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Python Library API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="modules.html">specd</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Python API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#solver-workspace">Solver workspace</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specd.SpecWorkSpace"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SpecWorkSpace.compute_dispersion"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.compute_dispersion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SpecWorkSpace.compute_egn"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.compute_egn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SpecWorkSpace.get_egnfunc"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.get_egnfunc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SpecWorkSpace.get_group_kl"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.get_group_kl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SpecWorkSpace.get_kernel_names"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.get_kernel_names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SpecWorkSpace.get_phase_kl"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.get_phase_kl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SpecWorkSpace.get_znodes"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.get_znodes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SpecWorkSpace.group_velocity"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.group_velocity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SpecWorkSpace.initialize"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.initialize()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#csr-dispersion-containers">CSR dispersion containers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specd.ComplexCSR"><code class="docutils literal notranslate"><span class="pre">ComplexCSR</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specd.ComplexCSR.component_names"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.component_names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.ComplexCSR.from_rows"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.from_rows()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.ComplexCSR.indptr"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.indptr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.ComplexCSR.mode_index"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.mode_index</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.ComplexCSR.nentry"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.nentry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.ComplexCSR.nrow"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.nrow</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.ComplexCSR.row"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.ComplexCSR.validate"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.ComplexCSR.values"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.values</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#specd.DispersionTable"><code class="docutils literal notranslate"><span class="pre">DispersionTable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specd.DispersionTable.azimuth_deg"><code class="docutils literal notranslate"><span class="pre">DispersionTable.azimuth_deg</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.DispersionTable.frequency_hz"><code class="docutils literal notranslate"><span class="pre">DispersionTable.frequency_hz</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.DispersionTable.from_hdf5"><code class="docutils literal notranslate"><span class="pre">DispersionTable.from_hdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.DispersionTable.from_rows"><code class="docutils literal notranslate"><span class="pre">DispersionTable.from_rows()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.DispersionTable.group_row"><code class="docutils literal notranslate"><span class="pre">DispersionTable.group_row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.DispersionTable.group_velocity"><code class="docutils literal notranslate"><span class="pre">DispersionTable.group_velocity</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.DispersionTable.nsolve"><code class="docutils literal notranslate"><span class="pre">DispersionTable.nsolve</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.DispersionTable.phase_row"><code class="docutils literal notranslate"><span class="pre">DispersionTable.phase_row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.DispersionTable.phase_velocity"><code class="docutils literal notranslate"><span class="pre">DispersionTable.phase_velocity</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.DispersionTable.solve_row"><code class="docutils literal notranslate"><span class="pre">DispersionTable.solve_row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.DispersionTable.to_hdf5"><code class="docutils literal notranslate"><span class="pre">DispersionTable.to_hdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.DispersionTable.validate"><code class="docutils literal notranslate"><span class="pre">DispersionTable.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.DispersionTable.velocity_units"><code class="docutils literal notranslate"><span class="pre">DispersionTable.velocity_units</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#complete-solver-output">Complete solver output</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specd.RaggedComplexField"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specd.RaggedComplexField.component_names"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField.component_names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.RaggedComplexField.indptr"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField.indptr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.RaggedComplexField.nrow"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField.nrow</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.RaggedComplexField.row"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField.row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.RaggedComplexField.units"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField.units</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.RaggedComplexField.validate"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.RaggedComplexField.values"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField.values</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#specd.KernelTable"><code class="docutils literal notranslate"><span class="pre">KernelTable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specd.KernelTable.parameter_names"><code class="docutils literal notranslate"><span class="pre">KernelTable.parameter_names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.KernelTable.propagation_q_inverse"><code class="docutils literal notranslate"><span class="pre">KernelTable.propagation_q_inverse</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.KernelTable.velocity"><code class="docutils literal notranslate"><span class="pre">KernelTable.velocity</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#specd.SolverOutput"><code class="docutils literal notranslate"><span class="pre">SolverOutput</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.acoustic_kernels"><code class="docutils literal notranslate"><span class="pre">SolverOutput.acoustic_kernels</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.attenuation"><code class="docutils literal notranslate"><span class="pre">SolverOutput.attenuation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.dispersion"><code class="docutils literal notranslate"><span class="pre">SolverOutput.dispersion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.eigenfunctions"><code class="docutils literal notranslate"><span class="pre">SolverOutput.eigenfunctions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.elastic_kernels"><code class="docutils literal notranslate"><span class="pre">SolverOutput.elastic_kernels</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.from_hdf5"><code class="docutils literal notranslate"><span class="pre">SolverOutput.from_hdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.kernel_observable"><code class="docutils literal notranslate"><span class="pre">SolverOutput.kernel_observable</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.kernel_type"><code class="docutils literal notranslate"><span class="pre">SolverOutput.kernel_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.model_depth"><code class="docutils literal notranslate"><span class="pre">SolverOutput.model_depth</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.sem_depth_indptr"><code class="docutils literal notranslate"><span class="pre">SolverOutput.sem_depth_indptr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.sem_depth_row"><code class="docutils literal notranslate"><span class="pre">SolverOutput.sem_depth_row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.sem_depth_values"><code class="docutils literal notranslate"><span class="pre">SolverOutput.sem_depth_values</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.to_hdf5"><code class="docutils literal notranslate"><span class="pre">SolverOutput.to_hdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.validate"><code class="docutils literal notranslate"><span class="pre">SolverOutput.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.SolverOutput.wave_type"><code class="docutils literal notranslate"><span class="pre">SolverOutput.wave_type</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#constant-q-helpers">Constant-Q helpers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specd.constant_q_response"><code class="docutils literal notranslate"><span class="pre">constant_q_response()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specd.constant_q_response_derivatives"><code class="docutils literal notranslate"><span class="pre">constant_q_response_derivatives()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#thomson-haskell-comparison-solver">Thomson-Haskell comparison solver</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specd.THSolver"><code class="docutils literal notranslate"><span class="pre">THSolver</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specd.THSolver.compute_swd"><code class="docutils literal notranslate"><span class="pre">THSolver.compute_swd()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -68,7 +164,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Python Library API Reference</li>
+      <li class="breadcrumb-item active">Python API reference</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/python/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -78,40 +174,511 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="python-library-api-reference">
-<h1>Python Library API Reference<a class="headerlink" href="#python-library-api-reference" title="Link to this heading"></a></h1>
-<p>This is the main page for Specd project</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">specd</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="specd.html">specd package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="specd.html#subpackages">Subpackages</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="specd.lib.html">specd.lib package</a></li>
+  <section id="python-api-reference">
+<h1>Python API reference<a class="headerlink" href="#python-api-reference" title="Link to this heading"></a></h1>
+<p>The public Python API uses NumPy arrays throughout. Build and install the
+<code class="docutils literal notranslate"><span class="pre">libswd</span></code> extension before running numerical examples. HDF5 support also
+requires <code class="docutils literal notranslate"><span class="pre">h5py</span></code>.</p>
+<section id="solver-workspace">
+<h2>Solver workspace<a class="headerlink" href="#solver-workspace" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="specd.SpecWorkSpace">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">specd.</span></span><span class="sig-name descname"><span class="pre">SpecWorkSpace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavetype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_att</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SpecWorkSpace" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.SpecWorkSpace.compute_dispersion">
+<span class="sig-name descname"><span class="pre">compute_dispersion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies_hz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azimuths_deg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.compute_dispersion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SpecWorkSpace.compute_dispersion" title="Link to this definition"></a></dt>
+<dd><p>Compute a frequency/azimuth grid as a CSR dispersion table.</p>
+<p>Mode counts may vary between solve points. Rows use frequency-major,
+azimuth-minor order and remain ordinary NumPy arrays.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.SpecWorkSpace.compute_egn">
+<span class="sig-name descname"><span class="pre">compute_egn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ang_in_deg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.compute_egn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SpecWorkSpace.compute_egn" title="Link to this definition"></a></dt>
+<dd><p>compute eigenvalues/eigenvectors</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>freq</strong> (<em>float</em>) – current frequency</p></li>
+<li><p><strong>ang_in_deg</strong> (<em>float</em>) – phase velocity azimuthal angle, in deg</p></li>
+<li><p><strong>only_phase</strong> (<em>bool</em>) – if False, only compute eigenvalues (phase velocities)
+if True, phase velocities and eigenfunctions will be computed</p></li>
 </ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="specd.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="specd.html#module-specd.THSolver">specd.THSolver module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.THSolver.THSolver"><code class="docutils literal notranslate"><span class="pre">THSolver</span></code></a></li>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>c</strong> – phase velocities</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.SpecWorkSpace.get_egnfunc">
+<span class="sig-name descname"><span class="pre">get_egnfunc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_displ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.get_egnfunc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SpecWorkSpace.get_egnfunc" title="Link to this definition"></a></dt>
+<dd><p>get eigenfunctions at current frequency/mode</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imode</strong> (<em>int</em>) – mode number</p></li>
+<li><p><strong>return_left</strong> (<em>bool</em>) – if true, return left eigenvectors
+else return right eigenvectors</p></li>
+<li><p><strong>return_displ</strong> (<em>bool</em>) – if true, return displacement polarization amplitudes instead of
+eigenvectors. For VTI Rayleigh/Scholte waves, the horizontal and
+vertical amplitudes retain a real convention; the physical pi/2
+phase offset of the vertical component is implicit. For example,
+the corresponding eigenvector is [u,v^{ar},chi^{ar}].</p></li>
 </ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="specd.html#module-specd.attenuation">specd.attenuation module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.attenuation.compute_q_sls_model"><code class="docutils literal notranslate"><span class="pre">compute_q_sls_model()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.attenuation.compute_sls_coefs"><code class="docutils literal notranslate"><span class="pre">compute_sls_coefs()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.attenuation.test"><code class="docutils literal notranslate"><span class="pre">test()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.attenuation.y_corrector"><code class="docutils literal notranslate"><span class="pre">y_corrector()</span></code></a></li>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.SpecWorkSpace.get_group_kl">
+<span class="sig-name descname"><span class="pre">get_group_kl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.get_group_kl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SpecWorkSpace.get_group_kl" title="Link to this definition"></a></dt>
+<dd><p>compute group velocity sensitivity kernels for mode {imode}</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>imode</strong> (<em>int</em>) – compute kernels at imode, imode elong [0,max_mode)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>frekl_c</strong> (<em>np.ndarray</em>) – group velocity kernels, shape(nkers,self._nz)</p></li>
+<li><p><strong>frekl_q</strong> (<em>np.ndarray</em>) – group velocity Q kernels,shape(nkers,self._nz), only returns when
+self._has_att = True</p></li>
 </ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="specd.html#module-specd.specd">specd.specd module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.specd.SpecWorkSpace"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace</span></code></a></li>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.SpecWorkSpace.get_kernel_names">
+<span class="sig-name descname"><span class="pre">get_kernel_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.get_kernel_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SpecWorkSpace.get_kernel_names" title="Link to this definition"></a></dt>
+<dd><p>get names for Frechet derivative</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kl_name</strong> – list of kernel names</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.SpecWorkSpace.get_phase_kl">
+<span class="sig-name descname"><span class="pre">get_phase_kl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.get_phase_kl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SpecWorkSpace.get_phase_kl" title="Link to this definition"></a></dt>
+<dd><p>compute phase velocity sensitivity kernels for mode {imode}</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>imode</strong> (<em>int</em>) – compute kernels at imode, imode elong [0,max_mode)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>frekl_c</strong> (<em>np.ndarray</em>) – phase velocity kernels, shape(nkers,self._nz)</p></li>
+<li><p><strong>frekl_q</strong> (<em>np.ndarray</em>) – phase velocity Q kernels,shape(nkers,self._nz), only returns when
+self._has_att = True</p></li>
 </ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="specd.html#module-specd">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.SpecWorkSpace.get_znodes">
+<span class="sig-name descname"><span class="pre">get_znodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.get_znodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SpecWorkSpace.get_znodes" title="Link to this definition"></a></dt>
+<dd><p>get mesh coordiantes, shape(nspec*NGLL+NGRL)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.SpecWorkSpace.group_velocity">
+<span class="sig-name descname"><span class="pre">group_velocity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.group_velocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SpecWorkSpace.group_velocity" title="Link to this definition"></a></dt>
+<dd><p>compute group velocites for each model at current frequency</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>u</strong> – group velocities at current frequency. For general anisotropy,
+shape is <code class="docutils literal notranslate"><span class="pre">(2,</span> <span class="pre">nmodes)</span></code> with x and y components by row.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float/complex</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>before calling this routine, use_qz should be True in self.compute_egn</p>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.SpecWorkSpace.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavetype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vpv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vsh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vsv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qa</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ql</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c21</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qani</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qfunc_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/specd.html#SpecWorkSpace.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SpecWorkSpace.initialize" title="Link to this definition"></a></dt>
+<dd><p>initialize working space for SEM</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wavetype</strong> (<em>str</em>) – wavetype, one of [‘love’,’rayl’,’aniso’]</p></li>
+<li><p><strong>z</strong> (<em>np.ndarray</em>) – depth vector, should include discontinuities at half sapce</p></li>
+<li><p><strong>rho</strong> (<em>np.ndarray</em>) – density, shape_like(z)</p></li>
+<li><p><strong>vph/vpv/vsh/vsv</strong> (<em>np.ndarray</em>) – VTI parameters, shape_like(z)</p></li>
+<li><p><strong>Qa/Qc/Qn/Ql</strong> (<em>np.ndarray</em>) – VTI constant quality factors, shape_like(z)</p></li>
+<li><p><strong>c21</strong> (<em>np.ndarray</em>) – 21 elastic tensor, shape(21,nz)</p></li>
+<li><p><strong>nQani</strong> (<em>int</em>) – no. of Q models for fully anisotropy</p></li>
+<li><p><strong>Qnai</strong> (<em>np.ndarray</em>) – quality factors, shape(nQnai,nz)</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – if True print model information</p></li>
+<li><p><strong>reference_frequency</strong> (<em>float</em>) – frequency in Hz at which the input storage moduli (and therefore
+the real input velocities) are defined; default is 1 Hz</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The input parameters should be carefully chose by user. For
+Love wave, only vsh/vsv/Qsh/Qsv can be enabled, and for
+Rayleigh wave, only vph/vpv/vsv can ve enabled, and
+other params are for full anisotropy</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="csr-dispersion-containers">
+<h2>CSR dispersion containers<a class="headerlink" href="#csr-dispersion-containers" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="specd.ComplexCSR">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">specd.</span></span><span class="sig-name descname"><span class="pre">ComplexCSR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indptr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/io.html#ComplexCSR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.ComplexCSR" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Complex CSR rows indexed by solve point and local mode number.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.ComplexCSR.component_names">
+<span class="sig-name descname"><span class="pre">component_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#specd.ComplexCSR.component_names" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.ComplexCSR.from_rows">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="specd.html#specd.io.ComplexCSR" title="specd.io.ComplexCSR"><span class="pre">ComplexCSR</span></a></span></span><a class="reference internal" href="../_modules/specd/io.html#ComplexCSR.from_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.ComplexCSR.from_rows" title="Link to this definition"></a></dt>
+<dd><p>Pack variable-length NumPy rows into a CSR container.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.ComplexCSR.indptr">
+<span class="sig-name descname"><span class="pre">indptr</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></span><a class="headerlink" href="#specd.ComplexCSR.indptr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.ComplexCSR.mode_index">
+<span class="sig-name descname"><span class="pre">mode_index</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></span><a class="headerlink" href="#specd.ComplexCSR.mode_index" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="specd.ComplexCSR.nentry">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">nentry</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#specd.ComplexCSR.nentry" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="specd.ComplexCSR.nrow">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">nrow</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#specd.ComplexCSR.nrow" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.ComplexCSR.row">
+<span class="sig-name descname"><span class="pre">row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/specd/io.html#ComplexCSR.row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.ComplexCSR.row" title="Link to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">(mode_index,</span> <span class="pre">values)</span></code> as zero-copy NumPy views.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.ComplexCSR.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nrow</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'csr'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/specd/io.html#ComplexCSR.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.ComplexCSR.validate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.ComplexCSR.values">
+<span class="sig-name descname"><span class="pre">values</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></span><a class="headerlink" href="#specd.ComplexCSR.values" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="specd.DispersionTable">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">specd.</span></span><span class="sig-name descname"><span class="pre">DispersionTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency_hz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azimuth_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="specd.html#specd.io.ComplexCSR" title="specd.io.ComplexCSR"><span class="pre">ComplexCSR</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="specd.html#specd.io.ComplexCSR" title="specd.io.ComplexCSR"><span class="pre">ComplexCSR</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'km/s'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/io.html#DispersionTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.DispersionTable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>CSR dispersion data on a frequency/azimuth grid.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.DispersionTable.azimuth_deg">
+<span class="sig-name descname"><span class="pre">azimuth_deg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></span><a class="headerlink" href="#specd.DispersionTable.azimuth_deg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.DispersionTable.frequency_hz">
+<span class="sig-name descname"><span class="pre">frequency_hz</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></span><a class="headerlink" href="#specd.DispersionTable.frequency_hz" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.DispersionTable.from_hdf5">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="specd.html#specd.io.DispersionTable" title="specd.io.DispersionTable"><span class="pre">DispersionTable</span></a></span></span><a class="reference internal" href="../_modules/specd/io.html#DispersionTable.from_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.DispersionTable.from_hdf5" title="Link to this definition"></a></dt>
+<dd><p>Read and validate a version-1 SpecSWD CSR HDF5 file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.DispersionTable.from_rows">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency_hz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">azimuth_deg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.0,)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_mode_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_components</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">('radial',)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_mode_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'km/s'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="specd.html#specd.io.DispersionTable" title="specd.io.DispersionTable"><span class="pre">DispersionTable</span></a></span></span><a class="reference internal" href="../_modules/specd/io.html#DispersionTable.from_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.DispersionTable.from_rows" title="Link to this definition"></a></dt>
+<dd><p>Create a table directly from variable-length solver outputs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.DispersionTable.group_row">
+<span class="sig-name descname"><span class="pre">group_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azimuth_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/specd/io.html#DispersionTable.group_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.DispersionTable.group_row" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.DispersionTable.group_velocity">
+<span class="sig-name descname"><span class="pre">group_velocity</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="specd.html#specd.io.ComplexCSR" title="specd.io.ComplexCSR"><span class="pre">ComplexCSR</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#specd.DispersionTable.group_velocity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="specd.DispersionTable.nsolve">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">nsolve</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#specd.DispersionTable.nsolve" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.DispersionTable.phase_row">
+<span class="sig-name descname"><span class="pre">phase_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azimuth_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/specd/io.html#DispersionTable.phase_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.DispersionTable.phase_row" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.DispersionTable.phase_velocity">
+<span class="sig-name descname"><span class="pre">phase_velocity</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="specd.html#specd.io.ComplexCSR" title="specd.io.ComplexCSR"><span class="pre">ComplexCSR</span></a></span><a class="headerlink" href="#specd.DispersionTable.phase_velocity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.DispersionTable.solve_row">
+<span class="sig-name descname"><span class="pre">solve_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azimuth_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/specd/io.html#DispersionTable.solve_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.DispersionTable.solve_row" title="Link to this definition"></a></dt>
+<dd><p>Map grid indices to the frequency-major CSR row.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.DispersionTable.to_hdf5">
+<span class="sig-name descname"><span class="pre">to_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/specd/io.html#DispersionTable.to_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.DispersionTable.to_hdf5" title="Link to this definition"></a></dt>
+<dd><p>Write schema-versioned CSR data using HDF5 compound complex values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.DispersionTable.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/specd/io.html#DispersionTable.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.DispersionTable.validate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.DispersionTable.velocity_units">
+<span class="sig-name descname"><span class="pre">velocity_units</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'km/s'</span></span><a class="headerlink" href="#specd.DispersionTable.velocity_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="complete-solver-output">
+<h2>Complete solver output<a class="headerlink" href="#complete-solver-output" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="specd.RaggedComplexField">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">specd.</span></span><span class="sig-name descname"><span class="pre">RaggedComplexField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indptr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'normalized'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/io.html#RaggedComplexField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.RaggedComplexField" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Variable-length complex samples with a fixed component dimension.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.RaggedComplexField.component_names">
+<span class="sig-name descname"><span class="pre">component_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#specd.RaggedComplexField.component_names" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.RaggedComplexField.indptr">
+<span class="sig-name descname"><span class="pre">indptr</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></span><a class="headerlink" href="#specd.RaggedComplexField.indptr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="specd.RaggedComplexField.nrow">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">nrow</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#specd.RaggedComplexField.nrow" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.RaggedComplexField.row">
+<span class="sig-name descname"><span class="pre">row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/specd/io.html#RaggedComplexField.row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.RaggedComplexField.row" title="Link to this definition"></a></dt>
+<dd><p>Return one field as a zero-copy <code class="docutils literal notranslate"><span class="pre">(npoint,ncomponent)</span></code> view.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.RaggedComplexField.units">
+<span class="sig-name descname"><span class="pre">units</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'normalized'</span></span><a class="headerlink" href="#specd.RaggedComplexField.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.RaggedComplexField.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nrow</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/specd/io.html#RaggedComplexField.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.RaggedComplexField.validate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.RaggedComplexField.values">
+<span class="sig-name descname"><span class="pre">values</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></span><a class="headerlink" href="#specd.RaggedComplexField.values" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="specd.KernelTable">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">specd.</span></span><span class="sig-name descname"><span class="pre">KernelTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propagation_q_inverse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/io.html#KernelTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.KernelTable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Projected kernels with shape <code class="docutils literal notranslate"><span class="pre">(nmode,nparameter,ndepth)</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.KernelTable.parameter_names">
+<span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#specd.KernelTable.parameter_names" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.KernelTable.propagation_q_inverse">
+<span class="sig-name descname"><span class="pre">propagation_q_inverse</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#specd.KernelTable.propagation_q_inverse" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.KernelTable.velocity">
+<span class="sig-name descname"><span class="pre">velocity</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></span><a class="headerlink" href="#specd.KernelTable.velocity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="specd.SolverOutput">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">specd.</span></span><span class="sig-name descname"><span class="pre">SolverOutput</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dispersion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="specd.html#specd.io.DispersionTable" title="specd.io.DispersionTable"><span class="pre">DispersionTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">wave_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attenuation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_observable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sem_depth_indptr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sem_depth_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eigenfunctions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="specd.html#specd.io.RaggedComplexField" title="specd.io.RaggedComplexField"><span class="pre">RaggedComplexField</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">elastic_kernels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="specd.html#specd.io.KernelTable" title="specd.io.KernelTable"><span class="pre">KernelTable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acoustic_kernels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="specd.html#specd.io.KernelTable" title="specd.io.KernelTable"><span class="pre">KernelTable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/io.html#SolverOutput"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SolverOutput" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Complete command-line result backed only by NumPy containers.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.SolverOutput.acoustic_kernels">
+<span class="sig-name descname"><span class="pre">acoustic_kernels</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="specd.html#specd.io.KernelTable" title="specd.io.KernelTable"><span class="pre">KernelTable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#specd.SolverOutput.acoustic_kernels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.SolverOutput.attenuation">
+<span class="sig-name descname"><span class="pre">attenuation</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#specd.SolverOutput.attenuation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.SolverOutput.dispersion">
+<span class="sig-name descname"><span class="pre">dispersion</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="specd.html#specd.io.DispersionTable" title="specd.io.DispersionTable"><span class="pre">DispersionTable</span></a></span><a class="headerlink" href="#specd.SolverOutput.dispersion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.SolverOutput.eigenfunctions">
+<span class="sig-name descname"><span class="pre">eigenfunctions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="specd.html#specd.io.RaggedComplexField" title="specd.io.RaggedComplexField"><span class="pre">RaggedComplexField</span></a></span><a class="headerlink" href="#specd.SolverOutput.eigenfunctions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.SolverOutput.elastic_kernels">
+<span class="sig-name descname"><span class="pre">elastic_kernels</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="specd.html#specd.io.KernelTable" title="specd.io.KernelTable"><span class="pre">KernelTable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#specd.SolverOutput.elastic_kernels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.SolverOutput.from_hdf5">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="specd.html#specd.io.SolverOutput" title="specd.io.SolverOutput"><span class="pre">SolverOutput</span></a></span></span><a class="reference internal" href="../_modules/specd/io.html#SolverOutput.from_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SolverOutput.from_hdf5" title="Link to this definition"></a></dt>
+<dd><p>Read complete output written by a C++ or Python solver.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.SolverOutput.kernel_observable">
+<span class="sig-name descname"><span class="pre">kernel_observable</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#specd.SolverOutput.kernel_observable" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.SolverOutput.kernel_type">
+<span class="sig-name descname"><span class="pre">kernel_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#specd.SolverOutput.kernel_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.SolverOutput.model_depth">
+<span class="sig-name descname"><span class="pre">model_depth</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></span><a class="headerlink" href="#specd.SolverOutput.model_depth" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.SolverOutput.sem_depth_indptr">
+<span class="sig-name descname"><span class="pre">sem_depth_indptr</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></span><a class="headerlink" href="#specd.SolverOutput.sem_depth_indptr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.SolverOutput.sem_depth_row">
+<span class="sig-name descname"><span class="pre">sem_depth_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solve_row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/specd/io.html#SolverOutput.sem_depth_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SolverOutput.sem_depth_row" title="Link to this definition"></a></dt>
+<dd><p>Return the physical SEM depth coordinates for one solve row.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.SolverOutput.sem_depth_values">
+<span class="sig-name descname"><span class="pre">sem_depth_values</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></span><a class="headerlink" href="#specd.SolverOutput.sem_depth_values" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.SolverOutput.to_hdf5">
+<span class="sig-name descname"><span class="pre">to_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/specd/io.html#SolverOutput.to_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SolverOutput.to_hdf5" title="Link to this definition"></a></dt>
+<dd><p>Write the complete version-1 solver output.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.SolverOutput.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/specd/io.html#SolverOutput.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.SolverOutput.validate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.SolverOutput.wave_type">
+<span class="sig-name descname"><span class="pre">wave_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#specd.SolverOutput.wave_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="constant-q-helpers">
+<h2>Constant-Q helpers<a class="headerlink" href="#constant-q-helpers" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="specd.constant_q_response">
+<span class="sig-prename descclassname"><span class="pre">specd.</span></span><span class="sig-name descname"><span class="pre">constant_q_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/attenuation.html#constant_q_response"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.constant_q_response" title="Link to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">M(omega)</span> <span class="pre">/</span> <span class="pre">M0</span></code> for storage modulus <code class="docutils literal notranslate"><span class="pre">M0</span></code> at the reference.</p>
+<p>The response uses the positive-frequency convention of SpecSWD:</p>
+<p><code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">=</span> <span class="pre">(1</span> <span class="pre">+</span> <span class="pre">i/Q)</span> <span class="pre">*</span> <span class="pre">(freq/reference_frequency)**alpha</span></code>,
+<code class="docutils literal notranslate"><span class="pre">alpha</span> <span class="pre">=</span> <span class="pre">2/pi</span> <span class="pre">*</span> <span class="pre">atan(1/Q)</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specd.constant_q_response_derivatives">
+<span class="sig-prename descclassname"><span class="pre">specd.</span></span><span class="sig-name descname"><span class="pre">constant_q_response_derivatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/attenuation.html#constant_q_response_derivatives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.constant_q_response_derivatives" title="Link to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">s</span></code>, <code class="docutils literal notranslate"><span class="pre">ds/domega</span></code>, <code class="docutils literal notranslate"><span class="pre">ds/d(Q^-1)</span></code>, and the mixed derivative.</p>
+</dd></dl>
+
+</section>
+<section id="thomson-haskell-comparison-solver">
+<h2>Thomson-Haskell comparison solver<a class="headerlink" href="#thomson-haskell-comparison-solver" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="specd.THSolver">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">specd.</span></span><span class="sig-name descname"><span class="pre">THSolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thick</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spherical</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/THSolver.html#THSolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.THSolver" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.THSolver.compute_swd">
+<span class="sig-name descname"><span class="pre">compute_swd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavetype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/specd/THSolver.html#THSolver.compute_swd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.THSolver.compute_swd" title="Link to this definition"></a></dt>
+<dd><p>compute dispersion (phase/group) for a give wavetype</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wavetype</strong> (<em>str</em>) – wave type, one of [‘Rc’,’Rg’,’Lc’,’Lg’]</p></li>
+<li><p><strong>mode</strong> (<em>int</em>) – which mode it will return, &gt;=0</p></li>
+<li><p><strong>T</strong> (<em>np.ndarray</em>) – period, in s</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>cg</strong> – phase velocity (for Rc,Lc) or group velocity (Rg,Lg)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -119,13 +686,12 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../markdown/gallery.html" class="btn btn-neutral float-left" title="Gallery" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="modules.html" class="btn btn-neutral float-right" title="specd" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright .</p>
+    <p>&#169; Copyright Nanqiao Du.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

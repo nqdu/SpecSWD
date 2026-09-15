@@ -28,6 +28,14 @@ specd.attenuation module
    :show-inheritance:
    :undoc-members:
 
+specd.io module
+---------------
+
+.. automodule:: specd.io
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 specd.specd module
 ------------------
 

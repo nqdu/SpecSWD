@@ -1,0 +1,284 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NumPy and HDF5 output &mdash; SpecSWD  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Gallery" href="gallery.html" />
+    <link rel="prev" title="Tutorial" href="Tutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SpecSWD
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">SpecSWD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">NumPy and HDF5 output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ragged-dispersion-rows">Ragged dispersion rows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#python-api">Python API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-output">Command-line output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#file-schema">File schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c-api">C++ API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpecSWD</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">NumPy and HDF5 output</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/markdown/io.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="numpy-and-hdf5-output">
+<h1>NumPy and HDF5 output<a class="headerlink" href="#numpy-and-hdf5-output" title="Link to this heading"></a></h1>
+<section id="ragged-dispersion-rows">
+<h2>Ragged dispersion rows<a class="headerlink" href="#ragged-dispersion-rows" title="Link to this heading"></a></h2>
+<p>Each frequency and azimuth can produce a different number of valid modes.
+SpecSWD represents phase and group results with independent CSR containers:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">indptr</span></code>: <code class="docutils literal notranslate"><span class="pre">uint64</span></code>, shape <code class="docutils literal notranslate"><span class="pre">(nsolve</span> <span class="pre">+</span> <span class="pre">1,)</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mode_index</span></code>: <code class="docutils literal notranslate"><span class="pre">int32</span></code>, shape <code class="docutils literal notranslate"><span class="pre">(nentry,)</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">values</span></code>: <code class="docutils literal notranslate"><span class="pre">complex128</span></code>, shape <code class="docutils literal notranslate"><span class="pre">(nentry,</span> <span class="pre">ncomponent)</span></code>; and</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">component_names</span></code>: labels for the final dimension.</p></li>
+</ul>
+<p>Solve rows are frequency-major and azimuth-minor:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">row</span> <span class="o">=</span> <span class="n">frequency_index</span> <span class="o">*</span> <span class="n">table</span><span class="o">.</span><span class="n">azimuth_deg</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="n">azimuth_index</span>
+<span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="n">csr</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="n">row</span><span class="p">:</span><span class="n">row</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">modes</span> <span class="o">=</span> <span class="n">csr</span><span class="o">.</span><span class="n">mode_index</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">csr</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>An empty row has equal adjacent offsets. Independent phase and group CSR
+tables allow their mode counts and mode selections to differ at the same solve
+point.</p>
+</section>
+<section id="python-api">
+<h2>Python API<a class="headerlink" href="#python-api" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.compute_dispersion</span></code> returns NumPy-backed data directly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">table</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">compute_dispersion</span><span class="p">(</span>
+    <span class="n">frequencies_hz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span>
+    <span class="n">azimuths_deg</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">30.0</span><span class="p">,</span> <span class="mf">60.0</span><span class="p">]),</span>
+    <span class="n">include_group</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">to_hdf5</span><span class="p">(</span><span class="s2">&quot;dispersion.h5&quot;</span><span class="p">)</span>
+
+<span class="n">restored</span> <span class="o">=</span> <span class="n">DispersionTable</span><span class="o">.</span><span class="n">from_hdf5</span><span class="p">(</span><span class="s2">&quot;dispersion.h5&quot;</span><span class="p">)</span>
+<span class="n">modes</span><span class="p">,</span> <span class="n">phase</span> <span class="o">=</span> <span class="n">restored</span><span class="o">.</span><span class="n">phase_row</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">group_modes</span><span class="p">,</span> <span class="n">group_values</span> <span class="o">=</span> <span class="n">restored</span><span class="o">.</span><span class="n">group_row</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <code class="docutils literal notranslate"><span class="pre">DispersionTable.from_rows</span></code> to pack existing variable-length NumPy arrays:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">specd</span> <span class="kn">import</span> <span class="n">DispersionTable</span>
+
+<span class="n">table</span> <span class="o">=</span> <span class="n">DispersionTable</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span>
+    <span class="n">frequency_hz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">]),</span>
+    <span class="n">phase_rows</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">3.0</span> <span class="o">+</span> <span class="mf">0.01</span><span class="n">j</span><span class="p">,</span> <span class="mf">3.4</span> <span class="o">+</span> <span class="mf">0.02</span><span class="n">j</span><span class="p">]),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">3.1</span> <span class="o">+</span> <span class="mf">0.01</span><span class="n">j</span><span class="p">]),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="n">phase_mode_rows</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The complete command-line result is available through <code class="docutils literal notranslate"><span class="pre">SolverOutput</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">specd</span> <span class="kn">import</span> <span class="n">SolverOutput</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">SolverOutput</span><span class="o">.</span><span class="n">from_hdf5</span><span class="p">(</span><span class="s2">&quot;out/specswd.h5&quot;</span><span class="p">)</span>
+<span class="n">solve_row</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">dispersion</span><span class="o">.</span><span class="n">solve_row</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">mode_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">dispersion</span><span class="o">.</span><span class="n">phase_velocity</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="n">solve_row</span><span class="p">])</span>
+
+<span class="n">depth</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">sem_depth_row</span><span class="p">(</span><span class="n">solve_row</span><span class="p">)</span>
+<span class="n">eigenfunction</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">eigenfunctions</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">mode_start</span><span class="p">)</span>
+<span class="n">elastic_kernel</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">elastic_kernels</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">mode_start</span><span class="p">]</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">eigenfunction</span></code> has shape <code class="docutils literal notranslate"><span class="pre">(n_sem_point,</span> <span class="pre">ncomponent)</span></code>. A kernel table has shape
+<code class="docutils literal notranslate"><span class="pre">(nphase_entry,</span> <span class="pre">nparameter,</span> <span class="pre">n_model_depth)</span></code>. Attenuating runs also provide
+<code class="docutils literal notranslate"><span class="pre">propagation_q_inverse</span></code> with the same shape. All public numeric containers are
+contiguous NumPy arrays; xarray and NumPy object arrays are not used.
+For VTI Rayleigh and Scholte waves, horizontal and vertical displacement
+components use real polarization amplitudes. The physical quadrature phase of
+the vertical component is implicit rather than stored as a factor of <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
+</section>
+<section id="command-line-output">
+<h2>Command-line output<a class="headerlink" href="#command-line-output" title="Link to this heading"></a></h2>
+<p>The solvers write one self-describing file and replace it on each run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>surflove<span class="w"> </span>model.txt<span class="w"> </span><span class="m">0</span>.02<span class="w"> </span><span class="m">1</span>.0<span class="w"> </span><span class="m">50</span><span class="w"> </span><span class="m">0</span>
+surfrayl<span class="w"> </span>model.txt<span class="w"> </span><span class="m">0</span>.02<span class="w"> </span><span class="m">1</span>.0<span class="w"> </span><span class="m">50</span><span class="w"> </span><span class="m">1</span>
+surfani<span class="w"> </span>model.txt<span class="w"> </span><span class="m">0</span>.02<span class="w"> </span><span class="m">1</span>.0<span class="w"> </span><span class="m">50</span><span class="w"> </span><span class="m">30</span>.0<span class="w"> </span><span class="m">1</span>
+</pre></div>
+</div>
+<p>The last value selects phase kernels (<code class="docutils literal notranslate"><span class="pre">0</span></code>) or group kernels (<code class="docutils literal notranslate"><span class="pre">1</span></code>). Anisotropic
+group velocity is saved with <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> components. Its group kernel is the
+radial derivative. Each command writes <code class="docutils literal notranslate"><span class="pre">out/specswd.h5</span></code>.</p>
+</section>
+<section id="file-schema">
+<h2>File schema<a class="headerlink" href="#file-schema" title="Link to this heading"></a></h2>
+<p>The implemented schema is <code class="docutils literal notranslate"><span class="pre">specswd-dispersion</span></code>, version 1:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/
+  attrs: schema, schema_version, layout, complex_encoding
+  attrs for complete output: content, wave_type, attenuation, kernel_type
+  /solutions
+    frequency_hz                 float64 (nfreq), units=&quot;Hz&quot;
+    azimuth_deg                  float64 (nazimuth), units=&quot;degree&quot;
+    /phase
+      indptr                     uint64 (nsolve+1)
+      mode_index                 int32 (nphase)
+      component_names            [&quot;phase&quot;]
+      values                     complex (nphase,1), units=&quot;km/s&quot;
+    /group                       optional, independent CSR
+      indptr                     uint64 (nsolve+1)
+      mode_index                 int32 (ngroup)
+      component_names            [&quot;radial&quot;] or [&quot;x&quot;,&quot;y&quot;]
+      values                     complex (ngroup,ncomponent), units=&quot;km/s&quot;
+  /model                         complete output only
+    depth                        float64 (n_model_depth), units=&quot;km&quot;
+  /mesh
+    depth_indptr                 uint64 (nsolve+1)
+    depth_values                 float64 (n_sem_point_total), units=&quot;km&quot;
+  /eigenfunctions
+    indptr                       uint64 (nphase+1)
+    component_names              wave-dependent component labels
+    values                       complex (n_eigen_point_total,ncomponent)
+  /kernels
+    attrs: observable, entry_alignment=&quot;solutions/phase&quot;
+    /elastic                     optional
+      parameter_names
+      velocity                   float64 (nphase,nparameter,n_model_depth)
+      propagation_q_inverse      optional, same shape
+    /acoustic                    optional, same datasets
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">depth_indptr</span></code> handles a different SEM mesh at every solve point.
+<code class="docutils literal notranslate"><span class="pre">eigenfunctions/indptr</span></code> handles the corresponding different eigenfunction
+length for every phase entry. Projected kernels use the fixed input model depth
+grid and therefore remain dense after the ragged phase-entry dimension has
+been packed.</p>
+<p>HDF5 has no portable native complex type. The file stores complex values as a
+compound with float64 members <code class="docutils literal notranslate"><span class="pre">r</span></code> and <code class="docutils literal notranslate"><span class="pre">i</span></code>. Python exposes this representation
+as <code class="docutils literal notranslate"><span class="pre">numpy.complex128</span></code>; C++ converts it to and from <code class="docutils literal notranslate"><span class="pre">specswd::Complex</span></code>.</p>
+</section>
+<section id="c-api">
+<h2>C++ API<a class="headerlink" href="#c-api" title="Link to this heading"></a></h2>
+<p>IO is declared in <code class="docutils literal notranslate"><span class="pre">shared/io.hpp</span></code> and is part of the <code class="docutils literal notranslate"><span class="pre">shared</span></code> target:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;shared/io.hpp&quot;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">specswd</span><span class="o">::</span><span class="n">Complex</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">specswd</span><span class="o">::</span><span class="n">io</span><span class="o">::</span><span class="n">ComplexCSR</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">specswd</span><span class="o">::</span><span class="n">io</span><span class="o">::</span><span class="n">DispersionTable</span><span class="p">;</span>
+
+<span class="n">DispersionTable</span><span class="w"> </span><span class="n">table</span><span class="p">;</span>
+<span class="n">table</span><span class="p">.</span><span class="n">frequency_hz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">0.05</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">};</span>
+<span class="n">table</span><span class="p">.</span><span class="n">azimuth_deg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">0.0</span><span class="p">};</span>
+<span class="n">table</span><span class="p">.</span><span class="n">phase_velocity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ComplexCSR</span><span class="o">::</span><span class="n">from_rows</span><span class="p">(</span>
+<span class="w">    </span><span class="p">{{{</span><span class="mf">3.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.01</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mf">3.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.02</span><span class="p">}},</span><span class="w"> </span><span class="p">{{</span><span class="mf">3.1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.01</span><span class="p">}},</span><span class="w"> </span><span class="p">{}},</span>
+<span class="w">    </span><span class="p">{</span><span class="s">&quot;phase&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">},</span><span class="w"> </span><span class="p">{}}</span>
+<span class="p">);</span>
+
+<span class="n">specswd</span><span class="o">::</span><span class="n">io</span><span class="o">::</span><span class="n">write_hdf5</span><span class="p">(</span><span class="s">&quot;dispersion.h5&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">table</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">restored</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">specswd</span><span class="o">::</span><span class="n">io</span><span class="o">::</span><span class="n">read_hdf5</span><span class="p">(</span><span class="s">&quot;dispersion.h5&quot;</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="p">[</span><span class="n">begin</span><span class="p">,</span><span class="w"> </span><span class="n">end</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">restored</span><span class="p">.</span><span class="n">phase_velocity</span><span class="p">.</span><span class="n">row_range</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">SolverOutput</span></code>, <code class="docutils literal notranslate"><span class="pre">RaggedComplexField</span></code>, and <code class="docutils literal notranslate"><span class="pre">KernelTable</span></code> provide the complete
+output form used by the executables. The implementation is in
+<code class="docutils literal notranslate"><span class="pre">src/shared/io.cpp</span></code> and calls the HDF5 C API directly. Linking <code class="docutils literal notranslate"><span class="pre">shared</span></code>
+propagates the required HDF5 include and library settings.</p>
+<p>Both implementations validate offsets, shapes, mode indices, coordinate
+counts, units, schema metadata, eigenfunction-to-depth alignment, and kernel
+dimensions before accepting or writing data.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Tutorial.html" class="btn btn-neutral float-left" title="Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gallery.html" class="btn btn-neutral float-right" title="Gallery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Nanqiao Du.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

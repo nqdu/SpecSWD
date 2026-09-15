@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to SpecSWD &mdash; SpecSWD  documentation</title>
+  <title>SpecSWD documentation &mdash; SpecSWD  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -41,13 +41,16 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="markdown/readme.html">SpecSWD</a></li>
-<li class="toctree-l1"><a class="reference internal" href="markdown/readme.html#installation">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="markdown/Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="markdown/io.html">NumPy and HDF5 output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="markdown/gallery.html">Gallery</a></li>
-<li class="toctree-l1"><a class="reference internal" href="python/index.html">Python Library API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="python/index.html">Python API reference</a></li>
 </ul>
 
         </div>
@@ -64,7 +67,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Welcome to SpecSWD</li>
+      <li class="breadcrumb-item active">SpecSWD documentation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -74,41 +77,75 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="welcome-to-specswd">
-<h1>Welcome to SpecSWD<a class="headerlink" href="#welcome-to-specswd" title="Link to this heading"></a></h1>
+  <section id="specswd-documentation">
+<h1>SpecSWD documentation<a class="headerlink" href="#specswd-documentation" title="Link to this heading"></a></h1>
+<p>SpecSWD computes surface-wave dispersion, eigenfunctions, and sensitivity
+kernels in layered elastic, acoustic, anisotropic, and attenuating media.</p>
+<p>The Python interface uses NumPy arrays. Variable mode counts are represented
+with CSR containers and stored in a versioned HDF5 schema that is shared with
+the C++ interface.</p>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">User guide</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="markdown/readme.html">SpecSWD</a></li>
-<li class="toctree-l1"><a class="reference internal" href="markdown/readme.html#installation">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="markdown/Tutorial.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#specswd-models">SpecSWD Models</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="markdown/Tutorial.html#love-wave-model">Love wave model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="markdown/Tutorial.html#rayleigh-scholte-wave-model">Rayleigh (Scholte) wave model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="markdown/Tutorial.html#fully-anisotropic-wave-model">Fully anisotropic wave model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="markdown/readme.html">SpecSWD</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="markdown/readme.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/readme.html#configure-and-build">Configure and build</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/readme.html#numerical-types">Numerical types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/readme.html#documentation">Documentation</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#q-model">Q model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#scale-units">Scale Units</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#example">Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="markdown/Tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#layered-model-convention">Layered model convention</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#love-wave-vti-model">Love-wave VTI model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#rayleigh-and-scholte-vti-model">Rayleigh and Scholte VTI model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#fully-anisotropic-model">Fully anisotropic model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#constant-q-attenuation">Constant-Q attenuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#phase-and-group-velocity">Phase and group velocity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#sensitivity-kernels">Sensitivity kernels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#variable-mode-frequency-grids">Variable-mode frequency grids</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="markdown/io.html">NumPy and HDF5 output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="markdown/io.html#ragged-dispersion-rows">Ragged dispersion rows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/io.html#python-api">Python API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/io.html#command-line-output">Command-line output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/io.html#file-schema">File schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/io.html#c-api">C++ API</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="markdown/gallery.html">Gallery</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="markdown/gallery.html#two-layer-love-wave-model">Two layer Love wave Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown/gallery.html#scholte-wave-example">Scholte Wave example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/gallery.html#two-layer-attenuating-love-wave-model">Two-layer attenuating Love-wave model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/gallery.html#coupled-fluid-solid-scholte-wave-model">Coupled fluid/solid Scholte-wave model</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="python/index.html">Python Library API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="python/modules.html">specd</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="python/specd.html">specd package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="python/specd.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="python/specd.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="python/specd.html#module-specd.THSolver">specd.THSolver module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="python/specd.html#module-specd.attenuation">specd.attenuation module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="python/specd.html#module-specd.specd">specd.specd module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="python/specd.html#module-specd">Module contents</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="python/index.html">Python API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python/index.html#solver-workspace">Solver workspace</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/index.html#specd.SpecWorkSpace"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="python/index.html#csr-dispersion-containers">CSR dispersion containers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/index.html#specd.ComplexCSR"><code class="docutils literal notranslate"><span class="pre">ComplexCSR</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/index.html#specd.DispersionTable"><code class="docutils literal notranslate"><span class="pre">DispersionTable</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="python/index.html#complete-solver-output">Complete solver output</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/index.html#specd.RaggedComplexField"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/index.html#specd.KernelTable"><code class="docutils literal notranslate"><span class="pre">KernelTable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/index.html#specd.SolverOutput"><code class="docutils literal notranslate"><span class="pre">SolverOutput</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="python/index.html#constant-q-helpers">Constant-Q helpers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/index.html#specd.constant_q_response"><code class="docutils literal notranslate"><span class="pre">constant_q_response()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/index.html#specd.constant_q_response_derivatives"><code class="docutils literal notranslate"><span class="pre">constant_q_response_derivatives()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="python/index.html#thomson-haskell-comparison-solver">Thomson-Haskell comparison solver</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/index.html#specd.THSolver"><code class="docutils literal notranslate"><span class="pre">THSolver</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -127,7 +164,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright .</p>
+    <p>&#169; Copyright Nanqiao Du.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

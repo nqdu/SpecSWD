@@ -18,9 +18,7 @@
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="specd package" href="specd.html" />
-    <link rel="prev" title="Python Library API Reference" href="index.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,19 +40,16 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../markdown/readme.html">SpecSWD</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown/readme.html#installation">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../markdown/Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown/io.html">NumPy and HDF5 output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../markdown/gallery.html">Gallery</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Python Library API Reference</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">specd</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="specd.html">specd package</a></li>
 </ul>
-</li>
-</ul>
-</li>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Python API reference</a></li>
 </ul>
 
         </div>
@@ -71,7 +66,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="index.html">Python Library API Reference</a></li>
       <li class="breadcrumb-item active">specd</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/python/modules.rst.txt" rel="nofollow"> View page source</a>
@@ -106,14 +100,78 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="specd.html#module-specd.attenuation">specd.attenuation module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="specd.html#specd.attenuation.compute_q_sls_model"><code class="docutils literal notranslate"><span class="pre">compute_q_sls_model()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="specd.html#specd.attenuation.compute_sls_coefs"><code class="docutils literal notranslate"><span class="pre">compute_sls_coefs()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="specd.html#specd.attenuation.test"><code class="docutils literal notranslate"><span class="pre">test()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="specd.html#specd.attenuation.y_corrector"><code class="docutils literal notranslate"><span class="pre">y_corrector()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="specd.html#specd.attenuation.constant_q_response"><code class="docutils literal notranslate"><span class="pre">constant_q_response()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="specd.html#specd.attenuation.constant_q_response_derivatives"><code class="docutils literal notranslate"><span class="pre">constant_q_response_derivatives()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="specd.html#module-specd.io">specd.io module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="specd.html#specd.io.ComplexCSR"><code class="docutils literal notranslate"><span class="pre">ComplexCSR</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.ComplexCSR.component_names"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.component_names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.ComplexCSR.from_rows"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.from_rows()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.ComplexCSR.indptr"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.indptr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.ComplexCSR.mode_index"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.mode_index</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.ComplexCSR.nentry"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.nentry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.ComplexCSR.nrow"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.nrow</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.ComplexCSR.row"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.ComplexCSR.validate"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.ComplexCSR.values"><code class="docutils literal notranslate"><span class="pre">ComplexCSR.values</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="specd.html#specd.io.DispersionTable"><code class="docutils literal notranslate"><span class="pre">DispersionTable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.DispersionTable.azimuth_deg"><code class="docutils literal notranslate"><span class="pre">DispersionTable.azimuth_deg</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.DispersionTable.frequency_hz"><code class="docutils literal notranslate"><span class="pre">DispersionTable.frequency_hz</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.DispersionTable.from_hdf5"><code class="docutils literal notranslate"><span class="pre">DispersionTable.from_hdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.DispersionTable.from_rows"><code class="docutils literal notranslate"><span class="pre">DispersionTable.from_rows()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.DispersionTable.group_row"><code class="docutils literal notranslate"><span class="pre">DispersionTable.group_row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.DispersionTable.group_velocity"><code class="docutils literal notranslate"><span class="pre">DispersionTable.group_velocity</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.DispersionTable.nsolve"><code class="docutils literal notranslate"><span class="pre">DispersionTable.nsolve</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.DispersionTable.phase_row"><code class="docutils literal notranslate"><span class="pre">DispersionTable.phase_row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.DispersionTable.phase_velocity"><code class="docutils literal notranslate"><span class="pre">DispersionTable.phase_velocity</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.DispersionTable.solve_row"><code class="docutils literal notranslate"><span class="pre">DispersionTable.solve_row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.DispersionTable.to_hdf5"><code class="docutils literal notranslate"><span class="pre">DispersionTable.to_hdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.DispersionTable.validate"><code class="docutils literal notranslate"><span class="pre">DispersionTable.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.DispersionTable.velocity_units"><code class="docutils literal notranslate"><span class="pre">DispersionTable.velocity_units</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="specd.html#specd.io.KernelTable"><code class="docutils literal notranslate"><span class="pre">KernelTable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.KernelTable.parameter_names"><code class="docutils literal notranslate"><span class="pre">KernelTable.parameter_names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.KernelTable.propagation_q_inverse"><code class="docutils literal notranslate"><span class="pre">KernelTable.propagation_q_inverse</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.KernelTable.velocity"><code class="docutils literal notranslate"><span class="pre">KernelTable.velocity</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="specd.html#specd.io.RaggedComplexField"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.RaggedComplexField.component_names"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField.component_names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.RaggedComplexField.indptr"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField.indptr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.RaggedComplexField.nrow"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField.nrow</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.RaggedComplexField.row"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField.row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.RaggedComplexField.units"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField.units</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.RaggedComplexField.validate"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.RaggedComplexField.values"><code class="docutils literal notranslate"><span class="pre">RaggedComplexField.values</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="specd.html#specd.io.SolverOutput"><code class="docutils literal notranslate"><span class="pre">SolverOutput</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.acoustic_kernels"><code class="docutils literal notranslate"><span class="pre">SolverOutput.acoustic_kernels</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.attenuation"><code class="docutils literal notranslate"><span class="pre">SolverOutput.attenuation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.dispersion"><code class="docutils literal notranslate"><span class="pre">SolverOutput.dispersion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.eigenfunctions"><code class="docutils literal notranslate"><span class="pre">SolverOutput.eigenfunctions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.elastic_kernels"><code class="docutils literal notranslate"><span class="pre">SolverOutput.elastic_kernels</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.from_hdf5"><code class="docutils literal notranslate"><span class="pre">SolverOutput.from_hdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.kernel_observable"><code class="docutils literal notranslate"><span class="pre">SolverOutput.kernel_observable</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.kernel_type"><code class="docutils literal notranslate"><span class="pre">SolverOutput.kernel_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.model_depth"><code class="docutils literal notranslate"><span class="pre">SolverOutput.model_depth</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.sem_depth_indptr"><code class="docutils literal notranslate"><span class="pre">SolverOutput.sem_depth_indptr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.sem_depth_row"><code class="docutils literal notranslate"><span class="pre">SolverOutput.sem_depth_row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.sem_depth_values"><code class="docutils literal notranslate"><span class="pre">SolverOutput.sem_depth_values</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.to_hdf5"><code class="docutils literal notranslate"><span class="pre">SolverOutput.to_hdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.validate"><code class="docutils literal notranslate"><span class="pre">SolverOutput.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.io.SolverOutput.wave_type"><code class="docutils literal notranslate"><span class="pre">SolverOutput.wave_type</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="specd.html#module-specd.specd">specd.specd module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="specd.html#specd.specd.SpecWorkSpace"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="specd.html#specd.specd.SpecWorkSpace.compute_dispersion"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.compute_dispersion()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="specd.html#specd.specd.SpecWorkSpace.compute_egn"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.compute_egn()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="specd.html#specd.specd.SpecWorkSpace.get_egnfunc"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.get_egnfunc()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="specd.html#specd.specd.SpecWorkSpace.get_group_kl"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.get_group_kl()</span></code></a></li>
@@ -136,15 +194,12 @@
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="Python Library API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="specd.html" class="btn btn-neutral float-right" title="specd package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright .</p>
+    <p>&#169; Copyright Nanqiao Du.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
