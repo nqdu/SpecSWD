@@ -20,15 +20,15 @@ compute_egn(bool use_qz)
     using crmat2 = Eigen::MatrixX<schur_crealw>;
 
     // frequency
-    real_t freq = mesh_->freq;
-    real_t om = 2. * M_PI * freq;
+    Real freq = mesh_->freq;
+    Real om = 2. * M_PI * freq;
     schur_realw omega2 = om * om;
 
     // mapping M/K/E to matrix
     int ng = this->ndof;
-    Eigen::Map<const Eigen::VectorX<real_t>> M(Mmat.data(),ng);
-    Eigen::Map<const Eigen::VectorX<complex_t>> K(Kmat.data(),ng);
-    Eigen::Map<const Eigen::Matrix<complex_t,-1,-1,1>> E(Emat.data(),ng,ng);
+    Eigen::Map<const Eigen::VectorX<Real>> M(Mmat.data(),ng);
+    Eigen::Map<const Eigen::VectorX<Complex>> K(Kmat.data(),ng);
+    Eigen::Map<const Eigen::Matrix<Complex,-1,-1,1>> E(Emat.data(),ng,ng);
     
     // eigenvalues computed
     Eigen::ArrayX<schur_crealw> c_all;
@@ -75,7 +75,7 @@ compute_egn(bool use_qz)
         if(!use_qz) { // only compute phase velocities
             A = ((schur_realw)1.0 / K.array().cast<schur_crealw>()).matrix().asDiagonal() * A;
             LAPACKE_CMPLX(geev) (
-                LAPACK_COL_MAJOR,'N','V',ng,
+                LAPACK_COL_MAJOR,'N','N',ng,
                 (LCREALW*)A.data(),ng,
                 (LCREALW*)k_all.data(),
                 nullptr,ng,
@@ -123,9 +123,9 @@ compute_egn(bool use_qz)
     c_phase.resize(nc);
     for(int ic = 0; ic < nc; ic ++) {
         int id = idx0[idx[ic]];
-        complex_t c0 = c_all[id];
+        Complex c0 = c_all[id];
         if(! mesh_->HAS_ATT) {
-            c0 = complex_t{c0.real(),(real_t)0.};
+            c0 = Complex{c0.real(),(Real)0.};
         }
         c_phase[ic] = c0;
     }
@@ -136,7 +136,7 @@ compute_egn(bool use_qz)
         for(int ic = 0; ic < nc; ic ++) {
             int id = idx0[idx[ic]];
             for(int i = 0; i < ng; i ++) {
-                complex_t val = mesh_->HAS_ATT ? vsr_c(i,id) : vsr_r(i,id);
+                Complex val = mesh_->HAS_ATT ? vsr_c(i,id) : vsr_r(i,id);
                 egn[ic * ng + i] = val;
             }
         }
@@ -151,13 +151,13 @@ compute_egn(bool use_qz)
  * @param c_i imaginary part of phase velocity
  */
 void SolverLove::
-get_phase_vel(int imode, real_t &c_r, real_t &c_i) const
+get_phase_vel(int imode, Real &c_r, Real &c_i) const
 {
     if(imode < 0 || imode >= (int)c_phase.size()) {
         throw std::runtime_error("SolverLove::get_phase_vel(): invalid mode index");
     }
 
-    complex_t c = c_phase[imode] * mesh_->SCALE_VELOCITY;
+    Complex c = c_phase[imode] * mesh_->SCALE_VELOCITY;
     c_r = c.real();
     c_i = c.imag();
 }
@@ -177,13 +177,13 @@ compute_egn(
     int ng = this->ndof;
 
     // prepare matrix A = om^2 M -E
-    real_t freq = mesh_->freq;
-    real_t om = 2. * M_PI * freq;
+    Real freq = mesh_->freq;
+    Real om = 2. * M_PI * freq;
     schur_realw omega2 = om * om;
 
     // mapping M/K/E to matrix
-    Eigen::Map<const Eigen::VectorX<complex_t>> M(Mmat.data(),ng);
-    Eigen::Map<const Eigen::Matrix<complex_t,-1,-1,1>> E(Emat.data(),ng,ng), K(Kmat.data(),ng,ng);
+    Eigen::Map<const Eigen::VectorX<Complex>> M(Mmat.data(),ng);
+    Eigen::Map<const Eigen::Matrix<Complex,-1,-1,1>> E(Emat.data(),ng,ng), K(Kmat.data(),ng,ng);
 
     // eigenvalues computed
     Eigen::ArrayX<schur_crealw> c_all;
@@ -224,7 +224,6 @@ compute_egn(
         // matrices
         crmat2 A = crmat2(M.cast<schur_crealw>().asDiagonal()) * omega2 - E.cast<schur_crealw>();
         crmat2 B = K.cast<schur_crealw>();
-        Eigen::ArrayX<schur_crealw> k_all(ng);
 
         // compute eigenvalues/vectors
         if(!use_qz) { // only compute phase velocities
@@ -278,9 +277,9 @@ compute_egn(
     c_phase.resize(nc);
     for(int ic = 0; ic < nc; ic ++) {
         int id = idx0[idx[ic]];
-        complex_t c0 = c_all[id];
+        Complex c0 = c_all[id];
         if(! mesh_->HAS_ATT) {
-            c0 = complex_t{c0.real(),(real_t)0.};
+            c0 = Complex{c0.real(),(Real)0.};
         }
         c_phase[ic] = c0;
     }
@@ -290,7 +289,7 @@ compute_egn(
         egn_l.resize(nc * ng); egn_r.resize(nc*ng);
         for(int ic = 0; ic < nc; ic ++) {
             int id = idx0[idx[ic]];
-            complex_t val_r , val_l;
+            Complex val_r , val_l;
             for(int i = 0; i < ng; i ++) {
                 val_r = mesh_->HAS_ATT ? vsr_c(i,id) : vsr_r(i,id);
                 val_l = mesh_->HAS_ATT ? vsl_c(i,id) : vsl_r(i,id);
@@ -309,13 +308,13 @@ compute_egn(
  * @param c_i imaginary part of phase velocity
  */
 void SolverRayl::
-get_phase_vel(int imode, real_t &c_r, real_t &c_i) const
+get_phase_vel(int imode, Real &c_r, Real &c_i) const
 {
     if(imode < 0 || imode >= (int)c_phase.size()) {
         throw std::runtime_error("SolverRayl::get_phase_vel(): invalid mode index");
     }
 
-    complex_t c = c_phase[imode] * mesh_->SCALE_VELOCITY;
+    Complex c = c_phase[imode] * mesh_->SCALE_VELOCITY;
     c_r = c.real();
     c_i = c.imag();
 }

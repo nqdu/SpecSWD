@@ -4,6 +4,7 @@
 #include "shared/attenuation.hpp"
 
 #include <Eigen/Core>
+#include <limits>
 
 namespace specswd
 {
@@ -12,9 +13,9 @@ namespace specswd
 template<bool HAS_ATT>
 static void get_real(
     size_t row, size_t col, 
-    size_t size,complex_t dc_dm,
-    real_t *__restrict frekl_r,
-    real_t *__restrict frekl_i)
+    size_t size,Complex dc_dm,
+    Real *__restrict frekl_r,
+    Real *__restrict frekl_i)
 {
     size_t loc_id = row * size + col;
     if constexpr (!HAS_ATT) {
@@ -35,19 +36,22 @@ static void get_real(
  */
 void SolverRayl::
 frechet_op_el(
-    complex_t c_M, complex_t c_K, complex_t c_E,
-    const complex_t *y,
-    const complex_t *x,
-    real_t * __restrict frekl_r,
-    real_t * __restrict frekl_i
+    Complex c_M, Complex c_K, Complex c_E,
+    const Complex *y,
+    const Complex *x,
+    Real * __restrict frekl_r,
+    Real * __restrict frekl_i,
+    Complex c_dwdM, Complex c_dwdK, Complex c_dwdE
 ) const
 {
+    (void)c_dwdM;
 
     // constants
     auto const &Me = *mesh_;
     using namespace GQTable;
     int nspec_el = Me.nspec_el;
-    real_t freq = Me.freq * Me.SCALE_VELOCITY / Me.SCALE_LENGTH;
+    Real freq = Me.freq * Me.SCALE_VELOCITY / Me.SCALE_LENGTH;
+    Real omega_scale = Me.SCALE_VELOCITY / Me.SCALE_LENGTH;
     int nglob_el = Me.nglob_el;
     size_t size = mesh_->ibool.size();
     const bool has_att = Me.HAS_ATT;
@@ -55,18 +59,18 @@ frechet_op_el(
     // lambda function to add contribution
     auto add_contribution_el = [&](
         int starid,int endid,
-        const real_t *weight,
-        const real_t *hp,
+        const Real *weight,
+        const Real *hp,
         auto ConstNGL) {
         constexpr int NGL = decltype(ConstNGL)::value;
 
         // temporary arrays
-        std::array<complex_t,NGL> U,V,lU,lV;
+        std::array<Complex,NGL> U,V,lU,lV;
 
         for(int ispec = starid; ispec < endid; ispec ++) {
             int id = ispec * NGLL;
             int iel = Me.el_elmnts[ispec];
-            real_t J = Me.jacodet[iel];
+            Real J = Me.jacodet[iel];
 
             // cache temporary arrays
             for(int i = 0; i < NGL; i ++) {
@@ -78,39 +82,71 @@ frechet_op_el(
             }
 
             // compute kernel
-            complex_t dc_drho{}, dc_dA{}, dc_dC{}, dc_dL{};
-            complex_t dc_deta{}, dc_dQci{},dc_dQai{},dc_dQli{};
-            const real_t two = 2.;
+            Complex dc_drho{}, dc_dA{}, dc_dC{}, dc_dL{};
+            Complex dc_deta{}, dc_dQci{},dc_dQai{},dc_dQli{};
+            const Real two = 2.;
             for(int m = 0; m < NGL; m ++) {
-                complex_t temp = weight[m] * J * c_M;
+                Complex temp = weight[m] * J * c_M;
                 dc_drho = temp * (U[m] * lU[m] + V[m] * lV[m]);
 
-                // get sls factor if required
-                complex_t sa = 1.,sl = 1.,sc = 1.;
-                complex_t dsdqai{},dsdqci{},dsdqli{};
-                real_t C = Me.xC[id+m], A = Me.xA[id+m];
-                real_t L = Me.xL[id+m], eta = Me.xeta[m];
+                // get attenuation factors and derivatives if required
+                Complex sa = 1.,sl = 1.,sc = 1.;
+                Complex dsdqai{},dsdqci{},dsdqli{};
+                Complex dwdsa{},dwdsc{},dwdsl{};
+                Complex d2sadwdq{},d2scdwdq{},d2sldwdq{};
+                Real C = Me.xC[id+m], A = Me.xA[id+m];
+                Real L = Me.xL[id+m], eta = Me.xeta[id+m];
                 if (has_att) {
-                    get_sls_Q_derivative(freq,Me.xQA[id+m],sa,dsdqai);
-                    get_sls_Q_derivative(freq,Me.xQC[id+m],sc,dsdqci);
-                    get_sls_Q_derivative(freq,Me.xQL[id+m],sl,dsdqli);
+                    const auto ra = get_attenuation_response(
+                        freq,Me.xQA[id+m],Me.ATTENUATION_REF_FREQUENCY
+                    );
+                    const auto rc = get_attenuation_response(
+                        freq,Me.xQC[id+m],Me.ATTENUATION_REF_FREQUENCY
+                    );
+                    const auto rl = get_attenuation_response(
+                        freq,Me.xQL[id+m],Me.ATTENUATION_REF_FREQUENCY
+                    );
+                    sa = ra.factor; sc = rc.factor; sl = rl.factor;
+                    dsdqai = ra.d_factor_d_qinv;
+                    dsdqci = rc.d_factor_d_qinv;
+                    dsdqli = rl.d_factor_d_qinv;
+                    dwdsa = ra.d_factor_d_omega * omega_scale;
+                    dwdsc = rc.d_factor_d_omega * omega_scale;
+                    dwdsl = rl.d_factor_d_omega * omega_scale;
+                    d2sadwdq = ra.d2_factor_d_omega_d_qinv * omega_scale;
+                    d2scdwdq = rc.d2_factor_d_omega_d_qinv * omega_scale;
+                    d2sldwdq = rl.d2_factor_d_omega_d_qinv * omega_scale;
                     dsdqai *= A;
                     dsdqci *= C;
                     dsdqli *= L;
+                    d2sadwdq *= A;
+                    d2scdwdq *= C;
+                    d2sldwdq *= L;
                 }
+
+                const Complex kA = c_K * sa + c_dwdK * dwdsa;
+                const Complex kL = c_K * sl + c_dwdK * dwdsl;
+                const Complex eA = c_E * sa + c_dwdE * dwdsa;
+                const Complex eC = c_E * sc + c_dwdE * dwdsc;
+                const Complex eL = c_E * sl + c_dwdE * dwdsl;
+                const Complex kqA = c_K * dsdqai + c_dwdK * d2sadwdq;
+                const Complex kqL = c_K * dsdqli + c_dwdK * d2sldwdq;
+                const Complex eqA = c_E * dsdqai + c_dwdE * d2sadwdq;
+                const Complex eqC = c_E * dsdqci + c_dwdE * d2scdwdq;
+                const Complex eqL = c_E * dsdqli + c_dwdE * d2sldwdq;
 
                 // K matrix
                 // dc_dA
-                temp = weight[m] * J * U[m] * lU[m] * c_K;
-                dc_dA = temp * sa; dc_dQai = temp * dsdqai;
+                temp = weight[m] * J * U[m] * lU[m];
+                dc_dA = temp * kA; dc_dQai = temp * kqA;
 
                 // dc_dL
-                temp = weight[m] * J * V[m] * lV[m] * c_K;
-                dc_dL = temp * sl; dc_dQli = temp * dsdqli;
+                temp = weight[m] * J * V[m] * lV[m];
+                dc_dL = temp * kL; dc_dQli = temp * kqL;
 
                 // Ematrix
-                complex_t sx{},sy{},lsx{},lsy{};
-                const real_t *hp_m = &hp[m * NGL];
+                Complex sx{},sy{},lsx{},lsy{};
+                const Real *hp_m = &hp[m * NGL];
                 for(int i = 0; i < NGL; i ++) {
                     sx += hp_m[i] * U[i];
                     sy += hp_m[i] * V[i];
@@ -119,36 +155,36 @@ frechet_op_el(
                 }
 
                 // E1
-                temp = weight[m] / J * sx * lsx * c_E;
-                dc_dL += temp * sl; dc_dQli += temp * dsdqli;
+                temp = weight[m] / J * sx * lsx;
+                dc_dL += temp * eL; dc_dQli += temp * eqL;
                 
                 // E3
-                temp = weight[m] / J * sy * lsy * c_E;
-                dc_dC = temp * sc; dc_dQci = temp * dsdqci;
+                temp = weight[m] / J * sy * lsy;
+                dc_dC = temp * eC; dc_dQci = temp * eqC;
 
                 // K2,  d / dm_k sum_{ij} w_j F_j hpT(i,j) U_j lV_i 
                 // = \sum_{i} w_k dF/dm_k hpT(i,k) U_k lV_i = lsy * w_k * U_k * dF/dm_k 
-                temp = weight[m] * U[m] * lsy * c_K;
-                dc_deta = temp * (A*sa - two*L*sl); 
+                temp = weight[m] * U[m] * lsy;
+                dc_deta = temp * (A*kA - two*L*kL);
                 temp *= eta;
-                dc_dA += temp * sa; dc_dQai += temp * dsdqai;
-                dc_dL += - temp * two * sl; dc_dQli += -temp * two * dsdqli;
+                dc_dA += temp * kA; dc_dQai += temp * kqA;
+                dc_dL += -temp * two * kL; dc_dQli += -temp * two * kqL;
 
                 // K2, -d / dm_k sum_{ij} w_i L_i hp(i,j) U_j lV_i
                 // = - \sum_{j} w_k dL/dm_k hp(j,k) U_j lV_k = -sx * w_k * lV_k dL/dm_k
-                temp = weight[m] * lV[m] * sx * c_K;
-                dc_dL += - temp * sl; dc_dQli += -temp * dsdqli;
+                temp = weight[m] * lV[m] * sx;
+                dc_dL += -temp * kL; dc_dQli += -temp * kqL;
 
                 //E2 \sum_{j} w_k dF/dm_k hp(j,k) V_j lU_k = -sx * w_k * lV_k dF/dm_k
-                temp = weight[m] * lU[m] * sy * c_E; 
-                dc_deta += temp * (A*sa - two*L*sl); 
+                temp = weight[m] * lU[m] * sy;
+                dc_deta += temp * (A*eA - two*L*eL);
                 temp *= eta;
-                dc_dA += temp * sa; dc_dQai += temp * dsdqai;
-                dc_dL += - temp * two * sl; dc_dQli += -temp * two * dsdqli;
+                dc_dA += temp * eA; dc_dQai += temp * eqA;
+                dc_dL += -temp * two * eL; dc_dQli += -temp * two * eqL;
 
                 // E2 -lsx * w_k * V_k * dL/dm_k 
-                temp = weight[m] * V[m] * lsx * c_E;
-                dc_dL += - temp * sl; dc_dQli += -temp * dsdqli;
+                temp = weight[m] * V[m] * lsx;
+                dc_dL += -temp * eL; dc_dQli += -temp * eqL;
 
                 // copy them to frekl
                 int id1 = iel * NGLL + m;
@@ -196,37 +232,41 @@ frechet_op_el(
  */
 void SolverRayl::
 frechet_op_ac(
-    complex_t c_M, complex_t c_K,  complex_t c_E,
-    const complex_t *y,
-    const complex_t *x,
-    real_t * __restrict frekl_r,
-    real_t * __restrict frekl_i
+    Complex c_M, Complex c_K,  Complex c_E,
+    const Complex *y,
+    const Complex *x,
+    Real * __restrict frekl_r,
+    Real * __restrict frekl_i,
+    Complex c_dwdM, Complex c_dwdK, Complex c_dwdE
 )const 
 {
+    (void)c_dwdK;
+    (void)c_dwdE;
     // constants
     using namespace GQTable;
     auto const &Me = *mesh_;
     int nspec_ac = Me.nspec_ac;
     int nglob_el = Me.nglob_el;
     size_t size = mesh_->ibool.size();
-    real_t freq = Me.freq * Me.SCALE_VELOCITY / Me.SCALE_LENGTH;
+    Real freq = Me.freq * Me.SCALE_VELOCITY / Me.SCALE_LENGTH;
+    Real omega_scale = Me.SCALE_VELOCITY / Me.SCALE_LENGTH;
     const bool has_att = Me.HAS_ATT;
  
     // lambda function to add contribution
     auto add_contribution_ac = [&](
         int starid,int endid,
-        const real_t *weight,
-        const real_t *hp,
+        const Real *weight,
+        const Real *hp,
         auto ConstNGL) {
         constexpr int NGL = decltype(ConstNGL)::value;
 
         // temporary arrays
-        std::array<complex_t,NGL> chi,lchi;
+        std::array<Complex,NGL> chi,lchi;
 
         for(int ispec = starid; ispec < endid; ispec ++) {
             int id = ispec * NGLL;
             int iel = Me.ac_elmnts[ispec];
-            real_t J = Me.jacodet[iel];
+            Real J = Me.jacodet[iel];
 
             // cache temporary arrays
             for(int i = 0; i < NGL; i ++) {
@@ -237,25 +277,35 @@ frechet_op_ac(
             }
 
             // compute kernel
-            complex_t dc_dkappa{}, dc_drho{}, dc_dqki{};
-            complex_t sk = 1., dsdqki{};
+            Complex dc_dkappa{}, dc_drho{}, dc_dqki{};
+            Complex sk = 1., dsdqki{}, dwdsk{}, d2skdwdq{};
             for(int m = 0; m < NGL; m ++) {
-                real_t rho = Me.xrho_ac[id+m];
-                real_t kappa = Me.xkappa_ac[id+m];
+                Real rho = Me.xrho_ac[id+m];
+                Real kappa = Me.xkappa_ac[id+m];
                 if (has_att) {
-                    get_sls_Q_derivative(freq,Me.xQk_ac[id+m],sk,dsdqki);
-                    dsdqki *= kappa;
+                    const auto response = get_attenuation_response(
+                        freq,Me.xQk_ac[id+m],Me.ATTENUATION_REF_FREQUENCY
+                    );
+                    sk = response.factor;
+                    dsdqki = response.d_factor_d_qinv;
+                    dwdsk = response.d_factor_d_omega * omega_scale;
+                    d2skdwdq = response.d2_factor_d_omega_d_qinv * omega_scale;
                 }
                 // kappa kernel
-                complex_t temp = -c_M * weight[m]* J*chi[m] * lchi[m] / (sk * kappa) / (sk * kappa);
-                dc_dkappa = temp * sk;
-                dc_dqki =  temp * dsdqki;
+                Complex temp = weight[m] * J * chi[m] * lchi[m];
+                dc_dkappa = -temp / (kappa * kappa)
+                    * (c_M / sk - c_dwdM * dwdsk / (sk * sk));
+                dc_dqki = temp / kappa
+                    * (-c_M * dsdqki / (sk * sk)
+                       + c_dwdM
+                           * (-d2skdwdq / (sk * sk)
+                              + 2. * dwdsk * dsdqki / (sk * sk * sk)));
 
                 // rho kernel
                 dc_drho = - c_K * weight[m]* J * chi[m] * lchi[m] / (rho * rho);
 
-                complex_t sx{},sy{};
-                const real_t *hp_m = &hp[m * NGL];
+                Complex sx{},sy{};
+                const Real *hp_m = &hp[m * NGL];
                 for(int i = 0; i < NGL; i ++) {
                     sx += hp_m[i] * chi[i];
                     sy += hp_m[i] * lchi[i]; 
@@ -302,13 +352,13 @@ void SolverRayl::
 prepare_adjoint_(
     int imode,
     int kltype,
-    complex_t * __restrict c_M,
-    complex_t * __restrict c_K,
-    complex_t * __restrict c_E,
-    complex_t *__restrict adj_lambda,
-    complex_t *__restrict adj_mu,
-    complex_t *__restrict adj_xi,
-    complex_t *__restrict adj_eta
+    Complex * __restrict c_M,
+    Complex * __restrict c_K,
+    Complex * __restrict c_E,
+    Complex *__restrict adj_lambda,
+    Complex *__restrict adj_mu,
+    Complex *__restrict adj_xi,
+    Complex *__restrict adj_eta
 ) const
 {
     // check kernel 
@@ -318,18 +368,18 @@ prepare_adjoint_(
 
     // set zero for coefficients
     for(int i = 0; i < 7; i ++) {
-        c_M[i] = complex_t(0,0);
-        c_K[i] = complex_t(0,0);
-        c_E[i] = complex_t(0,0);
+        c_M[i] = Complex(0,0);
+        c_K[i] = Complex(0,0);
+        c_E[i] = Complex(0,0);
     }
 
     // set zero for adjoint fields
     int ng = mesh_->nglob_ac + mesh_->nglob_el * 2;
     for(int i = 0; i < ng; i ++) {
-        adj_lambda[i] = complex_t(0,0);
-        adj_mu[i] = complex_t(0,0);
-        adj_xi[i] = complex_t(0,0);
-        adj_eta[i] = complex_t(0,0);
+        adj_lambda[i] = Complex(0,0);
+        adj_mu[i] = Complex(0,0);
+        adj_xi[i] = Complex(0,0);
+        adj_eta[i] = Complex(0,0);
     }
 
     if(kltype == 0) {
@@ -370,31 +420,31 @@ prepare_adjoint_(
 void SolverRayl::
 prepare_adjoint_phase_(
     int imode,
-    complex_t * __restrict c_M,
-    complex_t * __restrict c_K,
-    complex_t * __restrict c_E,
-    complex_t *__restrict adj_lambda,
-    complex_t *__restrict adj_mu,
-    complex_t *__restrict adj_xi,
-    complex_t *__restrict adj_eta
+    Complex * __restrict c_M,
+    Complex * __restrict c_K,
+    Complex * __restrict c_E,
+    Complex *__restrict adj_lambda,
+    Complex *__restrict adj_mu,
+    Complex *__restrict adj_xi,
+    Complex *__restrict adj_eta
 ) const
 {
 
     // map eigenfunction
     int ng = mesh_->nglob_el*2 + mesh_->nglob_ac;
-    using cmat2 = Eigen::Matrix<complex_t,-1,-1,1>;
-    Eigen::Map<const Eigen::VectorX<complex_t>> x(egn_r.data() + imode * ng,ng);
-    Eigen::Map<const Eigen::VectorX<complex_t>> y(egn_l.data() + imode * ng,ng);
+    using cmat2 = Eigen::Matrix<Complex,-1,-1,1>;
+    Eigen::Map<const Eigen::VectorX<Complex>> x(egn_r.data() + imode * ng,ng);
+    Eigen::Map<const Eigen::VectorX<Complex>> y(egn_l.data() + imode * ng,ng);
 
     // mapping K matrix
     Eigen::Map<const cmat2> K(Kmat.data(),ng,ng);
 
     // only 4-th coefs are non-zero
-    real_t om = mesh_->freq * 2.0 * M_PI;
-    complex_t c = c_phase[imode];
-    complex_t c_sq = c * c;
-    complex_t om_sq = om * om;
-    complex_t coef = -0.5 / om_sq * c_sq * c / (y.adjoint() * K * x).sum();
+    Real om = mesh_->freq * 2.0 * M_PI;
+    Complex c = c_phase[imode];
+    Complex c_sq = c * c;
+    Complex om_sq = om * om;
+    Complex coef = -0.5 / om_sq * c_sq * c / (y.adjoint() * K * x).sum();
     c_M[4] = om * om * coef;
     c_K[4] = -om_sq / c_sq * coef;
     c_E[4] = -coef; 
@@ -410,19 +460,18 @@ prepare_adjoint_phase_(
 void SolverRayl::
 prepare_adjoint_group_(
     int imode,
-    complex_t * __restrict c_M,
-    complex_t * __restrict c_K,
-    complex_t * __restrict c_E,
-    complex_t *__restrict adj_lambda,
-    complex_t *__restrict adj_mu,
-    complex_t *__restrict adj_xi,
-    complex_t *__restrict adj_eta
+    Complex * __restrict c_M,
+    Complex * __restrict c_K,
+    Complex * __restrict c_E,
+    Complex *__restrict adj_lambda,
+    Complex *__restrict adj_mu,
+    Complex *__restrict adj_xi,
+    Complex *__restrict adj_eta
 ) const
 {
     // typedefs
-    using cmat2 = Eigen::Matrix<complex_t,-1,-1,1>;
-    using cvec = Eigen::VectorX<complex_t>;
-    using rmat2 = Eigen::Matrix<real_t,-1,-1,1>;
+    using cmat2 = Eigen::Matrix<Complex,-1,-1,1>;
+    using cvec = Eigen::VectorX<Complex>;
 
     // map eigenfunction
     int ng = mesh_->nglob_el*2 + mesh_->nglob_ac;
@@ -433,44 +482,67 @@ prepare_adjoint_group_(
     // mapping K matrix
     Eigen::Map<const cmat2> K(Kmat.data(),ng,ng);
     Eigen::Map<const cvec> M(Mmat.data(),ng);
-    Eigen::Map<const rmat2> dE(dwdEmat.data(),ng,ng);
+    Eigen::Map<const cvec> dM(dwdMmat.data(),ng);
+    Eigen::Map<const cmat2> dK(dwdKmat.data(),ng,ng);
+    Eigen::Map<const cmat2> dE(dwdEmat.data(),ng,ng);
 
     // compute some coefs
-    real_t om = mesh_->freq * 2.0 * M_PI;
-    complex_t c = c_phase[imode];
-    complex_t c_sq = c * c;
-    complex_t om_sq = om * om, k2 = om_sq / c_sq;
-    complex_t twokinv = 0.5 * c / om;
-    complex_t yHKx = y.adjoint() * K * x;;
-    complex_t yHMx = y.adjoint() * M.asDiagonal() * x;
-    complex_t yHdEx = y.adjoint() * dE * x;
-    complex_t denoinv = (real_t)(1.) / (c * yHMx - twokinv * yHdEx);
-    complex_t denoinv_sq = denoinv * denoinv;
-    complex_t df_dalpha = yHKx * yHMx * denoinv_sq * (real_t)(0.5) * c / k2; // df/dc * dc/dalpha
-    df_dalpha += -yHKx * yHdEx * denoinv_sq / k2 * c/om * 0.25; // df/dk * dk/dalpha
+    Real om = mesh_->freq * 2.0 * M_PI;
+    Complex c = c_phase[imode];
+    Complex c_sq = c * c;
+    Complex om_sq = om * om, k2 = om_sq / c_sq;
+    Complex yHKx = y.adjoint() * K * x;;
+    Complex yHMx = y.adjoint() * M.asDiagonal() * x;
+    Complex yHdMx = y.adjoint() * dM.asDiagonal() * x;
+    Complex yHdKx = y.adjoint() * dK * x;
+    Complex yHdEx = y.adjoint() * dE * x;
+    Complex den = c * yHMx + 0.5 * om * c * yHdMx
+                    - 0.5 * om / c * yHdKx
+                    - 0.5 * c / om * yHdEx;
+    Complex denoinv = (Real)(1.) / den;
+    Complex denoinv_sq = denoinv * denoinv;
+    Complex dden_dc = yHMx + 0.5 * om * yHdMx
+                        + 0.5 * om / (c * c) * yHdKx
+                        - 0.5 / om * yHdEx;
+    Complex df_dalpha = yHKx * denoinv_sq * dden_dc
+                          * 0.5 * c / k2;
 
     // du_dx and du_dy*
+    cmat2 G = -0.5 * om / c * dK - 0.5 * c / om * dE;
+    G.diagonal().array() += c * M.array() + 0.5 * om * c * dM.array();
     cvec du_dx = K.transpose() * y.conjugate() * denoinv - 
-                 yHKx * denoinv_sq * (c * (M.asDiagonal() * y.conjugate()) -
-                 twokinv * (dE.transpose() * y.conjugate()));
+                 yHKx * denoinv_sq * G.transpose() * y.conjugate();
     cvec du_dys = K * x * denoinv - 
-                    yHKx * denoinv_sq * (
-                    c * (M.asDiagonal() * x) -
-                    twokinv * (dE * x)
-                );
+                    yHKx * denoinv_sq * G * x;
                         
     // mapping Q/Z/S/Sp matrices
-    using cmat2_col = Eigen::MatrixX<complex_t>;
+    using cmat2_col = Eigen::MatrixX<Complex>;
     Eigen::Map<const cmat2_col> Q(Qmat.data(),ng,ng);
     Eigen::Map<const cmat2_col> Z(Zmat.data(),ng,ng);
     Eigen::Map<const cmat2_col> S(Smat.data(),ng,ng);
     Eigen::Map<const cmat2_col> Sp(Spmat.data(),ng,ng);
 
+    // c_phase is stored after the single-precision QZ solve in the default
+    // build.  Reconstructing k^2 from that rounded phase velocity leaves the
+    // selected Schur diagonal spuriously nonsingular.  Snap only the adjoint
+    // solve to the nearest generalized Schur eigenvalue.
+    Complex k2_solve = k2;
+    Real smallest_residual = std::numeric_limits<Real>::max();
+    for(int i = 0; i < ng; ++i) {
+        if(std::abs(Sp(i,i)) == 0.) continue;
+        const Complex candidate = S(i,i) / Sp(i,i);
+        const Real residual = std::abs(candidate - k2);
+        if(residual < smallest_residual) {
+            smallest_residual = residual;
+            k2_solve = candidate;
+        }
+    }
+
     // solve (A - k2 B).H * lambda = (du_dx)*
     Eigen::Map<cvec> lambda(adj_lambda,ng);
     lambda.setZero();
-    du_dx = Z.adjoint() * du_dx;
-    cmat2_col P = (S - k2 * Sp).adjoint();
+    du_dx = Z.adjoint() * du_dx.conjugate();
+    cmat2_col P = (S - k2_solve * Sp).adjoint();
     solve_hessenberg_lower(P.data(),du_dx.data(),lambda.data(),ng);
     lambda = Q * lambda;
     lambda = lambda - (y.conjugate().array() * lambda.array()).sum() * y; // orthogonal to y
@@ -478,14 +550,14 @@ prepare_adjoint_group_(
     // solve xi, (A - k2 B) * xi = (du_dys)
     Eigen::Map<cvec> xi(adj_xi,ng);
     xi.setZero();
-    P = S - k2 * Sp;
+    P = S - k2_solve * Sp;
     du_dys = Q.adjoint() * du_dys;
     solve_hessenberg_upper(P.data(),du_dys.data(),xi.data(),ng);
     xi = Z * xi;
     xi = xi - (xi.array() * x.conjugate().array()).sum() * x; // orthogonal to x
 
     // compute c12 
-    complex_t c12 = df_dalpha + (lambda.adjoint() * K * x).sum() + (y.adjoint() * K * xi).sum();
+    Complex c12 = df_dalpha + (lambda.adjoint() * K * x).sum() + (y.adjoint() * K * xi).sum();
     c12 = -c12 / yHKx;
 
     // compute coefs for lambda
@@ -521,10 +593,10 @@ void SolverRayl::
 compute_kernels(
     int imode,
     int kltype,
-    std::vector<real_t> &frekl_el_r,
-    std::vector<real_t> &frekl_el_i,
-    std::vector<real_t> &frekl_ac_r,
-    std::vector<real_t> &frekl_ac_i
+    std::vector<Real> &frekl_el_r,
+    std::vector<Real> &frekl_el_i,
+    std::vector<Real> &frekl_ac_r,
+    std::vector<Real> &frekl_ac_i
 ) const
 {
     // sanity check
@@ -552,15 +624,15 @@ compute_kernels(
     std::fill(frekl_ac_i.begin(),frekl_ac_i.end(),0.);
 
     // mapping to Eigen arrays
-    Eigen::Map<Eigen::VectorX<real_t>> f_el_r(frekl_el_r.data(), frekl_el_r.size());
-    Eigen::Map<Eigen::VectorX<real_t>> f_el_i(frekl_el_i.data(), frekl_el_i.size());
-    Eigen::Map<Eigen::VectorX<real_t>> f_ac_r(frekl_ac_r.data(), frekl_ac_r.size());
-    Eigen::Map<Eigen::VectorX<real_t>> f_ac_i(frekl_ac_i.data(), frekl_ac_i.size()); 
+    Eigen::Map<Eigen::VectorX<Real>> f_el_r(frekl_el_r.data(), frekl_el_r.size());
+    Eigen::Map<Eigen::VectorX<Real>> f_el_i(frekl_el_i.data(), frekl_el_i.size());
+    Eigen::Map<Eigen::VectorX<Real>> f_ac_r(frekl_ac_r.data(), frekl_ac_r.size());
+    Eigen::Map<Eigen::VectorX<Real>> f_ac_i(frekl_ac_i.data(), frekl_ac_i.size());
 
     // compute all adjoint field, coefs
     int ng = this->ndof;
-    std::array<complex_t,7> c_M{},c_K{},c_E{};
-    Eigen::VectorX<complex_t> lambda(ng),mu(ng),xi(ng),eta(ng);
+    std::array<Complex,7> c_M{},c_K{},c_E{};
+    Eigen::VectorX<Complex> lambda(ng),mu(ng),xi(ng),eta(ng);
     this -> prepare_adjoint_(
         imode,
         kltype,
@@ -574,16 +646,16 @@ compute_kernels(
     );
 
     // allocate temp arrays
-    Eigen::VectorX<real_t> tp_el_r(frekl_el_r.size());
-    Eigen::VectorX<real_t> tp_el_i(frekl_el_i.size());
-    Eigen::VectorX<real_t> tp_ac_r(frekl_ac_r.size());
-    Eigen::VectorX<real_t> tp_ac_i(frekl_ac_i.size());
+    Eigen::VectorX<Real> tp_el_r(frekl_el_r.size());
+    Eigen::VectorX<Real> tp_el_i(frekl_el_i.size());
+    Eigen::VectorX<Real> tp_ac_r(frekl_ac_r.size());
+    Eigen::VectorX<Real> tp_ac_i(frekl_ac_i.size());
     tp_el_r.setZero(); tp_ac_r.setZero();
     tp_el_i.setZero(); tp_ac_i.setZero();
 
     // get left/right eigenvectors
-    const complex_t *x = egn_r.data() + imode * ng;
-    const complex_t *y = egn_l.data() + imode * ng;
+    const Complex *x = egn_r.data() + imode * ng;
+    const Complex *y = egn_l.data() + imode * ng;
 
     #define RUN_OP(i,a,b,fac) \
         this -> frechet_op_el( \
@@ -597,9 +669,9 @@ compute_kernels(
             tp_ac_r.data(),tp_ac_i.data() \
         ); \
         f_el_r += tp_el_r; \
-        f_el_i += (real_t) (fac) * tp_el_i; \
+        f_el_i += (Real) (fac) * tp_el_i; \
         f_ac_r += tp_ac_r; \
-        f_ac_i += (real_t) (fac) * tp_ac_i; \
+        f_ac_i += (Real) (fac) * tp_ac_i; \
         tp_el_r.setZero(); tp_el_i.setZero(); \
         tp_ac_r.setZero(); tp_ac_i.setZero(); \
     
@@ -626,6 +698,44 @@ compute_kernels(
 
     #undef RUN_OP
 
+    if(kltype == 1 && mesh_->HAS_ATT) {
+        using cmat2 = Eigen::Matrix<Complex,-1,-1,Eigen::RowMajor>;
+        Eigen::Map<const Eigen::VectorX<Complex>> xv(x,ng), yv(y,ng);
+        Eigen::Map<const Eigen::VectorX<Complex>> M(Mmat.data(),ng);
+        Eigen::Map<const Eigen::VectorX<Complex>> dM(dwdMmat.data(),ng);
+        Eigen::Map<const cmat2> K(Kmat.data(),ng,ng);
+        Eigen::Map<const cmat2> dK(dwdKmat.data(),ng,ng);
+        Eigen::Map<const cmat2> dE(dwdEmat.data(),ng,ng);
+        const Real omega = 2. * M_PI * mesh_->freq;
+        const Complex c = c_phase[imode];
+        const Complex b = (yv.adjoint() * K * xv).sum();
+        const Complex den =
+            c * (yv.array().conjugate() * M.array() * xv.array()).sum()
+            + 0.5 * omega * c
+                * (yv.array().conjugate() * dM.array() * xv.array()).sum()
+            - 0.5 * omega / c * (yv.adjoint() * dK * xv).sum()
+            - 0.5 * c / omega * (yv.adjoint() * dE * xv).sum();
+        const Complex direct = b / (den * den);
+        const Complex c_dwdM = -0.5 * omega * c * direct;
+        const Complex c_dwdK = 0.5 * omega / c * direct;
+        const Complex c_dwdE = 0.5 * c / omega * direct;
+
+        this -> frechet_op_el(
+            0.,0.,0.,y,x,tp_el_r.data(),tp_el_i.data(),
+            c_dwdM,c_dwdK,c_dwdE
+        );
+        this -> frechet_op_ac(
+            0.,0.,0.,y,x,tp_ac_r.data(),tp_ac_i.data(),
+            c_dwdM,c_dwdK,c_dwdE
+        );
+        f_el_r += tp_el_r;
+        f_el_i += tp_el_i;
+        f_ac_r += tp_ac_r;
+        f_ac_i += tp_ac_i;
+        tp_el_r.setZero(); tp_el_i.setZero();
+        tp_ac_r.setZero(); tp_ac_i.setZero();
+    }
+
     // transfer kernels
     this -> transform_kernels(kltype, frekl_el_r);
     this -> transform_kernels(kltype, frekl_el_i);
@@ -634,14 +744,20 @@ compute_kernels(
 
     // get cq kernel if required
     if(mesh_->HAS_ATT) {
-        complex_t val;
+        Complex val;
         if(kltype == 0) {
             val = c_phase[imode];
         } else {
             val = c_group[imode];
         }
-        get_fQ_kl(frekl_el_r.size(),val,frekl_el_r.data(),frekl_el_i.data());
-        get_fQ_kl(frekl_ac_r.size(),val,frekl_ac_r.data(),frekl_ac_i.data());
+        get_fQ_kl(
+            frekl_el_r.size(), val, mesh_->SCALE_VELOCITY,
+            frekl_el_r.data(), frekl_el_i.data()
+        );
+        get_fQ_kl(
+            frekl_ac_r.size(), val, mesh_->SCALE_VELOCITY,
+            frekl_ac_r.data(), frekl_ac_i.data()
+        );
     }
 }
 

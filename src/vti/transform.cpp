@@ -10,10 +10,10 @@ namespace specswd {
  * @param displ output displacement, shape(nspec*NGLL+NGRL)
  */
 void SolverLove::
-egn2displ(int imode,complex_t * __restrict displ ) const 
+egn2displ(int imode,Complex * __restrict displ ) const
 {
     using namespace GQTable;
-    const complex_t *u = egn.data() + imode * mesh_->nglob_el;
+    const Complex *u = egn.data() + imode * mesh_->nglob_el;
     for(int i = 0; i < mesh_->nspec_el + 1; i ++) {
         int NGL = NGLL;
         if(i == mesh_->nspec_el) {
@@ -33,18 +33,17 @@ egn2displ(int imode,complex_t * __restrict displ ) const
  * @param displ displacement, shape(2,npts)
  */
 void SolverRayl::
-egn2displ(int imode,complex_t * __restrict displ ) const 
+egn2displ(int imode,Complex * __restrict displ ) const
 {
     // get wave number
-    complex_t c = c_phase[imode];
-    complex_t k = (complex_t)(M_PI * 2.) * mesh_->freq / c;
-
+    Complex c = c_phase[imode];
+    Complex k = (Complex)(M_PI * 2.) * mesh_->freq / c;
     // size
     using namespace GQTable;
     int npts = mesh_->ibool.size();
 
     // get eigenfunction pointer
-    const complex_t *egn_r_ptr = egn_r.data() + imode * ndof;
+    const Complex *egn_r_ptr = egn_r.data() + imode * ndof;
 
     // loop elastic elements
     for(int ispec = 0; ispec < mesh_->nspec_el+mesh_->nspec_el_grl; ispec ++) {
@@ -61,19 +60,22 @@ egn2displ(int imode,complex_t * __restrict displ ) const
         for(int i = 0; i < NGL; i ++) {
             int iglob = mesh_->ibool_el[id0+i];
             displ[0*npts + id1+i] = egn_r_ptr[iglob];
-            displ[1*npts + id1+i] = egn_r_ptr[iglob + mesh_->nglob_el] / k; // this is V\bar = kV
+            // Keep the standard real Rayleigh polarization convention.  The
+            // physical pi/2 phase shift of the vertical component is implicit.
+            displ[1*npts + id1+i] =
+                egn_r_ptr[iglob + mesh_->nglob_el] / k;
         }
     }   
 
     // loop each acoustic element
-    std::array<complex_t,NGRL> chi;
+    std::array<Complex,NGRL> chi;
     for(int ispec = 0; ispec < mesh_->nspec_ac + mesh_->nspec_ac_grl; ispec += 1) {
         int iel = mesh_->ac_elmnts[ispec];
         int NGL = NGLL;
         int id0 = ispec * NGLL;
         int id1 = iel * NGLL;
-        const real_t *hp = &hprime[0];
-        const real_t J = mesh_->jacodet[iel];
+        const Real *hp = &hprime[0];
+        const Real J = mesh_->jacodet[iel];
 
         // GRL layer
         if(ispec == mesh_->nspec_ac) {
@@ -85,20 +87,21 @@ egn2displ(int imode,complex_t * __restrict displ ) const
         for(int i = 0; i < NGL; i ++) {
             int id = id0 + i;
             int iglob = mesh_->ibool_ac[id];
-            chi[i] = (iglob == -1) ? (complex_t)0.: egn_r_ptr[mesh_->nglob_el * 2 + iglob] / k;
+            chi[i] = (iglob == -1) ? (Complex)0.:
+                egn_r_ptr[mesh_->nglob_el * 2 + iglob] / k;
         }
 
 
         // compute derivative  dchi / dz
         for(int i = 0; i < NGL; i ++) {
-            complex_t dchi{};
+            Complex dchi{};
             for(int j = 0; j < NGL; j ++) {
                 dchi += chi[j] * hp[i * NGL + j];
             }
             dchi /= J;
 
             // set value to displ
-            real_t rho = mesh_->xrho_ac[id0 + i];
+            Real rho = mesh_->xrho_ac[id0 + i];
             displ[0*npts + id1+i] = -k / rho  * chi[i];
             displ[1*npts + id1+i] = dchi / rho;
         }
@@ -115,7 +118,7 @@ egn2displ(int imode,complex_t * __restrict displ ) const
 void SolverLove:: 
 transform_kernels(
     int kltype,
-    std::vector<real_t> &frekl
+    std::vector<Real> &frekl
 ) const
 {
     // sanity check
@@ -133,8 +136,8 @@ transform_kernels(
     int npts = M.nspec * NGLL + NGRL;
 
     // get scale factors
-    real_t scale_vel = M.SCALE_VELOCITY;
-    real_t scale_rho = M.SCALE_DENSITY;
+    Real scale_vel = M.SCALE_VELOCITY;
+    Real scale_rho = M.SCALE_DENSITY;
     for(int ipt = 0; ipt < npts; ipt ++) {
         double N_kl,L_kl,rho_kl;
         N_kl = frekl[0 * npts + ipt];
@@ -174,7 +177,7 @@ transform_kernels(
 void SolverRayl:: 
 transform_kernels(
     int kltype,
-    std::vector<real_t> &frekl
+    std::vector<Real> &frekl
 ) const
 {
     // sanity check
@@ -209,8 +212,8 @@ transform_kernels(
     }
 
     // scale factors
-    real_t scale_vel = M.SCALE_VELOCITY;
-    real_t scale_rho = M.SCALE_DENSITY;
+    Real scale_vel = M.SCALE_VELOCITY;
+    Real scale_rho = M.SCALE_DENSITY;
 
     // loop elastic domain
     for(int ispec = 0; ispec < nspec_el; ispec += 1) {
