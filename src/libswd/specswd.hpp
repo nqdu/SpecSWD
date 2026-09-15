@@ -2,8 +2,8 @@
 #define SPECSWD_LIB_UTILS_H_
 
 #include "numerical.hpp"
-using specswd::real_t;
-using specswd::complex_t;
+using specswd::Real;
+using specswd::Complex;
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,7 +12,12 @@ extern "C" {
 void 
 specswd_init_GQTable();
 
+// Deprecated compatibility entry point. Constant-Q attenuation has no fitted
+// coefficient table, so this function reports that its arguments are ignored.
 void specswd_reset_Qmodel(const double *w,const double *y);
+// Returns zero on success and nonzero if the mesh is uninitialized or the
+// frequency is not positive.
+int specswd_set_attenuation_reference_frequency(Real frequency);
 
 void 
 specswd_kernel_size(int *nkers, int *nkers_el, int *nkers_ac);
@@ -22,17 +27,17 @@ int specswd_egn_size();
 
 void
 specswd_init_mesh(
-    int swd_type,int nz, const real_t *z,const real_t *rho,
-    const real_t *vph,const real_t* vpv,const real_t *vsh,
-    const real_t *vsv,const real_t *eta,const real_t *QA, 
-    const real_t *QC, const real_t *QN,const real_t *QL, 
-    const real_t *c21,const real_t* Qani,int nQani,int Qfunc_id,
+    int swd_type,int nz, const Real *z,const Real *rho,
+    const Real *vph,const Real* vpv,const Real *vsh,
+    const Real *vsv,const Real *eta,const Real *QA,
+    const Real *QC, const Real *QN,const Real *QL,
+    const Real *c21,const Real* Qani,int nQani,int Qfunc_id,
     double scale_rho,double scale_v, double scale_z,
     bool HAS_ATT,bool print_tomo_info
 );
 
 // phase and group velocity computation
-void specswd_execute(real_t freq,real_t phi_in_deg,bool use_qz);
+void specswd_execute(Real freq,Real phi_in_deg,bool use_qz);
 void specswd_compute_group();
 
 void 
@@ -41,10 +46,10 @@ specswd_group_love(int imode);
 void 
 specswd_group_rayl(int imode);
 
-void specswd_phase_kl(int imode,real_t *frekl_c,real_t *frekl_q);
-void specswd_group_kl(int imode,real_t *frekl_c,real_t *frekl_q);
+void specswd_phase_kl(int imode,Real *frekl_c,Real *frekl_q);
+void specswd_group_kl(int imode,Real *frekl_c,Real *frekl_q);
 
-void specswd_eigen(int imode, real_t *egn_r, real_t *egn_i,
+void specswd_eigen(int imode, Real *egn_r, Real *egn_i,
               int return_left_egn,int return_displ);
 
 

@@ -8,14 +8,14 @@
 #include <memory>
 #include <complex>
 
-using specswd::real_t;
-using specswd::complex_t;
+using specswd::Real;
+using specswd::Complex;
 
 
 static void 
 specswd_init_mesh_love(
-    int nz, const real_t *z,const real_t *rho,const real_t *vsh,
-    const real_t *vsv,const real_t *QN, const real_t *QL,
+    int nz, const Real *z,const Real *rho,const Real *vsh,
+    const Real *vsv,const Real *QN, const Real *QL,
     bool HAS_ATT,bool print_tomo_info
 )
 {
@@ -48,10 +48,10 @@ specswd_init_mesh_love(
 
 static void 
 specswd_init_mesh_rayl(
-    int nz, const real_t *z,const real_t *rho,
-    const real_t *vph,const real_t* vpv,const real_t *vsv,
-    const real_t *eta,const real_t *QA, const real_t *QC,
-    const real_t *QL, bool HAS_ATT,bool print_tomo_info
+    int nz, const Real *z,const Real *rho,
+    const Real *vph,const Real* vpv,const Real *vsv,
+    const Real *eta,const Real *QA, const Real *QC,
+    const Real *QL, bool HAS_ATT,bool print_tomo_info
 )
 {
     using namespace specswd_pylib;
@@ -87,8 +87,8 @@ specswd_init_mesh_rayl(
 
 static void 
 specswd_init_mesh_aniso(
-    int nz, const real_t *z,const real_t *rho,
-    const real_t *c21,const real_t* Qani,
+    int nz, const Real *z,const Real *rho,
+    const Real *c21,const Real* Qani,
     bool HAS_ATT,int nQani,int Qfunc_id,
     bool print_tomo_info
 )
@@ -149,11 +149,11 @@ specswd_init_mesh_aniso(
  */
 extern "C" void 
 specswd_init_mesh(
-    int swd_type,int nz, const real_t *z,const real_t *rho,
-    const real_t *vph,const real_t* vpv,const real_t *vsh,
-    const real_t *vsv,const real_t *eta,const real_t *QA, 
-    const real_t *QC, const real_t *QN,const real_t *QL, 
-    const real_t *c21,const real_t* Qani,int nQani,int Qfunc_id,
+    int swd_type,int nz, const Real *z,const Real *rho,
+    const Real *vph,const Real* vpv,const Real *vsh,
+    const Real *vsv,const Real *eta,const Real *QA,
+    const Real *QC, const Real *QN,const Real *QL,
+    const Real *c21,const Real* Qani,int nQani,int Qfunc_id,
     double scale_rho,double scale_v, double scale_z,
     bool HAS_ATT,bool print_tomo_info
 )
@@ -197,7 +197,7 @@ specswd_init_mesh(
 }
 
 static void 
-_egn_love(real_t freq,bool use_qz)
+_egn_love(Real freq,bool use_qz)
 {
     using namespace specswd_pylib;
 
@@ -212,7 +212,7 @@ _egn_love(real_t freq,bool use_qz)
 }
 
 static void 
-_egn_rayl(real_t freq,bool use_qz)
+_egn_rayl(Real freq,bool use_qz)
 {
     using namespace specswd_pylib;
 
@@ -227,7 +227,7 @@ _egn_rayl(real_t freq,bool use_qz)
 }
 
 static void 
-_egn_aniso(real_t freq,real_t phi,bool use_qz)
+_egn_aniso(Real freq,Real phi,bool use_qz)
 {
     // get contants
     using namespace specswd_pylib;
@@ -239,7 +239,7 @@ _egn_aniso(real_t freq,real_t phi,bool use_qz)
 }
 
 extern "C" void 
-specswd_execute(real_t freq,real_t phi,bool use_qz)
+specswd_execute(Real freq,Real phi,bool use_qz)
 {
     switch (specswd_pylib::mesh_ptr->SWD_TYPE)
     {
@@ -283,7 +283,7 @@ specswd_compute_group()
  * 4. visco-elastic rayleigh nker = 10 vph/vpv/vsv/eta/Qai/Qci/Qli/vp/Qki/rho
  */
 extern "C" void 
-specswd_phase_kl(int imode,real_t *frekl_c,real_t *frekl_q)
+specswd_phase_kl(int imode,Real *frekl_c,Real *frekl_q)
 {
     using namespace specswd_pylib;
     bool HAS_ATT = mesh_ptr->HAS_ATT;
@@ -296,8 +296,8 @@ specswd_phase_kl(int imode,real_t *frekl_c,real_t *frekl_q)
     int npts = mesh_ptr->ibool.size();
 
     // temp arrays
-    std::vector<real_t> temp_el_r, temp_el_i;
-    std::vector<real_t> temp_ac_r, temp_ac_i;
+    std::vector<Real> temp_el_r, temp_el_i;
+    std::vector<Real> temp_ac_r, temp_ac_i;
 
     if(SWD_TYPE == 0) {
         love_ptr->compute_kernels(
@@ -355,22 +355,22 @@ specswd_phase_kl(int imode,real_t *frekl_c,real_t *frekl_q)
  * 4. visco-elastic rayleigh nker = 10 vph/vpv/vsv/eta/Qai/Qci/Qli/vp/Qki/rho
  */
 extern "C" void 
-specswd_group_kl(int imode,real_t *frekl_c,real_t *frekl_q)
+specswd_group_kl(int imode,Real *frekl_c,Real *frekl_q)
 {
     using namespace specswd_pylib;
     bool HAS_ATT = mesh_ptr->HAS_ATT;
     int SWD_TYPE = mesh_ptr->SWD_TYPE;
 
     // frekl
-    std::vector<real_t> f,fq;
+    std::vector<Real> f,fq;
     int nker, nker_el, nker_ac;
     specswd_kernel_size(&nker,&nker_el,&nker_ac);
     int nz = mesh_ptr->nz_tomo;
     int npts = mesh_ptr->ibool.size();
 
     // temp arrays
-    std::vector<real_t> temp_el_r, temp_el_i;
-    std::vector<real_t> temp_ac_r, temp_ac_i;
+    std::vector<Real> temp_el_r, temp_el_i;
+    std::vector<Real> temp_ac_r, temp_ac_i;
 
     if(SWD_TYPE == 0) {
         love_ptr-> compute_kernels(
@@ -385,8 +385,13 @@ specswd_group_kl(int imode,real_t *frekl_c,real_t *frekl_q)
         );
     }
     else {
-        printf("not implemented!\n");
-        exit(1);
+        // The legacy scalar kernel API returns the radial component
+        // u_r = khat . u for a fully anisotropic model.
+        aniso_ptr->compute_kernels(
+            imode,1,
+            temp_el_r,temp_el_i,
+            temp_ac_r,temp_ac_i,-1
+        );
     }
 
     // project to tomo kernels
@@ -419,7 +424,7 @@ specswd_group_kl(int imode,real_t *frekl_c,real_t *frekl_q)
  * the nglob,nsize is determined by specswd_egn_size()
  */
 extern "C" void 
-specswd_eigen(int imode, real_t *egn_r, real_t *egn_i,
+specswd_eigen(int imode, Real *egn_r, Real *egn_i,
               int return_left_egn,int return_displ)
 {
     using namespace specswd_pylib;
@@ -439,7 +444,7 @@ specswd_eigen(int imode, real_t *egn_r, real_t *egn_i,
     // return displ
     if(return_displ) {
         int ncomp = specswd_egn_size();
-        std::vector<complex_t> displ(ncomp*nsize);
+        std::vector<Complex> displ(ncomp*nsize);
         if(SWD_TYPE == 0) {
             love_ptr->egn2displ(
                 imode,
@@ -480,7 +485,7 @@ specswd_eigen(int imode, real_t *egn_r, real_t *egn_i,
 
         // copy to output
         for(int i = 0; i < nglob; i ++) {
-            complex_t val = love_ptr->egn[imode*nglob + i];
+            Complex val = love_ptr->egn[imode*nglob + i];
             egn_r[i] = val.real();
             if(HAS_ATT) {
                 egn_i[i] = val.imag();
@@ -500,9 +505,9 @@ specswd_eigen(int imode, real_t *egn_r, real_t *egn_i,
         }
 
         // copy to output
-        const std::vector<complex_t> &egn_use = return_left_egn ? rayl_ptr->egn_l : rayl_ptr->egn_r;
+        const std::vector<Complex> &egn_use = return_left_egn ? rayl_ptr->egn_l : rayl_ptr->egn_r;
         for(int i = 0; i < nglob; i ++) {
-            complex_t val = egn_use[imode*nglob + i];
+            Complex val = egn_use[imode*nglob + i];
             egn_r[i] = val.real();
             if(HAS_ATT) {
                 egn_i[i] = val.imag();
@@ -519,9 +524,9 @@ specswd_eigen(int imode, real_t *egn_r, real_t *egn_i,
         }
 
         // copy to output
-        const std::vector<complex_t> &egn_use = return_left_egn ? aniso_ptr->egn_l : aniso_ptr->egn_r;
+        const std::vector<Complex> &egn_use = return_left_egn ? aniso_ptr->egn_l : aniso_ptr->egn_r;
         for(int i = 0; i < nglob; i ++) {
-            complex_t val = egn_use[imode*nglob + i];
+            Complex val = egn_use[imode*nglob + i];
             egn_r[i] = val.real();
             if(HAS_ATT) {
                 egn_i[i] = val.imag();
@@ -529,4 +534,3 @@ specswd_eigen(int imode, real_t *egn_r, real_t *egn_i,
         }
     }
 }
- 

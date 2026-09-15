@@ -7,6 +7,7 @@
 #include <pybind11/numpy.h>
 
 #include <iostream>
+#include <stdexcept>
 
 
 namespace py = pybind11;
@@ -29,9 +30,16 @@ void init_mesh(
     double scale_z,
     bool HAS_ATT, 
     int Qfunc_id,
-    bool print_info
+    bool print_info,
+    double reference_frequency
 )
 {
+    if(reference_frequency <= 0.) {
+        throw std::invalid_argument(
+            "reference_frequency must be positive"
+        );
+    }
+
     // init GQtable
     specswd_init_GQTable(); 
 
@@ -59,13 +67,19 @@ void init_mesh(
         c21.data(),qani,
         nQani,Qfunc_id,
         scale_rho,scale_v,scale_z,
-        HAS_ATT,print_info
+        HAS_ATT,false
     );
+    if(specswd_set_attenuation_reference_frequency(reference_frequency) != 0) {
+        throw std::runtime_error(
+            "failed to set attenuation reference frequency"
+        );
+    }
+    if(print_info) specswd_pylib::mesh_ptr->print_model();
 }
 
 
 template <typename T> py::array_t<T> 
-compute_swd(real_t freq, real_t phi_in_deg,bool use_qz) 
+compute_swd(Real freq, Real phi_in_deg,bool use_qz)
 {
     using namespace specswd_pylib;
     py::array_t<T> c_out;
@@ -82,7 +96,7 @@ compute_swd(real_t freq, real_t phi_in_deg,bool use_qz)
         nc = rayl_ptr->c_phase.size();
     }
     else {
-        nc = rayl_ptr->c_phase.size();
+        nc = aniso_ptr->c_phase.size();
     }
     c_out.resize({nc});
 
@@ -155,7 +169,7 @@ compute_group_vel()
         }
     }
     else {
-        nc = rayl_ptr->c_phase.size();
+        nc = aniso_ptr->c_phase.size();
         u_r.resize({2,nc});
         if(HAS_ATT) {
             u_i.resize({2,nc});
@@ -164,11 +178,11 @@ compute_group_vel()
         for(int ic = 0; ic < nc; ic ++) {
             double ux_r,ux_i,uz_r,uz_i; 
             aniso_ptr->get_group_vel(ic,ux_r,ux_i,uz_r,uz_i);
-            u_r.mutable_data()[2*ic]   = ux_r;
-            u_r.mutable_data()[2*ic+1] = uz_r;
+            u_r.mutable_data()[ic]    = ux_r;
+            u_r.mutable_data()[nc+ic] = uz_r;
             if(HAS_ATT) {
-                u_i.mutable_data()[2*ic]   = ux_i;
-                u_i.mutable_data()[2*ic+1] = uz_i;
+                u_i.mutable_data()[ic]    = ux_i;
+                u_i.mutable_data()[nc+ic] = uz_i;
             }
         }
     }
@@ -293,12 +307,13 @@ PYBIND11_MODULE(libswd,m){
           arg("QC"), arg("QN"),
           arg("QL"),
           arg("c21"), arg("Qani"),
-            arg("scale_rho") = 0,
-            arg("scale_v") = 0,
-            arg("scale_z") = 0,
+          arg("scale_rho") = 0,
+          arg("scale_v") = 0,
+          arg("scale_z") = 0,
           arg("HAS_ATT") = false,
           arg("Qfunc_id") = 1,
           arg("print_info") = false,
+          arg("reference_frequency") = 1.,
           "initialize global vars for SWD"
     );
     

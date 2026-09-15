@@ -1,11 +1,11 @@
 #include "shared/GQTable.hpp"
-#include "shared/attenuation.hpp"
 #include "mesh/mesh.hpp"
 #include "vti/vti.hpp"
 #include "aniso/aniso.hpp"
 
 #include <memory>
 #include <complex>
+#include <cstdio>
 
 extern "C"  void 
 specswd_init_GQTable() {
@@ -53,15 +53,26 @@ specswd_const(int *nz_tomo, int *sem_size, int *nglob)
     }
 }
 
-/**
- * @brief reset reference Q model
- * @param w frequency in SLS, shape(NSLS)
- * @param y factor in SLS, shape(NSLS)
- */
-extern "C"  void 
-specswd_reset_Qmodel(const double *w,const double *y)
+extern "C" void
+specswd_reset_Qmodel(const double *,const double *)
 {
-    specswd::reset_ref_Q_model(w,y);
+    std::fputs(
+        "SpecSWD warning: specswd_reset_Qmodel is deprecated; "
+        "constant-Q attenuation ignores SLS coefficients.\n",
+        stderr
+    );
+}
+
+/**
+ * @brief Set the frequency in Hz at which real input moduli are defined.
+ */
+extern "C" int
+specswd_set_attenuation_reference_frequency(specswd::Real frequency)
+{
+    using namespace specswd_pylib;
+    if(!mesh_ptr || frequency <= 0.) return 1;
+    mesh_ptr->ATTENUATION_REF_FREQUENCY = frequency;
+    return 0;
 }
 
 extern "C" int 

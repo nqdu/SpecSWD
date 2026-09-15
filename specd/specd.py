@@ -56,7 +56,8 @@ class SpecWorkSpace:
                 eta=None,Qa=None,Qc=None,Qn=None,Ql=None,
                 c21=None,Qani=None,qfunc_id=1,
                 scale_rho=0.,scale_v=0.,scale_z=0.,
-                disp=False):
+                disp=False,
+                reference_frequency=1.):
         """
         initialize working space for SEM
 
@@ -71,7 +72,7 @@ class SpecWorkSpace:
         vph/vpv/vsh/vsv: np.ndarray
             VTI parameters, shape_like(z)
         Qa/Qc/Qn/Ql: np.ndarray
-            VTI quality factors, shape_like(z)
+            VTI constant quality factors, shape_like(z)
         c21: np.ndarray
             21 elastic tensor, shape(21,nz)
         nQani: int
@@ -80,6 +81,9 @@ class SpecWorkSpace:
             quality factors, shape(nQnai,nz)
         disp: bool
             if True print model information
+        reference_frequency: float
+            frequency in Hz at which the input storage moduli (and therefore
+            the real input velocities) are defined; default is 1 Hz
         
         Note
         ------------
@@ -93,6 +97,8 @@ class SpecWorkSpace:
         self._use_qz = False
         self._nz = len(z)
         assert(self._wavetype in ['love','rayl','aniso'])
+        if reference_frequency <= 0.:
+            raise ValueError("reference_frequency must be positive")
 
         # check input models
         _model_sanity_check(
@@ -119,7 +125,7 @@ class SpecWorkSpace:
                 ql = Ql 
 
         elif self._wavetype == 'rayl':
-            if (Qn is not None) and (Qa is not None) and (Qc is not None):
+            if (Qa is not None) and (Qc is not None) and (Ql is not None):
                 self._has_att = True
                 qa = Qa 
                 qc = Qc 
@@ -152,6 +158,7 @@ class SpecWorkSpace:
             scale_rho=scale_rho,
             scale_v=scale_v,
             scale_z=scale_z,
+            reference_frequency=reference_frequency,
             HAS_ATT=self._has_att,
             Qfunc_id=qfunc_id,
             print_info=disp
@@ -198,7 +205,8 @@ class SpecWorkSpace:
         Returns
         --------
         u: float/complex
-            group velocities at current frequency
+            group velocities at current frequency. For general anisotropy,
+            shape is ``(2, nmodes)`` with x and y components by row.
 
         Note
         ----------
@@ -212,6 +220,53 @@ class SpecWorkSpace:
             u = u_real + 1j * u_imag
 
         return u
+
+    def compute_dispersion(
+            self,
+            frequencies_hz:np.ndarray,
+            azimuths_deg=0.,
+            include_group:bool=True):
+        """Compute a frequency/azimuth grid as a CSR dispersion table.
+
+        Mode counts may vary between solve points. Rows use frequency-major,
+        azimuth-minor order and remain ordinary NumPy arrays.
+        """
+        from .io import DispersionTable
+
+        frequencies = np.asarray(frequencies_hz,dtype=np.float64)
+        azimuths = np.atleast_1d(np.asarray(azimuths_deg,dtype=np.float64))
+        if frequencies.ndim != 1 or frequencies.size == 0:
+            raise ValueError("frequencies_hz must be a nonempty 1-D array")
+        if azimuths.ndim != 1 or azimuths.size == 0:
+            raise ValueError("azimuths_deg must be a nonempty 1-D array")
+
+        phase_rows = []
+        group_rows = []
+        for frequency in frequencies:
+            for azimuth in azimuths:
+                phase = self.compute_egn(
+                    float(frequency),float(azimuth),only_phase=not include_group
+                )
+                phase_rows.append(np.asarray(phase,dtype=np.complex128))
+                if include_group:
+                    group = np.asarray(self.group_velocity(),dtype=np.complex128)
+                    if self._wavetype == "aniso":
+                        group = group.T
+                    else:
+                        group = group[:,np.newaxis]
+                    group_rows.append(group)
+
+        if self._wavetype == "aniso":
+            group_components = ("x","y")
+        else:
+            group_components = ("radial",)
+        return DispersionTable.from_rows(
+            frequencies,
+            phase_rows,
+            azimuth_deg=azimuths,
+            group_rows=group_rows if include_group else None,
+            group_components=group_components,
+        )
 
     def get_kernel_names(self):
         """
@@ -229,7 +284,7 @@ class SpecWorkSpace:
         elif self._wavetype == "rayl":
             kl_name = ['vph','vpv','vsv','rho','eta']
             if self._has_att:
-                kl_name += ['Qa','Qc','Qn','Ql']
+                kl_name += ['Qa','Qc','Ql']
             # acoustic 
             kl_name += ['vp_ac','rho_ac']
             if self._has_att:
@@ -310,8 +365,11 @@ class SpecWorkSpace:
             if true, return left eigenvectors
             else return right eigenvectors
         return_displ: bool
-            if true return displacement instead of eigenvectors
-            e.g. in scholte wave, eigenvectors = [u,v^{\bar},chi^{\bar}]
+            if true, return displacement polarization amplitudes instead of
+            eigenvectors. For VTI Rayleigh/Scholte waves, the horizontal and
+            vertical amplitudes retain a real convention; the physical pi/2
+            phase offset of the vertical component is implicit. For example,
+            the corresponding eigenvector is [u,v^{\bar},chi^{\bar}].
         """
         egntp = libswd.get_egn(
                 imode,
