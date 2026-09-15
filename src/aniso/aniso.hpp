@@ -14,14 +14,14 @@ class SolverAniso {
 
 public:
     // phase/group velocity (non-dimension) and eigen functions, non att case
-    std::vector<complex_t> c_phase, c_group_x, c_group_y; // shape(nmodes) 
-    std::vector<complex_t> egn_r,egn_l; // shape(nmodes,ndof)
+    std::vector<Complex> c_phase, c_group_x, c_group_y; // shape(nmodes)
+    std::vector<Complex> egn_r,egn_l; // shape(nmodes,ndof)
     int nkers_el,nkers_ac; // no. of kernels
     int ndof; // DOF of eigenfunction
 
     // solver matrices
-    std::vector<complex_t> Mmat; // shape(ndof)
-    std::vector<complex_t> Kmat,Emat,Hmat;  // shape(ndof,ndof)
+    std::vector<Complex> Mmat; // shape(ndof)
+    std::vector<Complex> Kmat,Emat,Hmat;  // shape(ndof,ndof)
 
     // prepare M/K/E matrices
     void prepare_matrices();
@@ -34,40 +34,46 @@ public:
     void compute_kernels(
         int imode,
         int kltype,
-        std::vector<real_t> &frekl_el_r,
-        std::vector<real_t> &frekl_el_i,
-        std::vector<real_t> &frekl_ac_r,
-        std::vector<real_t> &frekl_ac_i
+        std::vector<Real> &frekl_el_r,
+        std::vector<Real> &frekl_el_i,
+        std::vector<Real> &frekl_ac_r,
+        std::vector<Real> &frekl_ac_i,
+        int group_component=-1
     ) const;
 
     // group/phase velocity
     void compute_group_vel();
-    void get_phase_vel(int imode, real_t &c_r, real_t &c_i) const;
-    void get_group_vel(int imode, real_t &ux_r, real_t &ux_i,
-                        real_t &uy_r, real_t &uy_i) const;
+    void get_phase_vel(int imode, Real &c_r, Real &c_i) const;
+    void get_group_vel(int imode, Real &ux_r, Real &ux_i,
+                        Real &uy_r, Real &uy_i) const;
 
     // frechet operators
     void frechet_op_el(
-        complex_t c_M, complex_t c_K,
-        complex_t c_E, complex_t c_H,
-        const complex_t *y,
-        const complex_t *x,
-        real_t * __restrict frekl_r,
-        real_t * __restrict frekl_i
+        Complex c_M, Complex c_K,
+        Complex c_E, Complex c_H,
+        const Complex *y,
+        const Complex *x,
+        Real * __restrict frekl_r,
+        Real * __restrict frekl_i,
+        Complex c_dwdM=0., Complex c_dwdK=0.,
+        Complex c_dwdE=0., Complex c_dwdH=0.,
+        Complex c_dkxK=0., Complex c_dkyK=0.,
+        Complex c_dkxH=0., Complex c_dkyH=0.
     ) const;
 
     void frechet_op_ac(
-        complex_t c_M, complex_t c_K, complex_t c_E,
-        const complex_t *y,
-        const complex_t *x,
-        real_t * __restrict frekl_r,
-        real_t * __restrict frekl_i
+        Complex c_M, Complex c_K, Complex c_E,
+        const Complex *y,
+        const Complex *x,
+        Real * __restrict frekl_r,
+        Real * __restrict frekl_i,
+        Complex c_dwdM=0.
     ) const;
     
     // transforms
     void egn2displ(
         int imode,
-        complex_t * __restrict displ
+        Complex * __restrict displ
     ) const;
 
     void build(const Mesh *mesh);
@@ -81,12 +87,15 @@ private:
     const Mesh *mesh_;
 
     // derivative matrix
-    std::vector<real_t> dwdEmat; // dE / dw , shape(ndof,ndof)
-    std::vector<complex_t> dkxdKmat,dkydKmat; // dK / d kx,ky , shape(ndof,ndof)
-    std::vector<complex_t> dkxdHmat,dkydHmat; // dH / d kx,ky , shape(ndof,ndof)
+    std::vector<Complex> dwdMmat; // dM / d(omega), shape(ndof)
+    std::vector<Complex> dwdKmat,dwdEmat,dwdHmat;
+    // material-frequency derivatives, shape(ndof,ndof) except diagonal dwdMmat
+    std::vector<Complex> dkxdKmat,dkydKmat; // dK / d kx,ky , shape(ndof,ndof)
+    std::vector<Complex> dkxdHmat,dkydHmat; // dH / d kx,ky , shape(ndof,ndof)
 
     // QZ matrix all are column major
-    std::vector<complex_t> Qmat,Zmat,Smat,Spmat; // column major, shape(ndof,ndof)
+    std::vector<Complex> Qmat,Zmat,Smat,Spmat; // column major, shape(ndof,ndof)
+    std::vector<int> schur_index_; // selected mode -> companion QZ diagonal
 
     // prepare matrices for each material
     void prepare_matrices_solid_();
@@ -96,37 +105,40 @@ private:
     void prepare_adjoint_(
         int imode,
         int kltype,
-        complex_t * __restrict c_M,
-        complex_t * __restrict c_K,
-        complex_t * __restrict c_E,
-        complex_t * __restrict c_H,
-        complex_t *__restrict adj_lambda,
-        complex_t *__restrict adj_mu,
-        complex_t *__restrict adj_xi,
-        complex_t *__restrict adj_eta
+        Complex * __restrict c_M,
+        Complex * __restrict c_K,
+        Complex * __restrict c_E,
+        Complex * __restrict c_H,
+        Complex *__restrict adj_lambda,
+        Complex *__restrict adj_mu,
+        Complex *__restrict adj_xi,
+        Complex *__restrict adj_eta,
+        int group_component
     ) const;
 
     void prepare_adjoint_phase_(
         int imode,
-        complex_t * __restrict c_M,
-        complex_t * __restrict c_K,
-        complex_t * __restrict c_E,
-        complex_t * __restrict c_H,
-        complex_t *__restrict adj_lambda,
-        complex_t *__restrict adj_mu,
-        complex_t *__restrict adj_xi,
-        complex_t *__restrict adj_eta
+        Complex * __restrict c_M,
+        Complex * __restrict c_K,
+        Complex * __restrict c_E,
+        Complex * __restrict c_H,
+        Complex *__restrict adj_lambda,
+        Complex *__restrict adj_mu,
+        Complex *__restrict adj_xi,
+        Complex *__restrict adj_eta
     ) const;
 
     void prepare_adjoint_group_(
         int imode,
-        complex_t * __restrict c_M,
-        complex_t * __restrict c_K,
-        complex_t * __restrict c_E,
-        complex_t *__restrict adj_lambda,
-        complex_t *__restrict adj_mu,
-        complex_t *__restrict adj_xi,
-        complex_t *__restrict adj_eta
+        Complex * __restrict c_M,
+        Complex * __restrict c_K,
+        Complex * __restrict c_E,
+        Complex * __restrict c_H,
+        Complex *__restrict adj_lambda,
+        Complex *__restrict adj_mu,
+        Complex *__restrict adj_xi,
+        Complex *__restrict adj_eta,
+        int group_component
     ) const;
 };
 

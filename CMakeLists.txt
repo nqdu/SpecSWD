@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.25.0)
 ################## compiler options ##################
 # compiler
 set(CMAKE_CXX_COMPILER          ${CXX})
+set(CMAKE_C_COMPILER            ${CC})
 set(CMAKE_Fortran_COMPILER          ${FC})
 
 # compiler flags
@@ -16,6 +17,11 @@ set(EIGEN_INC                 ${EIGEN_INC})
 
 option(BUILD_LIBS "BUILD_LIBS" OFF)
 option(BUILD_TESTS "BUILD_TESTS" ON)
+option(SPECSWD_EGN_DOUBLE "Use double precision for generalized Schur solves" ON)
+
+if(SPECSWD_EGN_DOUBLE)
+  add_compile_definitions(SPECSWD_EGN_DOUBLE)
+endif()
 
 # set default values
 macro(setDefault var val)
@@ -26,7 +32,7 @@ endmacro()
 setDefault(EIGEN_INC   "~/software/eigen-5.0.0")
 
 # project
-project(specswd LANGUAGES CXX Fortran)
+project(specswd LANGUAGES C CXX Fortran)
 
 # build type 
 set(CMAKE_BUILD_TYPE RELEASE)
@@ -61,6 +67,8 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 find_package(LAPACK REQUIRED)
 find_package(LAPACKE REQUIRED)
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DEIGEN_USE_LAPACKE")
+
+find_package(HDF5 REQUIRED COMPONENTS C)
 
 #find_package(OpenMP REQUIRED)
 if (OPENMP_FOUND)

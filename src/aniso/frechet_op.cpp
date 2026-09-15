@@ -9,24 +9,18 @@ namespace specswd
 static void
 compute_q_deriv (
     const Mesh &Me,int id,int a,
-    complex_t *dcC21, complex_t *dcQ
+    Complex *dcC21, Complex *dcQ
 )
 {
-    std::array<real_t,21> c21,Qm;
-    int size_el = Me.ibool_el.size();
-    for(int idx = 0; idx < 21; idx ++) {
-        c21[idx] = Me.xC21[idx*size_el+id+a];
-    }
-    for(int q = 0; q < Me.nQani; q ++) {
-        Qm[q] = Me.xQani[q*size_el+id+a];
-    }
+    const int point = id + a;
     get_cmplx_c21_deriv (
         Me.freq * Me.SCALE_VELOCITY / Me.SCALE_LENGTH,
-        Qm.data(),
+        &Me.xQani[point*Me.nQani],
         Me.nQani,
         Me.Qani_funcid,
-        c21.data(),
-        dcC21,dcQ
+        &Me.xC21[point*21],
+        dcC21,dcQ,
+        Me.ATTENUATION_REF_FREQUENCY
     );
 }
 
@@ -36,14 +30,19 @@ compute_q_deriv (
  */
 void SolverAniso::
 frechet_op_el(
-    complex_t c_M, complex_t c_K,
-    complex_t c_E, complex_t c_H,
-    const complex_t *y,
-    const complex_t *x,
-    real_t * __restrict frekl_r,
-    real_t * __restrict frekl_i
+    Complex c_M, Complex c_K,
+    Complex c_E, Complex c_H,
+    const Complex *y,
+    const Complex *x,
+    Real * __restrict frekl_r,
+    Real * __restrict frekl_i,
+    Complex c_dwdM, Complex c_dwdK,
+    Complex c_dwdE, Complex c_dwdH,
+    Complex c_dkxK, Complex c_dkyK,
+    Complex c_dkxH, Complex c_dkyH
 ) const 
 {
+    (void)c_dwdM; // solid mass is frequency independent
     // get constants
     auto const &Me = *mesh_;
     int nspec_el = Me.nspec_el;
@@ -55,27 +54,49 @@ frechet_op_el(
     // temp arrays
     using namespace GQTable;
     const bool HAS_ATT = Me.HAS_ATT;
-    const complex_t imag_i = {0.,1.};
-    real_t khat[2] = {std::cos(Me.phi),std::sin(Me.phi)};
+    const Complex imag_i = {0.,1.};
+    Real khat[2] = {std::cos(Me.phi),std::sin(Me.phi)};
+    const Real omega_scale = Me.SCALE_VELOCITY / Me.SCALE_LENGTH;
+    const bool needs_stiffness_frequency_derivative =
+        c_dwdK != Complex{} || c_dwdE != Complex{}
+        || c_dwdH != Complex{};
+
+    Complex kweight[2][2],dw_kweight[2][2];
+    Complex hweight[2],dw_hweight[2];
+    for(int j = 0; j < 2; ++j) {
+        hweight[j] = c_H*khat[j]
+            + (j == 0 ? c_dkxH : c_dkyH);
+        dw_hweight[j] = c_dwdH*khat[j];
+        for(int q = 0; q < 2; ++q) {
+            kweight[j][q] = c_K*khat[j]*khat[q]
+                + c_dkxK*((j == 0 ? khat[q] : 0.)
+                           +(q == 0 ? khat[j] : 0.))
+                + c_dkyK*((j == 1 ? khat[q] : 0.)
+                           +(q == 1 ? khat[j] : 0.));
+            dw_kweight[j][q] = c_dwdK*khat[j]*khat[q];
+        }
+    }
 
     // derivatives
-    std::array<complex_t,21*21> dc21dc21; // shape(21,21)
-    std::vector<complex_t> dc21dq(21 * nQani,0); // shape(21,nQani)
+    std::array<Complex,21*21> dc21dc21; // shape(21,21)
+    std::vector<Complex> dc21dq(21 * nQani,0); // shape(21,nQani)
+    std::array<Complex,21*21> dcw_dc; // d(C_,omega)/dC0
+    std::vector<Complex> dcw_dq(21 * nQani,0);
 
     auto run_case = [&](
         int startid,int endid,
-        const real_t *weight,
-        const real_t *hp,
-        const real_t *hpT,
+        const Real *weight,
+        const Real *hp,
+        const Real *hpT,
         auto ConstNGL)
     {
         constexpr int NGL = decltype(ConstNGL)::value;
-        std::array<complex_t,NGL*3> u{0},lu{0};
+        std::array<Complex,NGL*3> u{0},lu{0};
 
         for(int ispec = startid; ispec < endid; ispec ++) {
             int iel = Me.el_elmnts[ispec];
             int id = ispec * NGLL;
-            real_t J = Me.jacodet[iel];
+            Real J = Me.jacodet[iel];
 
             // save temporay arrays
             for(int a = 0; a < NGL; a ++) {
@@ -87,7 +108,7 @@ frechet_op_el(
             }
 
             // compute kernels
-            complex_t df_drho{};
+            Complex df_drho{};
             for(int a = 0; a < NGL; a ++) {
                 df_drho = weight[a] * J * c_M * (
                     u[0*NGL+a] * lu[0*NGL+a] + 
@@ -101,10 +122,21 @@ frechet_op_el(
                         dc21dc21.data(),
                         dc21dq.data()
                     );
+                    if(needs_stiffness_frequency_derivative) {
+                        const int point = id+a;
+                        get_cmplx_c21_frequency_deriv(
+                            Me.freq*omega_scale,
+                            &Me.xQani[point*nQani],
+                            &Me.xC21[point*21],
+                            dcw_dc.data(),dcw_dq.data(),
+                            nQani,Me.Qani_funcid,
+                            Me.ATTENUATION_REF_FREQUENCY
+                        );
+                    }
                 }
 
                 // sums
-                std::array<complex_t,3> rsum{0},lsum{0};
+                std::array<Complex,3> rsum{0},lsum{0};
                 for(int i = 0; i < 3; i ++) {
                     for(int b = 0; b < NGL; b ++) {
                         rsum[i] += hp[a*NGL+b] * u[i*NGL+b];
@@ -112,61 +144,67 @@ frechet_op_el(
                     }
                 }
 
-                // reset derivatives
-                std::array<complex_t,21> df_dc21{0},df_dQ{0};
+                // First differentiate with respect to the complex stiffness
+                // and its omega derivative.  The attenuation Jacobians below
+                // then map both results to C0 and Q^-1.
+                std::array<Complex,21> g_c{},g_cw{};
+                std::array<Complex,21> df_dc21{},df_dQ{};
 
-                // loop two compoenents
+                // loop displacement components
                 for(int i = 0; i < 3; i ++) {
                 for(int p = 0; p < 3; p ++) {
-                    // K matrix
-                    complex_t temp1 = lu[i*NGL+a] * u[p*NGL+a] * J * weight[a] * c_K;
-                    complex_t temp2 = weight[a] * c_E / J;
-                    complex_t temp3 = weight[a] * lu[i*NGL+a] * rsum[p] * c_H * imag_i;
-                    complex_t temp4 = -weight[a] * u[p*NGL+a] * lsum[i] * c_H * imag_i;
+                    const Complex mass =
+                        lu[i*NGL+a]*u[p*NGL+a]*J*weight[a];
+                    for(int j = 0; j < 2; ++j) {
+                    for(int q = 0; q < 2; ++q) {
+                        const int v = voigt4(i,j,p,q);
+                        g_c[v] += mass*kweight[j][q];
+                        g_cw[v] += mass*dw_kweight[j][q];
+                    }}
 
-                    if (!HAS_ATT) {
-                        df_dc21[voigt4(i,0,p,0)] += khat[0] * khat[0] * temp1;
-                        df_dc21[voigt4(i,0,p,1)] += khat[0] * khat[1] * temp1;
-                        df_dc21[voigt4(i,1,p,0)] += khat[0] * khat[1] * temp1;
-                        df_dc21[voigt4(i,1,p,1)] += khat[1] * khat[1] * temp1;
+                    const Complex vertical =
+                        weight[a]*lsum[i]*rsum[p]/J;
+                    const int vv = voigt4(i,2,p,2);
+                    g_c[vv] += c_E*vertical;
+                    g_cw[vv] += c_dwdE*vertical;
 
-                        df_dc21[voigt4(i,2,p,2)] += temp2 * lsum[i] * rsum[p];
-
-                        df_dc21[voigt4(i,0,p,2)] += khat[0] * temp3;
-                        df_dc21[voigt4(i,1,p,2)] += khat[1] * temp3;
-                        df_dc21[voigt4(i,2,p,0)] += khat[0] * temp4;
-                        df_dc21[voigt4(i,2,p,1)] += khat[1] * temp4;
-                    }
-                    else {
-                        for(int m = 0; m < 21; m ++) {
-                            df_dc21[m] += dc21dc21[voigt4(i,0,p,0)*21+m] * khat[0] * khat[0] * temp1;
-                            df_dc21[m] += dc21dc21[voigt4(i,0,p,1)*21+m] * khat[0] * khat[1] * temp1;
-                            df_dc21[m] += dc21dc21[voigt4(i,1,p,0)*21+m] * khat[0] * khat[1] * temp1;
-                            df_dc21[m] += dc21dc21[voigt4(i,1,p,1)*21+m] * khat[1] * khat[1] * temp1;
-
-                            df_dc21[m] += dc21dc21[voigt4(i,2,p,2)*21+m] * temp2 * lsum[i] * rsum[p];
-
-                            df_dc21[m] += dc21dc21[voigt4(i,0,p,2)*21+m] * khat[0] * temp3;
-                            df_dc21[m] += dc21dc21[voigt4(i,1,p,2)*21+m] * khat[1] * temp3;
-                            df_dc21[m] += dc21dc21[voigt4(i,2,p,0)*21+m] * khat[0] * temp4;
-                            df_dc21[m] += dc21dc21[voigt4(i,2,p,1)*21+m] * khat[1] * temp4;
-
-                        }
-                        for(int m = 0; m < nQani; m ++) {
-                            df_dQ[m] += dc21dq[voigt4(i,0,p,0)*nQani+m] * khat[0] * khat[0] * temp1;
-                            df_dQ[m] += dc21dq[voigt4(i,0,p,1)*nQani+m] * khat[0] * khat[1] * temp1;
-                            df_dQ[m] += dc21dq[voigt4(i,1,p,0)*nQani+m] * khat[0] * khat[1] * temp1;
-                            df_dQ[m] += dc21dq[voigt4(i,1,p,1)*nQani+m] * khat[1] * khat[1] * temp1;
-
-                            df_dQ[m] += dc21dq[voigt4(i,2,p,2)*nQani+m] * temp2 * lsum[i] * rsum[p];
-
-                            df_dQ[m] += dc21dq[voigt4(i,0,p,2)*nQani+m] * khat[0] * temp3;
-                            df_dQ[m] += dc21dq[voigt4(i,1,p,2)*nQani+m] * khat[1] * temp3;
-                            df_dQ[m] += dc21dq[voigt4(i,2,p,0)*nQani+m] * khat[0] * temp4;
-                            df_dQ[m] += dc21dq[voigt4(i,2,p,1)*nQani+m] * khat[1] * temp4;
-                        }
+                    for(int j = 0; j < 2; ++j) {
+                        const Complex upper = imag_i*weight[a]
+                            *lu[i*NGL+a]*rsum[p];
+                        const Complex lower = -imag_i*weight[a]
+                            *u[p*NGL+a]*lsum[i];
+                        const int vu = voigt4(i,j,p,2);
+                        const int vl = voigt4(i,2,p,j);
+                        g_c[vu] += upper*hweight[j];
+                        g_c[vl] += lower*hweight[j];
+                        g_cw[vu] += upper*dw_hweight[j];
+                        g_cw[vl] += lower*dw_hweight[j];
                     }
                 }}
+
+                if(!HAS_ATT) {
+                    df_dc21 = g_c;
+                }
+                else {
+                    for(int output = 0; output < 21; ++output) {
+                        for(int input = 0; input < 21; ++input) {
+                            df_dc21[input] +=
+                                g_c[output]*dc21dc21[output*21+input];
+                            if(needs_stiffness_frequency_derivative) {
+                                df_dc21[input] += omega_scale*g_cw[output]
+                                    *dcw_dc[output*21+input];
+                            }
+                        }
+                        for(int iq = 0; iq < nQani; ++iq) {
+                            df_dQ[iq] +=
+                                g_c[output]*dc21dq[output*nQani+iq];
+                            if(needs_stiffness_frequency_derivative) {
+                                df_dQ[iq] += omega_scale*g_cw[output]
+                                    *dcw_dq[output*nQani+iq];
+                            }
+                        }
+                    }
+                }
 
 
                 //copy to frekl
@@ -210,12 +248,13 @@ frechet_op_el(
 
 void SolverAniso::
 frechet_op_ac(
-    complex_t c_M, complex_t c_K,
-    complex_t c_E,
-    const complex_t *y,
-    const complex_t *x,
-    real_t * __restrict frekl_r,
-    real_t * __restrict frekl_i
+    Complex c_M, Complex c_K,
+    Complex c_E,
+    const Complex *y,
+    const Complex *x,
+    Real * __restrict frekl_r,
+    Real * __restrict frekl_i,
+    Complex c_dwdM
 ) const 
 {
     // get constants
@@ -224,7 +263,8 @@ frechet_op_ac(
     int nspec_ac_grl = Me.nspec_ac_grl;
     int nglob_el = Me.nglob_el;
     const int size = Me.ibool.size();
-    real_t freq = Me.freq * Me.SCALE_VELOCITY / Me.SCALE_LENGTH;
+    Real freq = Me.freq * Me.SCALE_VELOCITY / Me.SCALE_LENGTH;
+    Real omega_scale = Me.SCALE_VELOCITY / Me.SCALE_LENGTH;
 
     // temp arrays
     using namespace GQTable;
@@ -233,18 +273,18 @@ frechet_op_ac(
     // loop over elements
     auto run_case = [&](
         int startid,int endid,
-        const real_t *weight,
-        const real_t *hp,
+        const Real *weight,
+        const Real *hp,
         auto ConstNGL)
     {
         constexpr int NGL = decltype(ConstNGL)::value;
-        std::array<complex_t,NGL> chi{0},lchi{0};
+        std::array<Complex,NGL> chi{0},lchi{0};
         for(int ispec = startid; ispec < endid; ispec ++) {
             int iel = Me.ac_elmnts[ispec];
             int id = ispec * NGLL;
 
             // jacobians
-            real_t J = Me.jacodet[iel];
+            Real J = Me.jacodet[iel];
 
             // cache chi and lchi in one element
             for(int i = 0; i < NGL; i ++) {
@@ -254,22 +294,32 @@ frechet_op_ac(
             }
 
             // derivatives
-            complex_t df_dkappa{},df_drho{}, df_dqki{};
-            complex_t sk = 1., dskdqi = 0.;
+            Complex df_dkappa{},df_drho{}, df_dqki{};
+            Complex sk = 1., dskdqi = 0.,dwdsk = 0.,d2skdwdq = 0.;
             for(int m = 0; m < NGL; m ++ ){
                 // copy material 
-                real_t rho = Me.xrho_ac[id+m];
-                real_t kappa = Me.xkappa_ac[id+m];
+                Real rho = Me.xrho_ac[id+m];
+                Real kappa = Me.xkappa_ac[id+m];
                 if (HAS_ATT) {
-                    get_sls_Q_derivative(freq,Me.xQk_ac[id+m],sk,dskdqi);
-                    dskdqi *= kappa;
+                    const auto response = get_attenuation_response(
+                        freq,Me.xQk_ac[id+m],Me.ATTENUATION_REF_FREQUENCY
+                    );
+                    sk = response.factor;
+                    dskdqi = response.d_factor_d_qinv;
+                    dwdsk = response.d_factor_d_omega*omega_scale;
+                    d2skdwdq =
+                        response.d2_factor_d_omega_d_qinv*omega_scale;
                 }
                 // kappa kernel
-                complex_t temp = -c_M * weight[m]* J*chi[m] * lchi[m] / (sk * kappa) / (sk * kappa);
-                df_dkappa = temp * sk;
-                df_dqki =  temp * dskdqi;
+                Complex temp = weight[m] * J * chi[m] * lchi[m];
+                df_dkappa = -temp/(kappa*kappa)
+                    *(c_M/sk-c_dwdM*dwdsk/(sk*sk));
+                df_dqki = temp/kappa
+                    *(-c_M*dskdqi/(sk*sk)
+                      +c_dwdM*(-d2skdwdq/(sk*sk)
+                        +2.*dwdsk*dskdqi/(sk*sk*sk)));
                 df_drho = - c_K * weight[m]* J * chi[m] * lchi[m] / rho / rho;
-                complex_t sx{},sy{};
+                Complex sx{},sy{};
                 for(int i = 0; i < NGL; i ++) {
                     sx += hp[m*NGL+i] * chi[i];
                     sy += hp[m*NGL+i] * lchi[i];

@@ -20,18 +20,18 @@ compute_egn(bool use_qz)
 
     // mapping M,K,E to matrix
     int ng = this->ndof;
-    Eigen::Map<const Eigen::VectorX<complex_t>> M(Mmat.data(),ng);
-    Eigen::Map<const Eigen::Matrix<complex_t,-1,-1,1>> K(Kmat.data(),ng,ng);
-    Eigen::Map<const Eigen::Matrix<complex_t,-1,-1,1>> E(Emat.data(),ng,ng);
-    Eigen::Map<const Eigen::Matrix<complex_t,-1,-1,1>> H(Hmat.data(),ng,ng);
+    Eigen::Map<const Eigen::VectorX<Complex>> M(Mmat.data(),ng);
+    Eigen::Map<const Eigen::Matrix<Complex,-1,-1,1>> K(Kmat.data(),ng,ng);
+    Eigen::Map<const Eigen::Matrix<Complex,-1,-1,1>> E(Emat.data(),ng,ng);
+    Eigen::Map<const Eigen::Matrix<Complex,-1,-1,1>> H(Hmat.data(),ng,ng);
     
     // construct A and B first companion
     // A = [[0 I],[om^2 M -E, -iH]]
     // B = [[I 0],[0 K]]
-    real_t freq = mesh_->freq;
+    Real freq = mesh_->freq;
     const schur_crealw imag_i{0.,1.};
-    real_t om = 2. * M_PI * freq; 
-    real_t omega2 = std::pow(om,2);
+    Real om = 2. * M_PI * freq;
+    Real omega2 = std::pow(om,2);
     crmat2 A(ng*2,ng*2), B(ng*2,ng*2);
     auto idx1 = seq(0,ng-1), idx2 = seq(ng,ng*2-1);
     A.setZero(); B.setZero();
@@ -121,9 +121,12 @@ compute_egn(bool use_qz)
 
     // copy to c/displ
     c_phase.resize(nc);
+    schur_index_.clear();
+    if(use_qz) schur_index_.resize(nc);
     for(int ic = 0; ic < nc; ic ++) {
         int id = idx0[idx[ic]];
         c_phase[ic] = c_all[id];
+        if(use_qz) schur_index_[ic] = id;
     }
 
     if(use_qz) {
@@ -133,11 +136,11 @@ compute_egn(bool use_qz)
             int id = idx0[idx[ic]];
 
             // normalize 
-            real_t sr = vsr(seq(0,ng-1),id).norm();
-            real_t sl = vsl(seq(ng,2*ng-1),id).norm();
+            Real sr = vsr(seq(0,ng-1),id).norm();
+            Real sl = vsl(seq(ng,2*ng-1),id).norm();
             for(int i = 0; i < ng; i ++) {
-                egn_r[ic * ng + i] = (complex_t)vsr(i,id) / sr;
-                egn_l[ic * ng + i] = (complex_t)vsl(i+ng,id) / sl;
+                egn_r[ic * ng + i] = (Complex)vsr(i,id) / sr;
+                egn_l[ic * ng + i] = (Complex)vsl(i+ng,id) / sl;
             }
         }
     }
@@ -151,12 +154,12 @@ compute_egn(bool use_qz)
  * @param c_i imaginary part of phase velocity
  */
 void SolverAniso::
-get_phase_vel(int imode, real_t &c_r, real_t &c_i) const
+get_phase_vel(int imode, Real &c_r, Real &c_i) const
 {
     if(imode < 0 || imode >= (int)c_phase.size()) {
         throw std::runtime_error("SolverAniso::get_phase_vel(): invalid mode index");
     }
-    complex_t c = c_phase[imode] * mesh_->SCALE_VELOCITY;
+    Complex c = c_phase[imode] * mesh_->SCALE_VELOCITY;
     c_r = c.real();
     c_i = c.imag();
 }

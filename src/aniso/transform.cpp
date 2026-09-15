@@ -12,7 +12,7 @@ namespace specswd
 void SolverAniso::
 egn2displ(
     int imode,
-    complex_t * __restrict displ
+    Complex * __restrict displ
 ) const 
 {
     using namespace GQTable;
@@ -20,12 +20,12 @@ egn2displ(
     int nglob_el = mesh_->nglob_el;
 
     // get wave number
-    complex_t c = c_phase[imode];
-    real_t freq = mesh_->freq;
-    real_t phi = mesh_->phi;
-    complex_t wvnm = (real_t)(M_PI * 2.) * freq / c;
-    complex_t kvec[2] = {std::cos(phi) * wvnm,std::sin(phi) * wvnm};
-    const complex_t I = complex_t{0.,1.};
+    Complex c = c_phase[imode];
+    Real freq = mesh_->freq;
+    Real phi = mesh_->phi;
+    Complex wvnm = (Real)(M_PI * 2.) * freq / c;
+    Complex kvec[2] = {std::cos(phi) * wvnm,std::sin(phi) * wvnm};
+    const Complex I = Complex{0.,1.};
 
     // loop elastic elements
     for(int ispec = 0; ispec < mesh_->nspec_el+ mesh_->nspec_el_grl; ispec ++) {
@@ -48,14 +48,14 @@ egn2displ(
     }
 
     // loop each acoustic element
-    std::array<complex_t,NGRL> chi;
+    std::array<Complex,NGRL> chi;
     for(int ispec = 0; ispec < mesh_->nspec_ac + mesh_->nspec_ac_grl; ispec += 1) {
         int iel = mesh_->ac_elmnts[ispec];
         int NGL = NGLL;
         int id0 = ispec * NGLL;
         int id1 = iel * NGLL;
-        const real_t *hp = &hprime[0];
-        const real_t J = mesh_->jacodet[iel];
+        const Real *hp = &hprime[0];
+        const Real J = mesh_->jacodet[iel];
 
         // GRL layer
         if(ispec == mesh_->nspec_ac) {
@@ -67,20 +67,20 @@ egn2displ(
         for(int i = 0; i < NGL; i ++) {
             int id = id0 + i;
             int iglob = mesh_->ibool_ac[id];
-            chi[i] = (iglob == -1) ? (complex_t)0.: egn_r[nglob_el * 3 + iglob];
+            chi[i] = (iglob == -1) ? (Complex)0.: egn_r[nglob_el * 3 + iglob];
         }
 
 
         // compute derivative  dchi / dz
         for(int i = 0; i < NGL; i ++) {
-            complex_t dchi{};
+            Complex dchi{};
             for(int j = 0; j < NGL; j ++) {
                 dchi += chi[j] * hp[i * NGL + j];
             }
             dchi /= J;
 
             // set value to displ
-            real_t rho = mesh_->xrho_ac[id0 + i];
+            Real rho = mesh_->xrho_ac[id0 + i];
             displ[0*npts + id1+i] = -I * chi[i] * kvec[0] / rho;
             displ[1*npts + id1+i] = -I * chi[i] * kvec[1] / rho;
             displ[2*npts + id1+i] = dchi / rho;
@@ -89,10 +89,10 @@ egn2displ(
 
     // rotate to R/T/Z 
     for(int ipt = 0; ipt < npts; ipt ++) {
-        complex_t ux = displ[0*npts+ipt], 
+        Complex ux = displ[0*npts+ipt],
                 uy = displ[1*npts+ipt];
-        complex_t ur = ux * std::cos(phi) + uy * std::sin(phi);
-        complex_t ut = -ux * std::sin(phi) + uy * std::cos(phi);
+        Complex ur = ux * std::cos(phi) + uy * std::sin(phi);
+        Complex ut = -ux * std::sin(phi) + uy * std::cos(phi);
         displ[0*npts+ipt] = ur;
         displ[1*npts+ipt] = ut;
     }

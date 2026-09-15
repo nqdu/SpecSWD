@@ -8,7 +8,7 @@
 namespace specswd
 {
 /**
- * @brief compute group velocity, elastic case
+ * @brief compute the complex group-velocity vector
  * 
  * @param mesh Mesh class
  */
@@ -23,34 +23,43 @@ compute_group_vel(
 
     // mapping matrices used
     int ng = this->ndof;
-    Eigen::Map<const Eigen::Matrix<real_t,-1,-1,1>> dE(dwdEmat.data(),ng,ng);
-    Eigen::Map<const Eigen::VectorX<complex_t>> M(Mmat.data(),ng);
-    Eigen::Map<const Eigen::Matrix<complex_t,-1,-1,1>> dkxdK(dkxdKmat.data(),ng,ng);
-    Eigen::Map<const Eigen::Matrix<complex_t,-1,-1,1>> dkydK(dkydKmat.data(),ng,ng);
-    Eigen::Map<const Eigen::Matrix<complex_t,-1,-1,1>> dkxdH(dkxdHmat.data(),ng,ng);
-    Eigen::Map<const Eigen::Matrix<complex_t,-1,-1,1>> dkydH(dkydHmat.data(),ng,ng);
+    Eigen::Map<const Eigen::Matrix<Complex,-1,-1,1>> dE(dwdEmat.data(),ng,ng);
+    Eigen::Map<const Eigen::VectorX<Complex>> M(Mmat.data(),ng);
+    Eigen::Map<const Eigen::VectorX<Complex>> dM(dwdMmat.data(),ng);
+    Eigen::Map<const Eigen::Matrix<Complex,-1,-1,1>> dK(dwdKmat.data(),ng,ng);
+    Eigen::Map<const Eigen::Matrix<Complex,-1,-1,1>> dH(dwdHmat.data(),ng,ng);
+    Eigen::Map<const Eigen::Matrix<Complex,-1,-1,1>> dkxdK(dkxdKmat.data(),ng,ng);
+    Eigen::Map<const Eigen::Matrix<Complex,-1,-1,1>> dkydK(dkydKmat.data(),ng,ng);
+    Eigen::Map<const Eigen::Matrix<Complex,-1,-1,1>> dkxdH(dkxdHmat.data(),ng,ng);
+    Eigen::Map<const Eigen::Matrix<Complex,-1,-1,1>> dkydH(dkydHmat.data(),ng,ng);
 
     // loop each mode
     for(int imode = 0; imode < nc; imode ++ ) {
         // get eigen functions
-        Eigen::Map<const Eigen::VectorX<complex_t>> x(&egn_r[imode*ng],ng);
-        Eigen::Map<const Eigen::VectorX<complex_t>> y(&egn_l[imode*ng],ng);
+        Eigen::Map<const Eigen::VectorX<Complex>> x(&egn_r[imode*ng],ng);
+        Eigen::Map<const Eigen::VectorX<Complex>> y(&egn_l[imode*ng],ng);
 
         // compute factors
-        complex_t c = c_phase[imode];
-        complex_t om = (real_t)2. * M_PI * mesh_->freq;
-        complex_t k = om / c;
-        complex_t yHMx = (y.conjugate().array() * M.array() * x.array()).sum();
-        complex_t yHdEx = (y.adjoint() * dE.cast<complex_t>() * x).sum();
-        complex_t denoinv = 2.0 * om * yHMx - yHdEx;
+        Complex c = c_phase[imode];
+        Complex om = (Real)2. * M_PI * mesh_->freq;
+        Complex k = om / c;
+        Complex yHMx = (y.conjugate().array() * M.array() * x.array()).sum();
+        Complex yHdMx =
+            (y.conjugate().array() * dM.array() * x.array()).sum();
+        Complex yHdEx = (y.adjoint() * dE * x).sum();
+        Complex yHdKx = (y.adjoint() * dK * x).sum();
+        Complex yHdHx = (y.adjoint() * dH * x).sum();
+        const Complex I{0.,1.};
+        Complex denoinv = 2.0 * om * yHMx + om * om * yHdMx
+                            - yHdEx - k * k * yHdKx - I * k * yHdHx;
         denoinv = 1.0 / denoinv;
 
         // along phase velocity terms
-        std::array<complex_t,2> uvec{};
-        complex_t yH_dkxH_x = (y.adjoint() * dkxdH * x).sum();
-        complex_t yH_dkyH_x = (y.adjoint() * dkydH * x).sum();
-        complex_t yH_dkxK_x = (y.adjoint() * dkxdK * x).sum();
-        complex_t yH_dkyK_x = (y.adjoint() * dkydK * x).sum();
+        std::array<Complex,2> uvec{};
+        Complex yH_dkxH_x = (y.adjoint() * dkxdH * x).sum();
+        Complex yH_dkyH_x = (y.adjoint() * dkydH * x).sum();
+        Complex yH_dkxK_x = (y.adjoint() * dkxdK * x).sum();
+        Complex yH_dkyK_x = (y.adjoint() * dkydK * x).sum();
         uvec[0] = k * yH_dkxK_x + yH_dkxH_x;
         uvec[1] = k * yH_dkyK_x + yH_dkyH_x;
         uvec[0] *= denoinv;
@@ -69,14 +78,14 @@ compute_group_vel(
  * @param uy_r/i real/imag part of group velocity in y direction 
  */
 void SolverAniso::
-get_group_vel(int imode, real_t &ux_r, real_t &ux_i,
-                real_t &uy_r, real_t &uy_i) const
+get_group_vel(int imode, Real &ux_r, Real &ux_i,
+                Real &uy_r, Real &uy_i) const
 {
     if(imode < 0 || imode >= (int)c_group_x.size()) {
         throw std::runtime_error("SolverAniso::get_group_vel(): invalid mode index");
     }
-    complex_t ux = c_group_x[imode] * mesh_->SCALE_VELOCITY;
-    complex_t uy = c_group_y[imode] * mesh_->SCALE_VELOCITY;
+    Complex ux = c_group_x[imode] * mesh_->SCALE_VELOCITY;
+    Complex uy = c_group_y[imode] * mesh_->SCALE_VELOCITY;
     ux_r = ux.real();
     ux_i = ux.imag();
     uy_r = uy.real();

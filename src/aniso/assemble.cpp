@@ -38,41 +38,53 @@ prepare_matrices_solid_()
     int ng = this->ndof;
     auto &Me = *mesh_;
     int nglob_el = mesh_->nglob_el;
-    const int size_el = Me.ibool_el.size();
-    real_t k[2] = {std::cos(Me.phi),std::sin(Me.phi)};
-    complex_t imag_i = {0.,1.};
-    real_t freq  = mesh_->freq * mesh_->SCALE_VELOCITY / mesh_->SCALE_LENGTH;
+    Real k[2] = {std::cos(Me.phi),std::sin(Me.phi)};
+    Complex imag_i = {0.,1.};
+    Real freq  = mesh_->freq * mesh_->SCALE_VELOCITY / mesh_->SCALE_LENGTH;
+    Real omega_scale = mesh_->SCALE_VELOCITY / mesh_->SCALE_LENGTH;
 
     auto assemble_cases = [&](
         int startid,int endid,
-        const real_t *weight,
-        const real_t *hp,
-        const real_t *hpT,
+        const Real *weight,
+        const Real *hp,
+        const Real *hpT,
         auto ConstNGL)
     {
         constexpr int NGL = decltype(ConstNGL)::value;
-        std::array<complex_t,NGL*21> sumC21; // shape(NGL,21)
+        std::array<Complex,NGL*21> sumC21; // shape(NGL,21)
+        std::array<Complex,NGL*21> dwdSumC21{}; // shape(NGL,21)
         #define C21(i,j,p,q,a) sumC21[a * 21 + voigt4(i,j,p,q)]
+        #define DWC21(i,j,p,q,a) dwdSumC21[a * 21 + voigt4(i,j,p,q)]
 
         // compute M/K/H/E for gll/grl layer, elastic
         for(int ispec = startid; ispec < endid; ispec ++) {
             int iel = Me.el_elmnts[ispec];
             int id = ispec * NGLL;
-            real_t J = Me.jacodet[iel];
+            Real J = Me.jacodet[iel];
 
             // cache temporary arrays
             for(int i = 0; i < NGL; i ++) {
+                const int point = id + i;
                 for(int idx = 0; idx < 21; idx ++) {
-                    sumC21[i*21+idx] = Me.xC21[idx*size_el+id+i];
+                    sumC21[i*21+idx] = Me.xC21[point*21+idx];
                 }
 
                 // apply Q model to C21 if required
                 if(Me.HAS_ATT){
-                    std::array<real_t,21> Qm;
-                    for(int q = 0; q < Me.nQani; q ++) {
-                        Qm[q] = Me.xQani[q*size_el+id+i];
+                    get_cmplx_c21_frequency_derivative(
+                        freq,&Me.xQani[point*Me.nQani],
+                        &Me.xC21[point*21],&dwdSumC21[i*21],
+                        Me.nQani,Me.Qani_funcid,
+                        Me.ATTENUATION_REF_FREQUENCY
+                    );
+                    for(int idx = 0; idx < 21; idx ++) {
+                        dwdSumC21[i*21+idx] *= omega_scale;
                     }
-                    get_cmplx_c21(freq,Qm.data(),&sumC21[i*21],Me.nQani,Me.Qani_funcid);
+                    get_cmplx_c21(
+                        freq,&Me.xQani[point*Me.nQani],
+                        &sumC21[i*21],Me.nQani,
+                        Me.Qani_funcid,Me.ATTENUATION_REF_FREQUENCY
+                    );
                 }
             }
 
@@ -81,15 +93,15 @@ prepare_matrices_solid_()
                 int iglob = Me.ibool_el[id + a];
 
                 // mass matrix
-                complex_t M0 = weight[a] * J * Me.xrho_el[id + a];
+                Complex M0 = weight[a] * J * Me.xrho_el[id + a];
                 for(int i = 0; i < 3; i ++) {
                     Mmat[iglob + nglob_el * i] += M0;
                     for(int p = 0; p < 3; p ++) {
                         // cache used c values
-                        complex_t c00_a = C21(i,0,p,0,a), c01_a = C21(i,0,p,1,a);
-                        complex_t c10_a = C21(i,1,p,0,a), c11_a = C21(i,1,p,1,a);
+                        Complex c00_a = C21(i,0,p,0,a), c01_a = C21(i,0,p,1,a);
+                        Complex c10_a = C21(i,1,p,0,a), c11_a = C21(i,1,p,1,a);
 
-                        complex_t temp = c00_a * k[0] * k[0] + 
+                        Complex temp = c00_a * k[0] * k[0] +
                                         c01_a * k[0] * k[1] + 
                                         c10_a * k[0] * k[1] +
                                         c11_a * k[1] * k[1];
@@ -97,16 +109,23 @@ prepare_matrices_solid_()
 
                         Kmat[idx] += temp * J * weight[a];
 
+                        Complex dwdtemp =
+                            DWC21(i,0,p,0,a) * k[0] * k[0] +
+                            DWC21(i,0,p,1,a) * k[0] * k[1] +
+                            DWC21(i,1,p,0,a) * k[0] * k[1] +
+                            DWC21(i,1,p,1,a) * k[1] * k[1];
+                        dwdKmat[idx] += dwdtemp * J * weight[a];
+
                         // update dkxdKmat, dkydKmat
                         dkxdKmat[idx] += J * weight[a] * (
-                                        c00_a * (real_t)2.0 * k[0] + 
+                                        c00_a * (Real)2.0 * k[0] +
                                         c01_a * k[1] +
                                         c10_a * k[1]
                         );
                         dkydKmat[idx] += J * weight[a] * (
                                         c01_a * k[0] +
                                         c10_a * k[0] + 
-                                        c11_a * k[1] * (real_t)2.0
+                                        c11_a * k[1] * (Real)2.0
                         );
                     }
                 }
@@ -120,24 +139,38 @@ prepare_matrices_solid_()
                         int idx = (i*nglob_el+iglob)*ng+(p*nglob_el+iglob1);
 
                         // E
-                        complex_t sx{};
+                        Complex sx{};
+                        Complex dwdsx{};
                         for(int s = 0; s < NGL; s ++) {
                             sx += C21(i,2,p,2,s) * weight[s] * hpT[a*NGL+s] * hpT[b*NGL+s];
+                            dwdsx += DWC21(i,2,p,2,s) * weight[s]
+                                     * hpT[a*NGL+s] * hpT[b*NGL+s];
                         }
                         Emat[idx] += sx / J;
+                        dwdEmat[idx] += dwdsx / J;
 
                         // cache used c values
-                        complex_t c02_a = C21(i,0,p,2,a);
-                        complex_t c12_a = C21(i,1,p,2,a);
-                        complex_t c20_b = C21(i,2,p,0,b);
-                        complex_t c21_b = C21(i,2,p,1,b);
+                        Complex c02_a = C21(i,0,p,2,a);
+                        Complex c12_a = C21(i,1,p,2,a);
+                        Complex c20_b = C21(i,2,p,0,b);
+                        Complex c21_b = C21(i,2,p,1,b);
 
                         // H
-                        complex_t temp1 = c02_a * k[0] + c12_a * k[1];
-                        complex_t temp2 = c20_b * k[0] + c21_b * k[1];
+                        Complex temp1 = c02_a * k[0] + c12_a * k[1];
+                        Complex temp2 = c20_b * k[0] + c21_b * k[1];
 
                         Hmat[idx] += temp1 * hp[a*NGL+b] * weight[a] - 
                                     temp2 * hpT[a*NGL+b] * weight[b];
+
+                        Complex dwdtemp1 =
+                            DWC21(i,0,p,2,a) * k[0]
+                            + DWC21(i,1,p,2,a) * k[1];
+                        Complex dwdtemp2 =
+                            DWC21(i,2,p,0,b) * k[0]
+                            + DWC21(i,2,p,1,b) * k[1];
+                        dwdHmat[idx] +=
+                            dwdtemp1 * hp[a*NGL+b] * weight[a]
+                            - dwdtemp2 * hpT[a*NGL+b] * weight[b];
 
                         // update dkxdHmat, dkydHmat
                         dkxdHmat[idx] += c02_a * imag_i * hp[a*NGL+b] * weight[a] -
@@ -149,6 +182,7 @@ prepare_matrices_solid_()
         
             }
         }
+        #undef DWC21
         #undef C21
     };
 
@@ -175,23 +209,24 @@ prepare_matrices_fluid_()
     int ng = this->ndof;
     auto &Me = *mesh_;
     int nglob_el = mesh_->nglob_el;
-    real_t freq = Me.freq * (Me.SCALE_VELOCITY / Me.SCALE_LENGTH);
+    Real freq = Me.freq * (Me.SCALE_VELOCITY / Me.SCALE_LENGTH);
+    Real omega_scale = Me.SCALE_VELOCITY / Me.SCALE_LENGTH;
 
     // acoustic case
     auto assemble_cases = [&](
         int startid,int endid,
-        const real_t *weight,
-        const real_t *hpT,
+        const Real *weight,
+        const Real *hpT,
         auto ConstNGL)
     {
         constexpr int NGL = decltype(ConstNGL)::value;
-        std::array<complex_t,NGL> sumL;
+        std::array<Complex,NGL> sumL;
 
         for(int ispec = startid; ispec < endid; ispec ++) {
             int iel = Me.ac_elmnts[ispec];
             int id = ispec * NGLL;
 
-            const float J = Me.jacodet[iel];
+            const Real J = Me.jacodet[iel];
 
             // cache temporary arrays
             for(int i = 0; i < NGL; i ++) {
@@ -203,23 +238,37 @@ prepare_matrices_fluid_()
                 int ig0 = Me.ibool_ac[id + i];
                 if(ig0 == -1) continue;
                 int iglob = ig0 + nglob_el * 3;
-                complex_t temp = weight[i] * J;
+                Complex temp = weight[i] * J;
 
                 // assemble M and K
-                complex_t  sk = 1.;
+                Complex  sk = 1.;
+                Complex dwdsk{};
                 if (Me.HAS_ATT){
-                    sk = get_sls_modulus_factor(freq,Me.xQk_ac[id+i]);
+                    const auto response = get_attenuation_response(
+                        freq,Me.xQk_ac[id+i],Me.ATTENUATION_REF_FREQUENCY
+                    );
+                    sk = response.factor;
+                    dwdsk = response.d_factor_d_omega * omega_scale;
                 }
                 Mmat[iglob] += temp / (sk * Me.xkappa_ac[id + i]);
+                dwdMmat[iglob] -= temp * dwdsk
+                    / (sk * sk * Me.xkappa_ac[id + i]);
 
-                Kmat[iglob * ng + iglob] += temp / Me.xrho_ac[id + i];
+                const Complex acoustic_k = temp/Me.xrho_ac[id+i];
+                Kmat[iglob*ng+iglob] += acoustic_k;
+                // The acoustic horizontal operator is k^2 K.  The
+                // directional matrices store (1/k) d(k^2 K)/d(kx,ky).
+                dkxdKmat[iglob*ng+iglob] +=
+                    2.*std::cos(Me.phi)*acoustic_k;
+                dkydKmat[iglob*ng+iglob] +=
+                    2.*std::sin(Me.phi)*acoustic_k;
 
                 // assemble E
                 for(int j = 0; j < NGL; j ++) {
                     int ig1 = Me.ibool_ac[id + j];
                     if(ig1 == -1) continue;
                     int iglob1 = ig1 + nglob_el * 3;
-                    complex_t s{};
+                    Complex s{};
                     for(int m = 0; m < NGL; m ++) {
                         s += sumL[m] * hpT[i * NGL + m] * hpT[j * NGL + m];
                     }
@@ -251,14 +300,14 @@ prepare_matrices_coupling_el_ac_()
     int ng = this->ndof;
     auto &Me = *mesh_;
     int nglob_el = mesh_->nglob_el;
-    real_t om = M_PI * 2 * mesh_->freq; // dimensionless unit here
+    Real om = M_PI * 2 * mesh_->freq; // dimensionless unit here
 
     // acoustic-elastic boundary
     for(int iface = 0; iface < Me.nfaces_bdry; iface ++) {
         int ispec_ac = Me.ispec_bdry[iface * 2 + 0];
         int ispec_el = Me.ispec_bdry[iface * 2 + 1];
         const auto is_pos = Me.bdry_norm_direc[iface];
-        float norm = is_pos ? -1 : 1.;
+        Real norm = is_pos ? -1 : 1.;
         int igll_el = is_pos ? 0 : NGLL - 1;
         int igll_ac = is_pos ? NGLL - 1 : 0;
 
@@ -267,17 +316,17 @@ prepare_matrices_coupling_el_ac_()
         int iglob_ac = Me.ibool_ac[ispec_ac * NGLL + igll_ac];
 
         // add contribution to E mat, elastic case
-        // E(nglob_el + iglob_el, nglob_el*2 + iglob_ac) += 
+        // E(2*nglob_el + iglob_el, 3*nglob_el + iglob_ac) +=
         int id = (nglob_el*2 + iglob_el) * ng + (nglob_el * 3 + iglob_ac);
-        Emat[id] += (complex_t)(om * om * norm);
+        Emat[id] += (Complex)(om * om * norm);
 
         // dE / dw
         dwdEmat[id] += 2. * om * norm;
         
         // acoustic case
-        // E(nglob_el*2 + iglob_ac, nglob_el + iglob_el) += norm
+        // E(3*nglob_el + iglob_ac, 2*nglob_el + iglob_el) += norm
         id = (nglob_el*3 + iglob_ac) * ng + (nglob_el*2 + iglob_el);
-        Emat[id] += (complex_t)norm;
+        Emat[id] += (Complex)norm;
     }
 }
 
@@ -292,20 +341,26 @@ prepare_matrices()
     Kmat.resize(ng*ng);
     Hmat.resize(ng*ng);
     Emat.resize(ng*ng);
+    dwdMmat.resize(ng);
+    dwdKmat.resize(ng*ng);
+    dwdHmat.resize(ng*ng);
     dwdEmat.resize(ng*ng);
     dkxdHmat.resize(ng*ng);
     dkydHmat.resize(ng*ng);
     dkxdKmat.resize(ng*ng);
     dkydKmat.resize(ng*ng);
-    std::fill(Mmat.begin(),Mmat.end(),(complex_t)0.);
-    std::fill(Kmat.begin(),Kmat.end(),(complex_t)0.);
-    std::fill(Hmat.begin(),Hmat.end(),(complex_t)0.);
-    std::fill(Emat.begin(),Emat.end(),(complex_t)0.);
-    std::fill(dwdEmat.begin(),dwdEmat.end(),0.);
-    std::fill(dkxdHmat.begin(),dkxdHmat.end(),(complex_t)0.);
-    std::fill(dkydHmat.begin(),dkydHmat.end(),(complex_t)0.);
-    std::fill(dkxdKmat.begin(),dkxdKmat.end(),(complex_t)0.);
-    std::fill(dkydKmat.begin(),dkydKmat.end(),(complex_t)0.);
+    std::fill(Mmat.begin(),Mmat.end(),(Complex)0.);
+    std::fill(Kmat.begin(),Kmat.end(),(Complex)0.);
+    std::fill(Hmat.begin(),Hmat.end(),(Complex)0.);
+    std::fill(Emat.begin(),Emat.end(),(Complex)0.);
+    std::fill(dwdMmat.begin(),dwdMmat.end(),(Complex)0.);
+    std::fill(dwdKmat.begin(),dwdKmat.end(),(Complex)0.);
+    std::fill(dwdHmat.begin(),dwdHmat.end(),(Complex)0.);
+    std::fill(dwdEmat.begin(),dwdEmat.end(),(Complex)0.);
+    std::fill(dkxdHmat.begin(),dkxdHmat.end(),(Complex)0.);
+    std::fill(dkydHmat.begin(),dkydHmat.end(),(Complex)0.);
+    std::fill(dkxdKmat.begin(),dkxdKmat.end(),(Complex)0.);
+    std::fill(dkydKmat.begin(),dkydKmat.end(),(Complex)0.);
 
     this ->prepare_matrices_solid_();
     this ->prepare_matrices_fluid_();
