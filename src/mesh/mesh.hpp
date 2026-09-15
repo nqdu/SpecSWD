@@ -20,10 +20,10 @@ struct Mesh {
     int nspec,nspec_grl; // no. of elements for gll/grl layer
     int nglob; // no. of unique points
     std::vector<int> ibool; // connectivity matrix, shape(nspec * NGLL + NGRL)
-    std::vector<real_t> skel;  // skeleton, shape(nspec * 2 + 2)
-    std::vector<real_t> znodes; // shape(nspec * NGLL + NGRL)
-    std::vector<real_t> jacodet; // deg of jacobian for GLL, shape(nspec + 1) dz / dxi
-    std::vector<real_t> zstore; // shape(nglob)  
+    std::vector<Real> skel;  // skeleton, shape(nspec * 2 + 2)
+    std::vector<Real> znodes; // shape(nspec * NGLL + NGRL)
+    std::vector<Real> jacodet; // deg of jacobian for GLL, shape(nspec + 1) dz / dxi
+    std::vector<Real> zstore; // shape(nglob)
 
     // scaling factors 
     double SCALE_LENGTH = 0.;
@@ -41,25 +41,26 @@ struct Mesh {
     std::vector<int> ibool_el, ibool_ac; // connectivity matrix, shape shape(nspec_? + nspec_?_grl)
 
     // density and elastic parameters
-    std::vector<real_t> xrho_ac; // shape(nspec_ac * NGLL + nspec_ac_grl * NGRL)
-    std::vector<real_t> xrho_el; // shape (nsepc_el * NGLL + nspec_el_grl * NGRL)
+    std::vector<Real> xrho_ac; // shape(nspec_ac * NGLL + nspec_ac_grl * NGRL)
+    std::vector<Real> xrho_el; // shape (nsepc_el * NGLL + nspec_el_grl * NGRL)
 
     // attenuation/type flag
     bool HAS_ATT;
     int SWD_TYPE; // =0 Love wave, = 1 for Rayleigh = 2 full aniso
+    Real ATTENUATION_REF_FREQUENCY = 1.; // Hz; input moduli are storage moduli here
     
     // vti media
-    std::vector<real_t> xA,xC,xL,xeta,xN; // shape(nspec_el * NGLL+ nspec_el_grl * NGRL)
-    std::vector<real_t> xQA,xQC,xQL,xQN; // shape(nspec_el * NGLL+ nspec_el_grl * NGRL), Q model
+    std::vector<Real> xA,xC,xL,xeta,xN; // shape(nspec_el * NGLL+ nspec_el_grl * NGRL)
+    std::vector<Real> xQA,xQC,xQL,xQN; // shape(nspec_el * NGLL+ nspec_el_grl * NGRL), Q model
 
     // full anisotropy
     int nQani; // no. of Q used for anisotropy
     int Qani_funcid = 1; // functions to apply Q to c21
-    std::vector<real_t> xC21; // shape(21,size_el)
-    std::vector<real_t> xQani; // shape(nQani,size_el)
+    std::vector<Real> xC21; // AoS shape(size_el,21)
+    std::vector<Real> xQani; // AoS shape(size_el,nQani)
 
     // fluid vti
-    std::vector<real_t> xkappa_ac,xQk_ac;
+    std::vector<Real> xkappa_ac,xQk_ac;
 
     // fluid-elastic boundary
     int nfaces_bdry;
@@ -67,12 +68,12 @@ struct Mesh {
     std::vector<uint8_t> bdry_norm_direc; //  shape(nfaces_bdry), = 1 point from acoustic -> z direc elastic
 
     int nz_tomo, nregions;
-    std::vector<real_t> rho_tomo;
-    std::vector<real_t> vpv_tomo,vph_tomo,vsv_tomo,vsh_tomo,eta_tomo;
-    std::vector<real_t> QC_tomo,QA_tomo,QL_tomo,QN_tomo;
-    std::vector<real_t> c21_tomo; // shape(21,nz_tomo)
-    std::vector<real_t> Qani_tomo; // shape(nQni,nz_tomo)
-    std::vector<real_t> depth_tomo;
+    std::vector<Real> rho_tomo;
+    std::vector<Real> vpv_tomo,vph_tomo,vsv_tomo,vsh_tomo,eta_tomo;
+    std::vector<Real> QC_tomo,QA_tomo,QL_tomo,QN_tomo;
+    std::vector<Real> c21_tomo; // shape(21,nz_tomo)
+    std::vector<Real> Qani_tomo; // shape(nQni,nz_tomo)
+    std::vector<Real> depth_tomo;
     std::vector<int> region_bdry; // shape(nregions,2)
     std::vector<int> iregion_flag; // shape(nspec + 1), return region flag
 
@@ -80,23 +81,23 @@ struct Mesh {
     std::vector<uint8_t> is_el_reg, is_ac_reg; // shape(nregions)
 
     // phase velocity search range
-    real_t PHASE_VELOC_MIN,PHASE_VELOC_MAX;
+    Real PHASE_VELOC_MIN,PHASE_VELOC_MAX;
 
     // constants
-    real_t freq;  // current frequency
-    real_t phi;   // current angle, in rad
+    Real freq;  // current frequency
+    Real phi;   // current angle, in rad
 
     // public functions
     void read_model(const char *filename);
-    void create_database(real_t freq,real_t phi);
+    void create_database(Real freq,Real phi);
     void print_model() const;
     void print_database() const;
     void allocate_1D_model(int nz0,int swd_type,int has_att,int nQani_tomo=0,int Qfunc_id=1);
     void create_model_attributes();
 
     // interpolate model
-    void interp_model(const real_t *param,const std::vector<int> &elmnts,std::vector<real_t> &md) const;
-    void project_kl(const real_t *frekl, real_t *kl_out) const;
+    void interp_model(const Real *param,const std::vector<int> &elmnts,std::vector<Real> &md) const;
+    void project_kl(const Real *frekl, Real *kl_out) const;
 
     // unit conversion
     void rescale_to_nodim(bool backward=false);

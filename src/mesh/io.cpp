@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 
 namespace specswd
 {
@@ -90,18 +91,35 @@ read_model_header_(const char *filename)
     std::string line;
     std::getline(infile,line);
     
-    // read SWD_TYPE and HAS_ATT
+    // read SWD_TYPE, HAS_ATT, anisotropic-Q metadata, and optional reference
+    // frequency. For VTI headers: "type has_att [reference_frequency_hz]".
+    // For attenuating full anisotropy:
+    // "2 1 nQani Qfunc_id [reference_frequency_hz]".
     std::array<int,4> dummy{};
     {
         std::istringstream info(line);
         info >> dummy[0] >> dummy[1];
         if((dummy[0] == 2)  && (dummy[1] == 1)) {
             info >> dummy[2] >> dummy[3];
+            Real reference_frequency;
+            if(info >> reference_frequency) {
+                ATTENUATION_REF_FREQUENCY = reference_frequency;
+            }
         }
         else {
             dummy[2] = 0;
             dummy[3] = 1;
+            Real reference_frequency;
+            if(dummy[1] == 1 && info >> reference_frequency) {
+                ATTENUATION_REF_FREQUENCY = reference_frequency;
+            }
         }
+    }
+
+    if(dummy[1] == 1 && ATTENUATION_REF_FREQUENCY <= 0.) {
+        throw std::runtime_error(
+            "attenuation reference frequency must be positive"
+        );
     }
 
     // find how many depth points in this file
@@ -116,7 +134,7 @@ read_model_header_(const char *filename)
     this -> allocate_1D_model(nz,dummy[0],dummy[1],dummy[2],dummy[3]);
 
     // allocate depth
-    real_t z = 0.;
+    Real z = 0.;
 
     // read depth in file
     infile.open(filename);
@@ -152,7 +170,7 @@ read_model_love_(const char *filename)
     // skip header
     std::getline(infile,line);
 
-    real_t temp;
+    Real temp;
     for(int i = 0; i < nz_tomo; i ++) {
         std::getline(infile,line);
         std::istringstream info(line);
@@ -190,7 +208,7 @@ read_model_rayl_(const char *filename)
     for(int i = 0; i < nz_tomo; i ++) {
         std::getline(infile,line);
         std::istringstream info(line);
-        real_t temp;
+        Real temp;
         info >> temp >> rho_tomo[i] >> vph_tomo[i] 
              >> vpv_tomo[i] >> vsv_tomo[i] >> eta_tomo[i];
         if(HAS_ATT) {
@@ -289,9 +307,9 @@ rescale_to_nodim(bool backward)
         this -> compute_scale_units();
     }
 
-    real_t scale_length = SCALE_LENGTH;
-    real_t scale_velocity = SCALE_VELOCITY;
-    real_t scale_density = SCALE_DENSITY;
+    Real scale_length = SCALE_LENGTH;
+    Real scale_velocity = SCALE_VELOCITY;
+    Real scale_density = SCALE_DENSITY;
     if(!backward) {
         scale_length = 1.0 / SCALE_LENGTH;
         scale_velocity = 1.0 / SCALE_VELOCITY;
@@ -299,7 +317,7 @@ rescale_to_nodim(bool backward)
     }
 
     // scale modulous 
-    real_t scale_modulous = scale_density * scale_velocity * scale_velocity;
+    Real scale_modulous = scale_density * scale_velocity * scale_velocity;
 
     // rescale tomography model
     #define RESCALE_TO_NODIM(vec,scale) \
@@ -350,13 +368,13 @@ read_model(const char *filename)
 }
 
 static bool 
-check_fluid_c21(const real_t *c21)
+check_fluid_c21(const Real *c21)
 {
     bool flag = true;
-    const real_t eps = 1.0e-12;
-    real_t c0 = c21[0];
+    const Real eps = 1.0e-12;
+    Real c0 = c21[0];
     flag = flag & (c0 > 0);
-    for(int i = 2; i < 21; i ++) {
+    for(int i = 1; i < 21; i ++) {
         if(i == 1 || i == 2 || i == 6 || i == 7 || i == 11 ) 
         {
             flag = flag && (std::abs(c21[i] - c0) < eps);
@@ -431,7 +449,7 @@ create_model_attributes()
             }
         }
         else { // full aniso
-            real_t temp_c21[21];
+            Real temp_c21[21];
             for(int j = 0; j < 21; j ++) {
                 temp_c21[j] = c21_tomo[j*nz_tomo+i];
             }
@@ -439,9 +457,9 @@ create_model_attributes()
             
             if(HAS_ATT && flag) { 
                 // all Q should be equal
-                real_t Q0 = Qani_tomo[i];
+                Real Q0 = Qani_tomo[i];
                 for(int j = 1; j < nQani; j ++) {
-                    if(std::abs(Qani_tomo[j*nQani+i] - Q0) >= 1.0e-6) {
+                    if(std::abs(Qani_tomo[j*nz_tomo+i] - Q0) >= 1.0e-6) {
                         printf("in fluid region, all Q should be the same!\n");
                         exit(1);
                     }
@@ -493,6 +511,8 @@ print_model() const
     std::string outinfo = "elastic";
     if(HAS_ATT) {
         outinfo = "visco-elastic";
+        printf("input moduli reference frequency = %g Hz\n",
+               ATTENUATION_REF_FREQUENCY);
     }
 
     if(SWD_TYPE == 0) { // love wave 
@@ -640,4 +660,3 @@ print_database() const
 }
 
 } // namespace specswd
-

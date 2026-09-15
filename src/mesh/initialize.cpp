@@ -79,7 +79,7 @@ create_material_info_()
         if(is_elastic[i] != is_elastic[i+1]) {
             int iloc_el = i + 1, iloc_ac = i;
             if(is_elastic[i]) {
-                bdry_norm_direc[i] = 0;
+                bdry_norm_direc[idx] = 0;
                 iloc_el = i;
                 iloc_ac = i + 1;
             }

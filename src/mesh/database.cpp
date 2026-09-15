@@ -1,7 +1,10 @@
 #include "mesh/mesh.hpp"
 #include "shared/GQTable.hpp"
 
+#include <cmath>
+#include <cstdlib>
 #include <iostream>
+#include <stdexcept>
 
 namespace specswd
 {
@@ -74,7 +77,7 @@ compute_minmax_veloc_(std::vector<double> &vmin,std::vector<double> &vmax)
  * @param phi0 directional angle,in deg
  */
 void Mesh::
-create_database(real_t freq0,real_t phi0)
+create_database(Real freq0,Real phi0)
 {
     // copy constants
     this -> freq = freq0 * SCALE_LENGTH / SCALE_VELOCITY; // nondim frequency
@@ -101,7 +104,7 @@ create_database(real_t freq0,real_t phi0)
         int istart = region_bdry[ig*2+0];
         int iend = region_bdry[ig*2+1];
         
-        real_t maxdepth = depth_tomo[iend] - depth_tomo[istart];
+        Real maxdepth = depth_tomo[iend] - depth_tomo[istart];
         nel[ig] = 1.5 * (maxdepth *  freq) / vmin[ig] + 1;
         if(nel[ig] <=0) nel[ig] = 1;
         nspec += nel[ig];
@@ -137,7 +140,7 @@ create_database(real_t freq0,real_t phi0)
     for(int ig = 0; ig < nregions - 1; ig ++) {
         int istart = region_bdry[ig*2+0];
         int iend = region_bdry[ig*2+1];
-        real_t h = (depth_tomo[iend] - depth_tomo[istart]) / nel[ig];
+        Real h = (depth_tomo[iend] - depth_tomo[istart]) / nel[ig];
         for(int j = 0; j < nel[ig]; j ++) {
             skel[id * 2 + 0] = depth_tomo[istart] + h * j;
             skel[id * 2 + 1] = depth_tomo[istart] + h * (j + 1.);
@@ -155,11 +158,24 @@ create_database(real_t freq0,real_t phi0)
 
     // half space skeleton
     nspec_el_grl = 0; nspec_ac_grl = 0;
-    real_t max_lambda_in_bottom = 20;
-    if (HAS_ATT) {
-        max_lambda_in_bottom = 5;
+    Real max_lambda_in_bottom = 20;
+    if(const char *value = std::getenv("SPECSWD_MAX_LAMBDA_HALF_SPACE")) {
+        try {
+            max_lambda_in_bottom = std::stod(value);
+        }
+        catch(const std::exception &) {
+            throw std::invalid_argument(
+                "SPECSWD_MAX_LAMBDA_HALF_SPACE must be a positive number"
+            );
+        }
+        if(!std::isfinite(max_lambda_in_bottom) || max_lambda_in_bottom<=0.) {
+            throw std::invalid_argument(
+                "SPECSWD_MAX_LAMBDA_HALF_SPACE must be a positive number"
+            );
+        }
     }
-    real_t scale = vmax[nregions-1] / freq / xgrl[NGRL-1] * max_lambda_in_bottom;  // up to 50 wavelength
+    Real scale = vmax[nregions-1] / freq / xgrl[NGRL-1]
+               * max_lambda_in_bottom;
     skel[nspec * 2 + 0] = depth_tomo[nz_tomo-1];
     skel[nspec * 2 + 1] = depth_tomo[nz_tomo-1] + xgrl[NGRL-1] * scale;
     iregion_flag[nspec] = nregions - 1;
@@ -172,10 +188,10 @@ create_database(real_t freq0,real_t phi0)
 
     // jacobians and coordinates
     for(int ispec = 0; ispec < nspec; ispec ++) {
-        real_t h = skel[ispec*2+1] - skel[ispec*2+0];
+        Real h = skel[ispec*2+1] - skel[ispec*2+0];
         jacodet[ispec] = h / 2.;
         for(int i = 0; i < NGLL; i ++) {
-            real_t xi = xgll[i];
+            Real xi = xgll[i];
             znodes[ispec * NGLL + i] = skel[ispec*2] + h * 0.5 * (xi + 1);
         }
     }
@@ -183,7 +199,7 @@ create_database(real_t freq0,real_t phi0)
     for(int ispec = nspec; ispec < nspec + 1; ispec ++) {
         jacodet[ispec] = scale;
         for(int i = 0; i < NGRL; i ++) {
-            real_t xi = xgrl[i];
+            Real xi = xgrl[i];
             znodes[ispec*NGLL+i] = skel[ispec*2] + xi * scale;
         }
     }
@@ -230,7 +246,7 @@ create_db_love_()
     this -> interp_model(vsh_tomo.data(),el_elmnts,xN);
     this -> interp_model(vsv_tomo.data(),el_elmnts,xL);
     for(size_t i = 0; i < size; i ++) {
-        real_t r = xrho_el[i];
+        Real r = xrho_el[i];
         xN[i] = std::pow(xN[i],2) * r;
         xL[i] = std::pow(xL[i],2) * r;
     }
@@ -319,13 +335,13 @@ create_db_aniso_()
     this -> interp_model(rho_tomo.data(),ac_elmnts,xrho_ac);
 
     // allocate elastic model
-    std::vector<real_t> xtemp_el(size_el);
+    std::vector<Real> xtemp_el(size_el);
     xC21.resize(21*size_el);
     xkappa_ac.resize(size_ac);
     for(int i = 0; i < 21; i ++) {
         this -> interp_model(&c21_tomo[i*nz_tomo],el_elmnts,xtemp_el);
         for(size_t j = 0; j < size_el;j ++) {
-            xC21[i*size_el+j] = xtemp_el[j];
+            xC21[j*21+i] = xtemp_el[j];
         }
     }
 
@@ -333,10 +349,11 @@ create_db_aniso_()
     this -> interp_model(&c21_tomo[0],ac_elmnts,xkappa_ac);
     if(HAS_ATT) {
         xQani.resize(size_el * nQani);
+        xQk_ac.resize(size_ac);
         for(int iq = 0; iq < nQani; iq ++) {
             this -> interp_model(&Qani_tomo[iq*nz_tomo],el_elmnts,xtemp_el);
             for(size_t j = 0; j < size_el;j ++) {
-                xQani[iq*size_el+j] = xtemp_el[j];
+                xQani[j*nQani+iq] = xtemp_el[j];
             }
         }
         this -> interp_model(&Qani_tomo[0],ac_elmnts,xQk_ac);
