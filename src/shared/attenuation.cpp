@@ -1,82 +1,75 @@
-#include "numerical.hpp"
+#include "shared/attenuation.hpp"
 
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <complex>
+#include <stdexcept>
 
 namespace specswd
 {
 
-// only valid for frequency range [0.01,100]
-const int NSLS = 5;
-std::array<double,NSLS> y_sls_ref = {1.93044501, 1.64217132, 1.73606189, 1.42826439, 1.66934129};
-std::array<double,NSLS> w_sls_ref = {4.71238898e-02, 6.63370885e-01, 9.42477796e+00, 1.14672436e+02,1.05597079e+03};
-
-
 /**
- * @brief reset reference SLS model
- * 
- * @param w_sls new refernce w_sls, shape(NSLS)
- * @param y_sls new refernce y_sls, shape(NSLS)
+ * @brief Evaluate the causal constant-Q modulus normalized at a reference
+ * frequency.
+ *
+ * For q = Q^-1 and positive physical angular frequency,
+ *
+ *   alpha(q) = 2/pi atan(q),
+ *   M(omega,Q) = M_0 s(omega,Q),
+ *   s(omega,Q) = (1 + i q) (omega/omega_0)^alpha.
+ *
+ * Thus M_0 = Re M(omega_0,Q) and Im M/Re M = q at every positive
+ * frequency. Derivatives are with respect to physical angular frequency
+ * omega and q.
  */
-void 
-reset_ref_Q_model(const double *w_sls, const double *y_sls)
+AttenuationResponse get_attenuation_response(
+    Real freq,Real Q,Real reference_frequency
+)
 {
-    for(int i = 0; i < NSLS; i ++) {
-        w_sls_ref[i] = w_sls[i];
-        y_sls_ref[i] = y_sls[i];
+    if(!(freq > 0.) || !std::isfinite(freq)) {
+        throw std::invalid_argument("frequency must be positive and finite");
     }
+    if(!(Q > 0.)) {
+        throw std::invalid_argument("Q must be positive");
+    }
+    if(!(reference_frequency > 0.)
+       || !std::isfinite(reference_frequency)) {
+        throw std::invalid_argument(
+            "attenuation reference frequency must be positive and finite"
+        );
+    }
+
+    const Real q = 1. / Q;
+    const Real omega = 2. * M_PI * freq;
+    const Real log_ratio =
+        std::log(freq) - std::log(reference_frequency);
+    const Real alpha = 2. / M_PI * std::atan(q);
+    const Real dalpha_dq = 2. / (M_PI * (1. + q * q));
+    const Real amplitude = std::exp(alpha * log_ratio);
+    const Complex I{0., 1.};
+    const Complex loss_factor = 1. + I * q;
+
+    AttenuationResponse response{};
+    response.factor = amplitude * loss_factor;
+    response.d_factor_d_omega = alpha / omega * response.factor;
+    response.d_factor_d_qinv =
+        amplitude * (I + loss_factor * dalpha_dq * log_ratio);
+    response.d2_factor_d_omega_d_qinv =
+        (dalpha_dq * response.factor
+         + alpha * response.d_factor_d_qinv) / omega;
+    return response;
+}
+
+Complex get_attenuation_modulus_factor(
+    Real freq,Real Q,Real reference_frequency
+)
+{
+    return get_attenuation_response(freq,Q,reference_frequency).factor;
 }
 
 /**
- * @brief correct y from reference model to target model
- * @param Q target Q 
- * @param y_sls reference y_sls parameters
- * @param w_sls reference w_sls
- */
-static void 
-get_Q_sls_model(float Q,double *y_sls,double *w_sls)
-{
-    double dy[NSLS];
-    double y[NSLS];
-    for(int i = 0; i < NSLS; i ++) {
-        y[i] = y_sls_ref[i] / Q; 
-    }
-    dy[0] = 1. + 0.5 * y[0];
-    for(int i = 1; i < NSLS; i ++) {
-        dy[i] = dy[i-1] + (dy[i-1] - 0.5) * y[i-1] + 0.5 * y[i];
-    }
-
-    // copy to y_sls/w_sls
-    for(int i = 0; i < NSLS; i ++) {
-        w_sls[i] = w_sls_ref[i];
-        y_sls[i] = dy[i] * y[i];
-    }
-}
-
-/**
- * @brief get SLS Q terms on the elastic modulus
- * 
- * @param freq current frequency
- * @param Q Q value 
- * @return s modulus factor  mu = mu * s 
- */
-complex_t get_sls_modulus_factor(real_t freq,real_t Q)
-{
-    double y_sls[NSLS], w_sls[NSLS];
-    double om = 2 * M_PI * freq;
-    const complex_t I = {0.,1.};
-
-    get_Q_sls_model(Q,y_sls,w_sls);
-    complex_t s {};
-    for(int j = 0; j < NSLS; j ++) {
-        s += I * om * y_sls[j] / (w_sls[j] + I * om);
-    }
-
-    return (complex_t)(s + 1.);
-}
-
-/**
- * @brief Get the Q factor and derivative for SLS model
+ * @brief Get the constant-Q modulus factor and its inverse-Q derivative.
  * 
  * @param freq frequency 
  * @param Q current Q
@@ -84,60 +77,37 @@ complex_t get_sls_modulus_factor(real_t freq,real_t Q)
  * @param dsdqi Q^{-1} derivative ds / dQi
  */
 void 
-get_sls_Q_derivative(real_t freq,real_t Q,complex_t &s,complex_t &dsdqi)
+get_attenuation_Q_derivative(
+    Real freq,Real Q,Complex &s,Complex &dsdqi,
+    Real reference_frequency
+)
 {
-    double dy[NSLS],dd_dqi[NSLS];
-    double y[NSLS];
-    const complex_t I = {0.,1.};
-    double om = 2 * M_PI * freq;
-
-    // compute corrector
-    for(int i = 0; i < NSLS; i ++) {
-        y[i] = y_sls_ref[i] / Q; 
-    }
-    dy[0] = 1. + 0.5 * y[0];
-    for(int i = 1; i < NSLS; i ++) {
-        dy[i] = dy[i-1] + (dy[i-1] - 0.5) * y[i-1] + 0.5 * y[i];
-    }
-
-    dd_dqi[0] = 0.5 * y_sls_ref[0];
-    for(int i = 1; i < NSLS; i ++) {
-        dd_dqi[i] = dd_dqi[i-1] + (dy[i-1] - 0.5) * y_sls_ref[i-1] + dd_dqi[i-1] * y[i-1] +  0.5 * y_sls_ref[i];
-    }
-
-    // sum together
-    complex_t s1{},dsdqi1{};
-    s1 = 0.; dsdqi1 = 0.;
-    for(int i = 0; i < NSLS; i ++) {
-        s1 += I * om * y[i] * dy[i]/ (w_sls_ref[i] + I * om);
-
-        // y' = delta * y 
-        // dy'/dqi = d delta /dqi * y + delta * dy/dqi
-        double dyp_dqi = dd_dqi[i] * y[i] + dy[i] * y_sls_ref[i];
-        dsdqi1 += I * om * dyp_dqi / (w_sls_ref[i] + I * om);
-    }
-
-    s = (complex_t)(s1 + 1.);
-    dsdqi = dsdqi1;
+    const auto response = get_attenuation_response(
+        freq,Q,reference_frequency
+    );
+    s = response.factor;
+    dsdqi = response.d_factor_d_qinv;
 }
 
 /**
  * @brief convert df_complx/dm to df_real/dm and dfQi_dm, where f_complx = f_real (1 + 0.5 i * fQi) = f_real + i f_imag
  * @param npts size of frekl_r
- * @param f_cmplx user defiend quantity
- * @param frekl_r,frekl_i real/imag parts of derivatives
+ * @param f_cmplx nondimensional user-defined quantity
+ * @param f_scale scale that converts f_cmplx to the units of its derivatives
+ * @param frekl_r,frekl_i real/imaginary parts of derivatives
  */
 void
-get_fQ_kl(size_t npts,complex_t f_cmplx,
-          const real_t *frekl_r,
-          real_t *__restrict frekl_i)
+get_fQ_kl(size_t npts,Complex f_cmplx,Real f_scale,
+          const Real *frekl_r,
+          Real *__restrict frekl_i)
 {
-    real_t f_real = f_cmplx.real();
-    real_t f_imag = f_cmplx.imag();
-    real_t fQi = 2. * f_imag / f_real;
+    f_cmplx *= f_scale;
+    Real f_real = f_cmplx.real();
+    Real f_imag = f_cmplx.imag();
+    Real fQi = 2. * f_imag / f_real;
 
     for(size_t ipt = 0; ipt < npts; ipt ++) {
-        real_t dQidm = (frekl_i[ipt] * 2. - fQi * frekl_r[ipt]) / f_real;
+        Real dQidm = (frekl_i[ipt] * 2. - fQi * frekl_r[ipt]) / f_real;
         frekl_i[ipt] = dQidm;
     }
 }
@@ -148,26 +118,38 @@ static int c662flat(int m,int n) {
     return m * 6 + n - (m * (m + 1)) / 2;
 }
 
+static void validate_anisotropic_q_model_(int nQani,int Qani_funcid)
+{
+    if(Qani_funcid != 1) {
+        throw std::invalid_argument("unsupported anisotropic Q model");
+    }
+    if(nQani != 2) {
+        throw std::invalid_argument(
+            "anisotropic Q model 1 requires Qkappa and Qmu"
+        );
+    }
+}
+
 /**
  * @brief only set Qkappa and Qmu to C21 
  * @see Carcione and Cavallini (1995d), delta = 2, M3 = M4 = M2 -> Qmu
  */
 static void 
-C21_iso_(complex_t Qk_fac,complex_t Qmu_fac,complex_t __restrict *c21)
+C21_iso_(Complex Qk_fac,Complex Qmu_fac,Complex __restrict *c21)
 {
     // get kappa and mu by using average
     #define C(p,q) c21[c662flat(p,q)]
-    complex_t eps = (real_t)(1.0/3.0) * (C(0,0) + C(1,1) + C(2,2));
-    complex_t mu = (real_t)(1.0/3.0) * (C(3,3) + C(4,4) + C(5,5));
-    complex_t kappa = eps - (real_t)(4. / 3.) * mu;
+    Complex eps = (Real)(1.0/3.0) * (C(0,0) + C(1,1) + C(2,2));
+    Complex mu = (Real)(1.0/3.0) * (C(3,3) + C(4,4) + C(5,5));
+    Complex kappa = eps - (Real)(4. / 3.) * mu;
 
     // add back to c21
     for(int i = 0; i < 3; i ++) {
-        C(i,i) = C(i,i) - eps + kappa * Qk_fac + (real_t)(4./3.) * mu * Qmu_fac;
+        C(i,i) = C(i,i) - eps + kappa * Qk_fac + (Real)(4./3.) * mu * Qmu_fac;
     }
     for(int i = 0; i < 3; i ++) {
         for(int j = i + 1; j < 3; j ++) {
-            C(i,j) = C(i,j) - eps + kappa * Qk_fac + (real_t)2.0 * mu * ((real_t)1.0 - (real_t)1.0/3.0 * Qmu_fac);
+            C(i,j) = C(i,j) - eps + kappa * Qk_fac + (Real)2.0 * mu * ((Real)1.0 - (Real)1.0/3.0 * Qmu_fac);
         }
     }
 
@@ -176,11 +158,41 @@ C21_iso_(complex_t Qk_fac,complex_t Qmu_fac,complex_t __restrict *c21)
     #undef C
 }
 
+static void
+C21_iso_frequency_derivative_(
+    Complex dQk_domega,Complex dQmu_domega,
+    const Real *c21,Complex *__restrict dc21_domega
+)
+{
+    #define C(p,q) c21[c662flat(p,q)]
+    #define DC(p,q) dc21_domega[c662flat(p,q)]
+
+    std::fill(dc21_domega,dc21_domega + 21,Complex{});
+    const Real eps = (C(0,0) + C(1,1) + C(2,2)) / 3.;
+    const Real mu = (C(3,3) + C(4,4) + C(5,5)) / 3.;
+    const Real kappa = eps - (4. / 3.) * mu;
+
+    for(int i = 0; i < 3; i ++) {
+        DC(i,i) = kappa * dQk_domega
+                  + (4. / 3.) * mu * dQmu_domega;
+        for(int j = i + 1; j < 3; j ++) {
+            DC(i,j) = kappa * dQk_domega
+                      - (2. / 3.) * mu * dQmu_domega;
+        }
+    }
+    for(int i = 3; i < 6; i ++) {
+        DC(i,i) = C(i,i) * dQmu_domega;
+    }
+
+    #undef DC
+    #undef C
+}
+
 static void 
-C21_iso_deriv_(const complex_t *Qfac, const complex_t *dQfac,
-                const real_t *c21,
-                complex_t *__restrict dCC21_dc,
-                complex_t *__restrict dCC21_dQi)
+C21_iso_deriv_(const Complex *Qfac, const Complex *dQfac,
+                const Real *c21,
+                Complex *__restrict dCC21_dc,
+                Complex *__restrict dCC21_dQi)
 {
     // set derivatives to zero 
     for(int i = 0; i < 21 * 2; i ++) {
@@ -198,8 +210,8 @@ C21_iso_deriv_(const complex_t *Qfac, const complex_t *dQfac,
 
     // compute derivatives
     // auto generated by sympy
-    #define SETDC(i,j,a) dCC21_dc[i*21+j] = (complex_t) (a)
-    #define SETDQ(i,j,b) dCC21_dQi[i*2+j] = (complex_t) (b)
+    #define SETDC(i,j,a) dCC21_dc[i*21+j] = (Complex) (a)
+    #define SETDQ(i,j,b) dCC21_dQi[i*2+j] = (Complex) (b)
     #define C(p,q) c21[c662flat(p,q)]
     SETDC(0,0,(1.0/3.0)*Qk_fac + 2.0/3.0);
     SETDC(0,6,(1.0/3.0)*Qk_fac - 1.0/3.0);
@@ -286,13 +298,20 @@ C21_iso_deriv_(const complex_t *Qfac, const complex_t *dQfac,
  * @param[in] Qani_funcid function id for anisotropic Q model
  * @param[inout] c21 real C21 modulus shape(21), return complex modulus
  */
-void 
-get_cmplx_c21(real_t freq,const real_t *Qm,complex_t * __restrict c21, int nQani,int Qani_funcid)
+void
+get_cmplx_c21(
+    Real freq,const Real *Qm,Complex * __restrict c21,
+    int nQani,int Qani_funcid,Real reference_frequency
+)
 {
-    // get all sls factor
-    std::array<complex_t,21> Qfac;
+    validate_anisotropic_q_model_(nQani,Qani_funcid);
+
+    // get all attenuation factors
+    std::array<Complex,21> Qfac;
     for(int im = 0; im < nQani; im ++) {
-        Qfac[im] = get_sls_modulus_factor(freq,Qm[im]);
+        Qfac[im] = get_attenuation_modulus_factor(
+            freq,Qm[im],reference_frequency
+        );
     }
 
     // choose anisotropic Q model
@@ -310,6 +329,109 @@ get_cmplx_c21(real_t freq,const real_t *Qm,complex_t * __restrict c21, int nQani
 }
 
 /**
+ * @brief frequency derivative of the attenuated C21 tensor
+ * @param[in] freq frequency in Hz
+ * @param[in] Qm Q values, shape(nQani)
+ * @param[in] C21 real reference tensor, shape(21)
+ * @param[out] dC21_domega derivative with respect to physical angular
+ * frequency, shape(21)
+ */
+void
+get_cmplx_c21_frequency_derivative(
+    Real freq,const Real *Qm,const Real *C21,
+    Complex * __restrict dC21_domega,
+    int nQani,int Qani_funcid,Real reference_frequency
+)
+{
+    validate_anisotropic_q_model_(nQani,Qani_funcid);
+
+    std::array<Complex,21> dQfac_domega{};
+    for(int im = 0; im < nQani; im ++) {
+        dQfac_domega[im] = get_attenuation_response(
+            freq,Qm[im],reference_frequency
+        ).d_factor_d_omega;
+    }
+
+    switch(Qani_funcid)
+    {
+    case 1:
+        C21_iso_frequency_derivative_(
+            dQfac_domega[0],dQfac_domega[1],C21,dC21_domega
+        );
+        break;
+    default:
+        throw std::invalid_argument("unsupported anisotropic Q model");
+    }
+}
+
+/**
+ * @brief Derivatives of the frequency derivative of the attenuated tensor.
+ *
+ * The first output is d(C_,omega)/dC0 with shape (21,21), indexed by
+ * output component first.  The second is d(C_,omega)/d(Q^-1), with shape
+ * (21,nQani).  These mixed derivatives are needed by group-velocity
+ * kernels because their denominator contains the frequency derivative of
+ * the material operator.
+ */
+void
+get_cmplx_c21_frequency_deriv(
+    Real freq,const Real *Qm,const Real *C21,
+    Complex * __restrict dCw_dC,
+    Complex * __restrict dCw_dQinv,
+    int nQani,int Qani_funcid,Real reference_frequency
+)
+{
+    validate_anisotropic_q_model_(nQani,Qani_funcid);
+
+    std::array<Complex,2> d_factor_domega{};
+    std::array<Complex,2> d2_factor_domega_dq{};
+    for(int iq = 0; iq < nQani; ++iq) {
+        const auto response = get_attenuation_response(
+            freq,Qm[iq],reference_frequency
+        );
+        d_factor_domega[iq] = response.d_factor_d_omega;
+        d2_factor_domega_dq[iq] =
+            response.d2_factor_d_omega_d_qinv;
+    }
+
+    std::fill(dCw_dC,dCw_dC+21*21,Complex{});
+    std::fill(dCw_dQinv,dCw_dQinv+21*nQani,Complex{});
+
+    // The supported anisotropic attenuation map is linear in C0.  Applying
+    // its omega derivative to the 21 tensor basis vectors gives the exact
+    // Jacobian with respect to C0.
+    std::array<Real,21> basis{};
+    std::array<Complex,21> column{};
+    for(int input = 0; input < 21; ++input) {
+        basis.fill(0.);
+        basis[input] = 1.;
+        C21_iso_frequency_derivative_(
+            d_factor_domega[0],d_factor_domega[1],
+            basis.data(),column.data()
+        );
+        for(int output = 0; output < 21; ++output) {
+            dCw_dC[output*21+input] = column[output];
+        }
+    }
+
+    // Differentiating C_,omega with respect to one inverse-Q parameter only
+    // replaces the corresponding factor derivative by its omega/q mixed
+    // derivative.
+    for(int iq = 0; iq < nQani; ++iq) {
+        const Complex dk = iq == 0 ? d2_factor_domega_dq[iq]
+                                     : Complex{};
+        const Complex dm = iq == 1 ? d2_factor_domega_dq[iq]
+                                     : Complex{};
+        C21_iso_frequency_derivative_(
+            dk,dm,C21,column.data()
+        );
+        for(int output = 0; output < 21; ++output) {
+            dCw_dQinv[output*nQani+iq] = column[output];
+        }
+    }
+}
+
+/**
  * @brief compute derivatives of c21 att model
  * @param Qm Q values, shape(nQani)
  * @param freq frequency, in real unit
@@ -322,19 +444,24 @@ get_cmplx_c21(real_t freq,const real_t *Qm,complex_t * __restrict c21, int nQani
  */
 void 
 get_cmplx_c21_deriv(
-    real_t freq,
-    const real_t *Qm,
+    Real freq,
+    const Real *Qm,
     int nQani,
     int Qani_funcid,
-    const real_t *C21,
-    complex_t * __restrict dCC21_dc,
-    complex_t * __restrict dCC21_dQi
+    const Real *C21,
+    Complex * __restrict dCC21_dc,
+    Complex * __restrict dCC21_dQi,
+    Real reference_frequency
 )
 {
-    // get all sls factor
-    std::array<complex_t,21> Qfac,dQfac;
+    validate_anisotropic_q_model_(nQani,Qani_funcid);
+
+    // get all attenuation factors and inverse-Q derivatives
+    std::array<Complex,21> Qfac,dQfac;
     for(int im = 0; im < nQani; im ++) {
-        get_sls_Q_derivative(freq,Qm[im],Qfac[im],dQfac[im]);
+        get_attenuation_Q_derivative(
+            freq,Qm[im],Qfac[im],dQfac[im],reference_frequency
+        );
     }
 
     switch (Qani_funcid)
@@ -351,4 +478,3 @@ get_cmplx_c21_deriv(
 }
 
 } // namespace specswd
-
