@@ -1,47 +1,46 @@
-# conf.py
+"""Sphinx configuration for the SpecSWD user and API documentation."""
 
-project = 'SpecSWD'
-author = 'Nanqiao Du'
-
-import os
+from pathlib import Path
 import sys
-sys.path.insert(0, os.path.abspath('../'))
-sys.path.insert(0, os.path.abspath('../../../'))
-sys.path.insert(0, os.path.abspath('../../'))
 
-latex_engine = 'pdflatex'  
-# Set up LaTeX formatting elements
-latex_elements = {
-    'preamble': r'''
-    \usepackage{amsmath}
-    \usepackage{amssymb}
-    '''
-}
 
-# Add myst-parser to the extensions list
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT))
+
+project = "SpecSWD"
+author = "Nanqiao Du"
+copyright = "Nanqiao Du"
+
 extensions = [
-    'myst_parser',  # Markdown parser
-    'sphinx.ext.mathjax',  # for math rendering in HTML
-    'sphinx.ext.autodoc',  # For generating Python API docs
-    'sphinx.ext.napoleon',  # For Google and NumPy docstring styles (optional)
-    'sphinx.ext.viewcode',  # To link source code in the API docs (optional)
+    "myst_parser",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
 ]
 
-# You might have:
-autodoc_default_options = {
-    'members': True,
-    'undoc-members': True,  # <--- include this to document all functions
-    'private-members': False,
-    'special-members': False,
-    'show-inheritance': True,
-}
-
-# Add .md as a valid source suffix
 source_suffix = {
-    '.rst': 'restructuredtext',
-    '.md': 'markdown',  # Enable Markdown support
+    ".rst": "restructuredtext",
+    ".md": "markdown",
 }
+master_doc = "index"
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-# Optional: Set up the master document
-master_doc = 'index'  # Default is 'index.rst', which you can change as needed
-html_theme = 'sphinx_rtd_theme'
+myst_enable_extensions = ["amsmath", "dollarmath"]
+autodoc_default_options = {
+    "members": True,
+    "show-inheritance": True,
+}
+# API pages can still be generated before the compiled extensions are built.
+autodoc_mock_imports = ["specd.lib.libswd", "specd.lib.cps330"]
+
+html_theme = "sphinx_rtd_theme"
+html_static_path = ["static"]
+
+latex_engine = "pdflatex"
+latex_elements = {
+    "preamble": r"""
+\usepackage{amsmath}
+\usepackage{amssymb}
+""",
+}

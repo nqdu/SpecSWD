@@ -1,48 +1,51 @@
 # Gallery
-## Two layer Love wave Model
-| Layer Number    | h | $\rho$ | $\beta_{v}$| $\beta_{h}$ | $Q_L$ | $Q_N$ |
-| -------- | ------- |---- |--| --| -- | --|
-| 1  | 35   | 2.8 | 3.0 | 3.3 | 220 | 200 |
-| 2 | $\infty$ | 3.2 | 5.0 | 5.5 |330 |300|
 
-![image](../../../example/love/eigenvalues_att.jpg)
-*Benchmark of phase/group/group Q ith Analytical Solution*
+## Two-layer attenuating Love-wave model
 
-![image](../../../example/love/phase_deriv_veloc_att.jpg)
-*Benchmark of phase velocity sensitivity kernels ith Analytical Solution*
+| Layer | Thickness (km) | $\rho$ (g/cm³) | $V_{SV}$ (km/s) | $V_{SH}$ (km/s) | $Q_L$ | $Q_N$ |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 35 | 2.8 | 3.0 | 3.3 | 200 | 220 |
+| Half-space | $\infty$ | 3.2 | 5.0 | 5.5 | 300 | 330 |
 
+![Love-wave dispersion benchmark](../../../example/love/eigenvalues_att.jpg)
 
-![image](../../../example/love/group_deriv_veloc_att.jpg)
-*Benchmark of group velocity sensitivity kernels ith Analytical Solution*
+Phase velocity, group velocity, and propagation-Q benchmark against the
+analytical solution.
 
-## Scholte Wave example
-| Layer Number    | h | $\rho$ | $\alpha$| $\beta$ |
-| -------- | ------- |---- |--| --|
-| 1  | 5   | 1.0 | 1.5 | 0 |
-| 2  | 45   | 2.57 | 5.22 | 3.1 |
-| 3  | 50   | 2.95 | 6.94 | 4.0 |
-| 2 | $\infty$ | 3.57 | 5.0 | 8.75 |5.0 |
+![Love-wave phase kernels](../../../example/love/phase_deriv_veloc_att.jpg)
 
-![image](../../../example/scholte/eigenvalues.jpg)
-*Benchmark of phase/group/ velocities with CPS330.*
+Phase-velocity sensitivity kernels compared with the analytical solution.
 
-![image](../../../example/scholte/eigenvecs.jpg)
-*Normalized eigenfunctions*
+![Love-wave group kernels](../../../example/love/group_deriv_veloc_att.jpg)
 
-![image](../../../example/scholte/phase_deriv.jpg)
-*Benchmark of phase velocity derivativates with FD approximation*
+Group-velocity sensitivity kernels compared with the analytical solution.
 
-![image](../../../example/scholte/group_deriv.jpg)
-*Benchmark of group velocity derivativates with FD approximation*
+## Coupled fluid/solid Scholte-wave model
 
+| Layer | Thickness (km) | $\rho$ (g/cm³) | $V_P$ (km/s) | $V_S$ (km/s) |
+|---:|---:|---:|---:|---:|
+| Fluid | 5 | 1.00 | 1.50 | 0.00 |
+| Solid 1 | 45 | 2.57 | 5.22 | 3.10 |
+| Solid 2 | 50 | 2.95 | 6.94 | 4.00 |
+| Half-space | $\infty$ | 3.57 | 8.75 | 5.00 |
 
-<!-- # Gallery
-### Benchmark: SWDTTI with CPS330
-![image](example//rayleigh/phase.jpg)
-### HTI model: Phase velocity vs. Azimuthal angle
-![image](example/tti/group-direc.jpg)
+![Scholte-wave dispersion](../../../example/scholte/eigenvalues.jpg)
 
-### Fluid-Elastic Coupling phase and group velocity
-![image](example/ac/phase.jpg)
-![image](example/ac/group.jpg)
-### Acoustic  -->
+Phase and group velocity benchmark against CPS330.
+
+![Scholte-wave eigenfunctions](../../../example/scholte/eigenvecs.jpg)
+
+Normalized coupled solid displacement and acoustic-potential eigenfunctions.
+
+![Scholte-wave phase kernels](../../../example/scholte/phase_deriv.jpg)
+
+Phase kernels compared with centred finite differences.
+
+![Scholte-wave group kernels](../../../example/scholte/group_deriv.jpg)
+
+Group kernels compared with centred finite differences.
+
+The test suite also covers attenuating fully anisotropic group velocity,
+radial/x/y group-kernel consistency, and coupled acoustic bulk-modulus group
+kernels. These checks use the same analytic frequency and model derivatives as
+the production solver.

@@ -16,100 +16,55 @@ mpl.rcParams['legend.fontsize'] = 20
 mpl.rcParams['savefig.bbox'] = 'tight'
 
 @jit(nopython=True)
-def get_Q_sls_model(Q):
-
-    y_sls_ref = np.array([1.93044501, 1.64217132, 1.73606189, 1.42826439, 1.66934129])
-    w_sls_ref = np.array([4.71238898e-02, 6.63370885e-01, 9.42477796e+00, 1.14672436e+02,1.05597079e+03])
-    dy = y_sls_ref * 0 
-    y = y_sls_ref * 0
-    NSLS = len(y)
-
-    for i in range(NSLS):
-        y[i] = y_sls_ref[i] / Q 
-    dy[0] = 1. + 0.5 * y[0]
-
-    for i in range(1,NSLS):
-        dy[i] = dy[i-1] + (dy[i-1] - 0.5) * y[i-1] + 0.5 * y[i]
-
-    #// copy to y_sls/w_sls
-    w_sls = w_sls_ref * 1. 
-    y_sls = dy * y 
-
-    return w_sls,y_sls 
+def get_constant_q_modulus_factor(freq,Q,reference_frequency=1.):
+    q = 1. / Q
+    alpha = 2. / np.pi * np.arctan(q)
+    return (1. + 1j * q) * (freq / reference_frequency)**alpha
 
 @jit(nopython=True)
-def compute_q_sls_model(y_sls,w_sls,om,exact=False):
-    Q_ls = 1. 
-    nsls = len(y_sls)
-    if exact:
-        for p in range(nsls):
-            Q_ls += y_sls[p] * om**2 / (om**2 + w_sls[p]**2)
-
-    # denom
-    Q_demon = 0.
-    for p in range(nsls):
-        Q_demon += y_sls[p] * om * w_sls[p] / (om**2 + w_sls[p]**2)
-    
-    return Q_ls / Q_demon
-
-@jit(nopython=True)
-def get_sls_modulus_factor(freq,Q):
-    om = 2 * np.pi * freq
-
-    w_sls,y_sls = get_Q_sls_model(Q)
-    s = np.sum(1j * om * y_sls / (w_sls + 1j * om))
-
-    return s + 1.
-
-@jit(nopython=True)
-def get_sls_Q_deriv(freq,Q):
-    y_sls_ref = np.array([1.93044501, 1.64217132, 1.73606189, 1.42826439, 1.66934129])
-    w_sls_ref = np.array([4.71238898e-02, 6.63370885e-01, 9.42477796e+00, 1.14672436e+02,1.05597079e+03])
-    dy = y_sls_ref * 0 
-    y = y_sls_ref  / Q 
-
-    # corrector
-    NSLS = len(y_sls_ref)
-    dy[0] = 1. + 0.5 * y[0]
-    for i in range(1,NSLS):
-        dy[i] = dy[i-1] + (dy[i-1] - 0.5) * y[i-1] + 0.5 * y[i]
-    dd_dqi = dy * 0
-    dd_dqi[0] = 0.5 * y_sls_ref[0]
-    for i in range(1,NSLS):
-        dd_dqi[i] = dd_dqi[i-1] + (dy[i-1] - 0.5) * y_sls_ref[i-1] + dd_dqi[i-1] * y[i-1] +  0.5 * y_sls_ref[i]
-
-    dd_dqi = dd_dqi * y + dy * y_sls_ref
-    om = 2 * np.pi * freq
-    dsdqi = np.sum(1j * om * dd_dqi /(w_sls_ref + 1j * om))
-    s = np.sum(1j * om * y * dy / (w_sls_ref + 1j * om))
-
-    return s + 1., dsdqi
+def get_constant_q_Q_deriv(freq,Q,reference_frequency=1.):
+    q = 1. / Q
+    alpha = 2. / np.pi * np.arctan(q)
+    dalpha_dq = 2. / (np.pi * (1. + q*q))
+    log_ratio = np.log(freq) - np.log(reference_frequency)
+    amplitude = np.exp(alpha * log_ratio)
+    s = amplitude * (1. + 1j * q)
+    dsdqi = amplitude * (
+        1j + (1. + 1j * q) * dalpha_dq * log_ratio
+    )
+    return s,dsdqi
 
 
 
 def get_group(c,r1,r2,bev1,bev2,beh1,beh2,H,om,HAS_ATT,Qv1,Qv2,Qh1,Qh2):
-    freq = om / (2 * np.pi)
+    def residual(c_eval,om_eval):
+        freq = om_eval / (2 * np.pi)
+        L1 = r1 * bev1**2
+        L2 = r2 * bev2**2
+        N1 = r1 * beh1**2
+        N2 = r2 * beh2**2
+        if HAS_ATT:
+            L1 *= get_constant_q_modulus_factor(freq,Qv1)
+            L2 *= get_constant_q_modulus_factor(freq,Qv2)
+            N1 *= get_constant_q_modulus_factor(freq,Qh1)
+            N2 *= get_constant_q_modulus_factor(freq,Qh2)
 
-    L1 = r1 * bev1**2 
-    L2 = r2 * bev2**2 
-    N1 = r1 * beh1**2 
-    N2 = r2 * beh2**2 
-    if HAS_ATT:
-        L1 *= get_sls_modulus_factor(freq,Qv1)
-        L2 *= get_sls_modulus_factor(freq,Qv2)
-        N1 *= get_sls_modulus_factor(freq,Qh1)
-        N2 *= get_sls_modulus_factor(freq,Qh2)
-    else:
-        pass
+        k = om_eval / c_eval
+        vertical1 = np.sqrt(-N1/L1 + c_eval**2*r1/L1)
+        vertical2 = np.sqrt(N2/L2 - c_eval**2*r2/L2)
+        return (
+            -vertical1 * np.tan(H*k*vertical1)
+            + L2/L1 * vertical2
+        )
 
-    gamma2 = np.sqrt((1 - r2 * c**2/N2) * N2/L2)
-    Omega = om/c * H * gamma2 * (
-                ((r1 * c**2 - N1) / (N2 - r2 / r1 * N1)) +
-                (L2 / L1) * ((N2 - r2*c**2) / (N2 - r2/r1 * N1))
-            )
-    u = N1 / (c * r1) * ( c**2 * r1 / N1 + Omega) / ( 1 + Omega)
-
-    return u
+    # Differentiate the complete dispersive equation f(c,omega)=0, then use
+    # U = (dk/domega)^-1 for k=omega/c.
+    h_om = max(abs(om),1.) * 1.e-5
+    h_c = max(abs(c),1.) * 1.e-6
+    df_dom = (residual(c,om+h_om) - residual(c,om-h_om)) / (2*h_om)
+    df_dc = (residual(c+h_c,om) - residual(c-h_c,om)) / (2*h_c)
+    dc_dom = -df_dom / df_dc
+    return 1. / (1./c - om/c**2 * dc_dom)
 
 def get_cQ_kl(dcdm,cc):
     cl = np.real(cc)
@@ -180,10 +135,10 @@ def love_func(c,r1,r2,bev1,bev2,beh1,beh2,Qv1,Qv2,Qh1,Qh2,H,om,HAS_ATT,phase_kl=
 
     # factor and deriv
     if HAS_ATT:
-        sn1,dsdqin1 = get_sls_Q_deriv(freq,Qh1)
-        sn2,dsdqin2 = get_sls_Q_deriv(freq,Qh2)
-        sl1,dsdqil1 = get_sls_Q_deriv(freq,Qv1)
-        sl2,dsdqil2 = get_sls_Q_deriv(freq,Qv2)
+        sn1,dsdqin1 = get_constant_q_Q_deriv(freq,Qh1)
+        sn2,dsdqin2 = get_constant_q_Q_deriv(freq,Qh2)
+        sl1,dsdqil1 = get_constant_q_Q_deriv(freq,Qv1)
+        sl2,dsdqil2 = get_constant_q_Q_deriv(freq,Qv2)
     else:
         sn1,dsdqin1 = 1.,0.
         sn2,dsdqin2 = 1.,0.

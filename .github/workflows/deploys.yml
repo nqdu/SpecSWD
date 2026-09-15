@@ -10,39 +10,49 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Install doc tools
+      - name: Install system dependencies
         run: |
-          sudo apt install -y doxygen
-          pip install sphinx myst-parser sphinx_rtd_theme 
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            doxygen \
+            gfortran \
+            libhdf5-dev \
+            liblapack-dev \
+            liblapacke-dev
 
-      - name: Build libaries
+      - name: Install Eigen 5
         run: |
-          sudo apt install cmake build-essential gfortran liblapack-dev liblapacke-dev 
-          wget https://gitlab.com/libeigen/eigen/-/archive/5.0.0/eigen-5.0.0.tar.gz
-          tar -xvf eigen-5.0.0.tar.gz
+          wget --quiet https://gitlab.com/libeigen/eigen/-/archive/5.0.0/eigen-5.0.0.tar.gz
+          tar -xzf eigen-5.0.0.tar.gz
+
+      - name: Install Python dependencies
+        run: |
           pip install pybind11-global
-          mkdir -p build
-          cd build 
-          cmake .. -DCXX=g++ -DFC=gfortran -DEIGEN_INC=./eigen-5.0.0/  -DBUILD_LIBS=ON
-          make -j4
-          make test
-          make install
-          cd ..
-          
-          
+          pip install sphinx myst-parser sphinx_rtd_theme numpy scipy matplotlib numba h5py
+
+      - name: Build libraries
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_CXX_COMPILER=g++ \
+            -DCMAKE_Fortran_COMPILER=gfortran \
+            -DEIGEN_INC="$GITHUB_WORKSPACE/eigen-5.0.0" \
+            -DBUILD_LIBS=ON
+          cmake --build build --parallel 4
+          OMP_NUM_THREADS=4 ctest --test-dir build --output-on-failure
+          cmake --install build --component python
+
       - name: Build Doxygen C++ API Docs
-        run: doxygen misc/doxygen/doxygen.cfg 
+        run: doxygen misc/doxygen/doxygen.cfg
 
       - name: Build Python docs (Sphinx)
-        run: |
-          sphinx-apidoc -o misc/source/python ./specd
-          
+        run: sphinx-apidoc -o misc/source/python ./specd
+
       - name: Build master docs (Sphinx)
-        run: |
-          pip install numpy scipy matplotlib numba h5py
-           sphinx-build -b html misc/source docs
+        run: sphinx-build -b html misc/source docs
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

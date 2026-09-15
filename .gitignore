@@ -61,6 +61,11 @@ __pycache__/
 *.idea/
 #.vscode/
 
+theory/spec/
+build/
+example/paper/*.jpg
+example/paper/*.pdf
+
 # Logs
 *.log
 
