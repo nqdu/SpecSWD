@@ -14,19 +14,19 @@ namespace specswd
  */
 void 
 solve_hessenberg_lower(
-    const complex_t *P_ptr,
-    const complex_t *b_ptr,
-    complex_t *__restrict x_ptr,
+    const Complex *P_ptr,
+    const Complex *b_ptr,
+    Complex *__restrict x_ptr,
     int n
 )
 {
     // threshold
-    const real_t eps = 1.0e-12;
+    const Real eps = 1.0e-12;
 
     // mapping to Eigen
-    Eigen::Map<const Eigen::MatrixX<complex_t>> P(P_ptr,n,n);
-    Eigen::Map<const Eigen::VectorX<complex_t>> b(b_ptr,n);
-    Eigen::Map<Eigen::VectorX<complex_t>> x(x_ptr,n);
+    Eigen::Map<const Eigen::MatrixX<Complex>> P(P_ptr,n,n);
+    Eigen::Map<const Eigen::VectorX<Complex>> b(b_ptr,n);
+    Eigen::Map<Eigen::VectorX<Complex>> x(x_ptr,n);
     x.setZero();
 
     using Eigen::indexing::seq;
@@ -36,7 +36,7 @@ solve_hessenberg_lower(
         auto idx = seq(0,i-1);
         bool is2x2 = (i + 1 < n) && (std::abs(P(i,i+1)) > eps);
         if(!is2x2) {
-            complex_t s = P(i,idx) * x(idx);
+            Complex s = P(i,idx) * x(idx);
             bool SMALL_DIAG = std::abs(P(i,i)) < eps;
             x[i] = SMALL_DIAG ? 0 : (b[i] - s) / P(i,i);
 
@@ -44,22 +44,22 @@ solve_hessenberg_lower(
             i += 1;
         }
         else {
-            complex_t s1 = P(i,idx) * x(idx);
-            complex_t s2 = P(i+1,idx) * x(idx);
-            complex_t rhs1 = b[i] - s1;
-            complex_t rhs2 = b[i+1] - s2;
+            Complex s1 = P(i,idx) * x(idx);
+            Complex s2 = P(i+1,idx) * x(idx);
+            Complex rhs1 = b[i] - s1;
+            Complex rhs2 = b[i+1] - s2;
 
             // solve 2x2 system
-            complex_t a11 = P(i,i), a12 = P(i,i+1);
-            complex_t a21 = P(i+1,i), a22 = P(i+1,i+1);
-            complex_t det = a11 * a22 - a12 * a21;
+            Complex a11 = P(i,i), a12 = P(i,i+1);
+            Complex a21 = P(i+1,i), a22 = P(i+1,i+1);
+            Complex det = a11 * a22 - a12 * a21;
             if(std::abs(det) > eps) {
                 x[i] = (a22 * rhs1 - a12 * rhs2) / det;
                 x[i+1] = (-a21 * rhs1 + a11 * rhs2) / det;
             }
             else {
-                x[i] = complex_t(0,0);
-                x[i+1] = complex_t(0,0);
+                x[i] = Complex(0,0);
+                x[i+1] = Complex(0,0);
             }
             i += 2;
         }
@@ -75,19 +75,19 @@ solve_hessenberg_lower(
  */
 void 
 solve_hessenberg_upper(
-    const complex_t *P_ptr,
-    const complex_t *b_ptr,
-    complex_t *__restrict x_ptr,
+    const Complex *P_ptr,
+    const Complex *b_ptr,
+    Complex *__restrict x_ptr,
     int n
 )
 {   
     // threshold
-    const real_t eps = 1.0e-12;
+    const Real eps = 1.0e-12;
 
     // mapping to Eigen
-    Eigen::Map<const Eigen::MatrixX<complex_t>> P(P_ptr,n,n);
-    Eigen::Map<const Eigen::VectorX<complex_t>> b(b_ptr,n);
-    Eigen::Map<Eigen::VectorX<complex_t>> x(x_ptr,n);
+    Eigen::Map<const Eigen::MatrixX<Complex>> P(P_ptr,n,n);
+    Eigen::Map<const Eigen::VectorX<Complex>> b(b_ptr,n);
+    Eigen::Map<Eigen::VectorX<Complex>> x(x_ptr,n);
     x.setZero();
 
     // solver quasi-upper triangular system
@@ -97,7 +97,7 @@ solve_hessenberg_upper(
         auto idx = seq(i+1,n-1);
         bool is2x2 = (i-1 >=0) && (std::abs(P(i,i-1)) > eps);
         if(!is2x2) {
-            complex_t s = P(i,idx) * x(idx);
+            Complex s = P(i,idx) * x(idx);
             bool SMALL_DIAG = std::abs(P(i,i)) < eps;
             x[i] = SMALL_DIAG ? 0 : (b[i] - s) / P(i,i);
 
@@ -105,22 +105,22 @@ solve_hessenberg_upper(
             i -= 1;
         }
         else {
-            complex_t s1 = P(i-1,idx) * x(idx);
-            complex_t s2 = P(i,idx) * x(idx);
-            complex_t rhs1 = b[i-1] - s1;
-            complex_t rhs2 = b[i] - s2;
+            Complex s1 = P(i-1,idx) * x(idx);
+            Complex s2 = P(i,idx) * x(idx);
+            Complex rhs1 = b[i-1] - s1;
+            Complex rhs2 = b[i] - s2;
 
             // solve 2x2 system
-            complex_t a11 = P(i-1,i-1), a12 = P(i-1,i);
-            complex_t a21 = P(i,i-1), a22 = P(i,i);
-            complex_t det = a11 * a22 - a12 * a21;
+            Complex a11 = P(i-1,i-1), a12 = P(i-1,i);
+            Complex a21 = P(i,i-1), a22 = P(i,i);
+            Complex det = a11 * a22 - a12 * a21;
             if(std::abs(det) > eps) {
                 x[i-1] = (a22 * rhs1 - a12 * rhs2) / det;
                 x[i] = (-a21 * rhs1 + a11 * rhs2) / det;
             }
             else {
-                x[i-1] = complex_t(0,0);
-                x[i] = complex_t(0,0);
+                x[i-1] = Complex(0,0);
+                x[i] = Complex(0,0);
             }
             i -= 2;
         }

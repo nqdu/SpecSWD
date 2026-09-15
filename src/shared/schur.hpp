@@ -32,10 +32,10 @@ schur_qz(
     Eigen::ArrayX<COMMTP> &w,
     COMMTP *__restrict vr,
     COMMTP *__restrict vl, 
-    std::vector<complex_t> &Qmat,
-    std::vector<complex_t> &Zmat,
-    std::vector<complex_t> &Smat,
-    std::vector<complex_t> &Spmat,
+    std::vector<Complex> &Qmat,
+    std::vector<Complex> &Zmat,
+    std::vector<Complex> &Smat,
+    std::vector<Complex> &Spmat,
     bool jobvr = true,
     bool jobvl = false
 );

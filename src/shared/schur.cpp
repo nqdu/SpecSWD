@@ -38,10 +38,10 @@ schur_qz(
     Eigen::ArrayX<COMMTP> &w,
     COMMTP *__restrict vr,
     COMMTP *__restrict vl, 
-    std::vector<complex_t> &Qmat,
-    std::vector<complex_t> &Zmat,
-    std::vector<complex_t> &Smat,
-    std::vector<complex_t> &Spmat,
+    std::vector<Complex> &Qmat,
+    std::vector<Complex> &Zmat,
+    std::vector<Complex> &Smat,
+    std::vector<Complex> &Spmat,
     bool jobvr = true,
     bool jobvl = false
 )
@@ -147,10 +147,10 @@ template void schur_qz<schur_realw>(
     Eigen::ArrayX<schur_realw> &w,
     schur_realw *__restrict vr,
     schur_realw *__restrict vl, 
-    std::vector<complex_t> &Qmat,
-    std::vector<complex_t> &Zmat,
-    std::vector<complex_t> &Smat,
-    std::vector<complex_t> &Spmat,
+    std::vector<Complex> &Qmat,
+    std::vector<Complex> &Zmat,
+    std::vector<Complex> &Smat,
+    std::vector<Complex> &Spmat,
     bool jobvr,
     bool jobvl
 );
@@ -161,10 +161,10 @@ template void schur_qz<schur_crealw>(
     Eigen::ArrayX<schur_crealw> &w,
     schur_crealw *__restrict vr,
     schur_crealw *__restrict vl, 
-    std::vector<complex_t> &Qmat,
-    std::vector<complex_t> &Zmat,
-    std::vector<complex_t> &Smat,
-    std::vector<complex_t> &Spmat,
+    std::vector<Complex> &Qmat,
+    std::vector<Complex> &Zmat,
+    std::vector<Complex> &Smat,
+    std::vector<Complex> &Spmat,
     bool jobvr,
     bool jobvl
 );

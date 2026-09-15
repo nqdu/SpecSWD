@@ -10,8 +10,8 @@
 namespace specswd
 {
 
-using real_t = SPECSWD_REAL_TYPE;
-using complex_t = std::complex<real_t>;
+using Real = SPECSWD_REAL_TYPE;
+using Complex = std::complex<Real>;
 
 } // namespace specswd
 
