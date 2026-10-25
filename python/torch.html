@@ -1,0 +1,316 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PyTorch API reference &mdash; SpecSWD  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Native Python API reference" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SpecSWD
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../markdown/readme.html">SpecSWD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown/Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown/pytorch.html">PyTorch backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown/benchmarks.html">C++ and PyTorch efficiency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown/io.html">NumPy and HDF5 output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown/gallery.html">Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Native Python API reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PyTorch API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#solver-workspace">Solver workspace</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specd.torch.SpecWorkSpace"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.SpecWorkSpace.compute_dispersion"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.compute_dispersion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.SpecWorkSpace.compute_egn"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.compute_egn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.SpecWorkSpace.get_egnfunc"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.get_egnfunc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.SpecWorkSpace.get_group_kl"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.get_group_kl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.SpecWorkSpace.get_kernel_names"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.get_kernel_names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.SpecWorkSpace.get_phase_kl"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.get_phase_kl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.SpecWorkSpace.group_velocity"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.group_velocity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.SpecWorkSpace.initialize"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.SpecWorkSpace.kernels"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.kernels()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.SpecWorkSpace.parameters"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.parameters</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#tensor-dispersion-tables">Tensor dispersion tables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specd.torch.DispersionTable"><code class="docutils literal notranslate"><span class="pre">DispersionTable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.DispersionTable.azimuth_deg"><code class="docutils literal notranslate"><span class="pre">DispersionTable.azimuth_deg</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.DispersionTable.frequency_hz"><code class="docutils literal notranslate"><span class="pre">DispersionTable.frequency_hz</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.DispersionTable.from_hdf5"><code class="docutils literal notranslate"><span class="pre">DispersionTable.from_hdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.DispersionTable.group_components"><code class="docutils literal notranslate"><span class="pre">DispersionTable.group_components</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.DispersionTable.group_mode_rows"><code class="docutils literal notranslate"><span class="pre">DispersionTable.group_mode_rows</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.DispersionTable.group_row"><code class="docutils literal notranslate"><span class="pre">DispersionTable.group_row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.DispersionTable.group_rows"><code class="docutils literal notranslate"><span class="pre">DispersionTable.group_rows</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.DispersionTable.phase_mode_rows"><code class="docutils literal notranslate"><span class="pre">DispersionTable.phase_mode_rows</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.DispersionTable.phase_row"><code class="docutils literal notranslate"><span class="pre">DispersionTable.phase_row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.DispersionTable.phase_rows"><code class="docutils literal notranslate"><span class="pre">DispersionTable.phase_rows</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specd.torch.DispersionTable.to_hdf5"><code class="docutils literal notranslate"><span class="pre">DispersionTable.to_hdf5()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#material-helpers">Material helpers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specd.torch.constant_q_response"><code class="docutils literal notranslate"><span class="pre">constant_q_response()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specd.torch.isotropic_c21"><code class="docutils literal notranslate"><span class="pre">isotropic_c21()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpecSWD</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">PyTorch API reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/python/torch.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pytorch-api-reference">
+<h1>PyTorch API reference<a class="headerlink" href="#pytorch-api-reference" title="Link to this heading"></a></h1>
+<p>Install the optional backend with <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">'.[torch]'</span></code> and
+import it from <code class="docutils literal notranslate"><span class="pre">specd.torch</span></code>. It runs without the native extensions.
+See <a class="reference internal" href="../markdown/pytorch.html"><span class="doc">PyTorch backend</span></a> for model conventions, differentiation,
+kernel units, and runnable examples.</p>
+<section id="solver-workspace">
+<h2>Solver workspace<a class="headerlink" href="#solver-workspace" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="specd.torch.SpecWorkSpace">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">specd.torch.</span></span><span class="sig-name descname"><span class="pre">SpecWorkSpace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavetype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngll</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngrl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">halfspace_wavelengths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/solver.html#SpecWorkSpace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.SpecWorkSpace" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Independent PyTorch implementation of the SpecSWD spectral solver.</p>
+<p>Model tensors retain their graphs. Non-tensor inputs become float64 leaf
+tensors requiring gradients, accessible through <code class="docutils literal notranslate"><span class="pre">parameters</span></code>. Geometry,
+adaptive element counts, interpolation locations and mode selection are
+discrete, fixed decisions during differentiation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.torch.SpecWorkSpace.compute_dispersion">
+<span class="sig-name descname"><span class="pre">compute_dispersion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies_hz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azimuths_deg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/solver.html#SpecWorkSpace.compute_dispersion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.SpecWorkSpace.compute_dispersion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.torch.SpecWorkSpace.compute_egn">
+<span class="sig-name descname"><span class="pre">compute_egn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ang_in_deg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/solver.html#SpecWorkSpace.compute_egn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.SpecWorkSpace.compute_egn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.torch.SpecWorkSpace.get_egnfunc">
+<span class="sig-name descname"><span class="pre">get_egnfunc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_displ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/solver.html#SpecWorkSpace.get_egnfunc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.SpecWorkSpace.get_egnfunc" title="Link to this definition"></a></dt>
+<dd><p>Return displacement at SEM nodes or the raw right eigenvector.</p>
+<p>Anisotropic displacements use radial/transverse/vertical components;
+Rayleigh uses the native real polarization amplitude convention.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.torch.SpecWorkSpace.get_group_kl">
+<span class="sig-name descname"><span class="pre">get_group_kl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/solver.html#SpecWorkSpace.get_group_kl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.SpecWorkSpace.get_group_kl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.torch.SpecWorkSpace.get_kernel_names">
+<span class="sig-name descname"><span class="pre">get_kernel_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/solver.html#SpecWorkSpace.get_kernel_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.SpecWorkSpace.get_kernel_names" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.torch.SpecWorkSpace.get_phase_kl">
+<span class="sig-name descname"><span class="pre">get_phase_kl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/solver.html#SpecWorkSpace.get_phase_kl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.SpecWorkSpace.get_phase_kl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.torch.SpecWorkSpace.group_velocity">
+<span class="sig-name descname"><span class="pre">group_velocity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/solver.html#SpecWorkSpace.group_velocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.SpecWorkSpace.group_velocity" title="Link to this definition"></a></dt>
+<dd><p>All modes at once using operator JVPs and eigenvalue perturbation.</p>
+<p>For P(k,f)r=0, dk/df = -(l^H P_f r)/(l^H P_k r). Forward-mode
+autodiff computes the operator partials without one eigensolver backward
+per mode. Keeping the eigenvectors in the graph supports group kernels.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.torch.SpecWorkSpace.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavetype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">vph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vpv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vsh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vsv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qa</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ql</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c21</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qani</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/solver.html#SpecWorkSpace.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.SpecWorkSpace.initialize" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.torch.SpecWorkSpace.kernels">
+<span class="sig-name descname"><span class="pre">kernels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">observable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'phase'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'real'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/solver.html#SpecWorkSpace.kernels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.SpecWorkSpace.kernels" title="Link to this definition"></a></dt>
+<dd><p>Return named autograd derivatives on the original model grid.</p>
+<p>Q derivatives here are d/dQ. <code class="docutils literal notranslate"><span class="pre">get_phase_kl</span></code> and <code class="docutils literal notranslate"><span class="pre">get_group_kl</span></code>
+convert these to d/d(Q^-1), matching the native kernel convention.
+Anisotropic group kernels use the radial group component.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="specd.torch.SpecWorkSpace.parameters">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#specd.torch.SpecWorkSpace.parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="tensor-dispersion-tables">
+<h2>Tensor dispersion tables<a class="headerlink" href="#tensor-dispersion-tables" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="specd.torch.DispersionTable">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">specd.torch.</span></span><span class="sig-name descname"><span class="pre">DispersionTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency_hz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'torch.Tensor'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azimuth_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'torch.Tensor'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'list'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'list</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_components</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'tuple'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">('radial',)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_mode_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'list</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_mode_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'list</span> <span class="pre">|</span> <span class="pre">None'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/io.html#DispersionTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.DispersionTable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.torch.DispersionTable.azimuth_deg">
+<span class="sig-name descname"><span class="pre">azimuth_deg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></span><a class="headerlink" href="#specd.torch.DispersionTable.azimuth_deg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.torch.DispersionTable.frequency_hz">
+<span class="sig-name descname"><span class="pre">frequency_hz</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></span><a class="headerlink" href="#specd.torch.DispersionTable.frequency_hz" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.torch.DispersionTable.from_hdf5">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/io.html#DispersionTable.from_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.DispersionTable.from_hdf5" title="Link to this definition"></a></dt>
+<dd><p>Read detached float64/complex128 tensors from a v1 dispersion file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.torch.DispersionTable.group_components">
+<span class="sig-name descname"><span class="pre">group_components</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('radial',)</span></span><a class="headerlink" href="#specd.torch.DispersionTable.group_components" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.torch.DispersionTable.group_mode_rows">
+<span class="sig-name descname"><span class="pre">group_mode_rows</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#specd.torch.DispersionTable.group_mode_rows" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.torch.DispersionTable.group_row">
+<span class="sig-name descname"><span class="pre">group_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/io.html#DispersionTable.group_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.DispersionTable.group_row" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.torch.DispersionTable.group_rows">
+<span class="sig-name descname"><span class="pre">group_rows</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#specd.torch.DispersionTable.group_rows" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.torch.DispersionTable.phase_mode_rows">
+<span class="sig-name descname"><span class="pre">phase_mode_rows</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#specd.torch.DispersionTable.phase_mode_rows" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.torch.DispersionTable.phase_row">
+<span class="sig-name descname"><span class="pre">phase_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/io.html#DispersionTable.phase_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.DispersionTable.phase_row" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="specd.torch.DispersionTable.phase_rows">
+<span class="sig-name descname"><span class="pre">phase_rows</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></span><a class="headerlink" href="#specd.torch.DispersionTable.phase_rows" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specd.torch.DispersionTable.to_hdf5">
+<span class="sig-name descname"><span class="pre">to_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/io.html#DispersionTable.to_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.DispersionTable.to_hdf5" title="Link to this definition"></a></dt>
+<dd><p>Write the existing specswd-dispersion v1 schema; detach at IO only.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="material-helpers">
+<h2>Material helpers<a class="headerlink" href="#material-helpers" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="specd.torch.constant_q_response">
+<span class="sig-prename descclassname"><span class="pre">specd.torch.</span></span><span class="sig-name descname"><span class="pre">constant_q_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/materials.html#constant_q_response"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.constant_q_response" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specd.torch.isotropic_c21">
+<span class="sig-prename descclassname"><span class="pre">specd.torch.</span></span><span class="sig-name descname"><span class="pre">isotropic_c21</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/specd/torch/materials.html#isotropic_c21"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#specd.torch.isotropic_c21" title="Link to this definition"></a></dt>
+<dd><p>Build (21,nz) stiffnesses without breaking the input autograd graph.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Native Python API reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Nanqiao Du.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

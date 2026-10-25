@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SpecSWD documentation &mdash; SpecSWD  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
@@ -45,12 +45,15 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="markdown/readme.html">SpecSWD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="markdown/Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="markdown/pytorch.html">PyTorch backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="markdown/benchmarks.html">C++ and PyTorch efficiency</a></li>
 <li class="toctree-l1"><a class="reference internal" href="markdown/io.html">NumPy and HDF5 output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="markdown/gallery.html">Gallery</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="python/index.html">Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python/index.html">Native Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python/torch.html">PyTorch API reference</a></li>
 </ul>
 
         </div>
@@ -81,14 +84,15 @@
 <h1>SpecSWD documentation<a class="headerlink" href="#specswd-documentation" title="Link to this heading"></a></h1>
 <p>SpecSWD computes surface-wave dispersion, eigenfunctions, and sensitivity
 kernels in layered elastic, acoustic, anisotropic, and attenuating media.</p>
-<p>The Python interface uses NumPy arrays. Variable mode counts are represented
-with CSR containers and stored in a versioned HDF5 schema that is shared with
-the C++ interface.</p>
+<p>The native Python interface uses NumPy arrays and CSR containers. The optional
+<code class="docutils literal notranslate"><span class="pre">specd.torch</span></code> backend uses PyTorch tensors and automatic differentiation,
+and runs without native extensions. Both backends share the versioned HDF5
+dispersion schema with the C++ interface.</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="markdown/readme.html">SpecSWD</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="markdown/readme.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/readme.html#native-build-requirements">Native build requirements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="markdown/readme.html#configure-and-build">Configure and build</a></li>
 <li class="toctree-l2"><a class="reference internal" href="markdown/readme.html#numerical-types">Numerical types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="markdown/readme.html#documentation">Documentation</a></li>
@@ -103,6 +107,21 @@ the C++ interface.</p>
 <li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#phase-and-group-velocity">Phase and group velocity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#sensitivity-kernels">Sensitivity kernels</a></li>
 <li class="toctree-l2"><a class="reference internal" href="markdown/Tutorial.html#variable-mode-frequency-grids">Variable-mode frequency grids</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="markdown/pytorch.html">PyTorch backend</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="markdown/pytorch.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/pytorch.html#forward-solve-and-automatic-differentiation">Forward solve and automatic differentiation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/pytorch.html#model-parameters">Model parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/pytorch.html#outputs-and-kernels">Outputs and kernels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/pytorch.html#frequency-and-azimuth-sweeps">Frequency and azimuth sweeps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/pytorch.html#numerical-scope">Numerical scope</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/pytorch.html#examples-and-validation">Examples and validation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="markdown/benchmarks.html">C++ and PyTorch efficiency</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="markdown/benchmarks.html#measurement-conditions">Measurement conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="markdown/benchmarks.html#reproduce">Reproduce</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="markdown/io.html">NumPy and HDF5 output</a><ul>
@@ -123,7 +142,7 @@ the C++ interface.</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="python/index.html">Python API reference</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="python/index.html">Native Python API reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="python/index.html#solver-workspace">Solver workspace</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="python/index.html#specd.SpecWorkSpace"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace</span></code></a></li>
 </ul>
@@ -146,6 +165,22 @@ the C++ interface.</p>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="python/index.html#thomson-haskell-comparison-solver">Thomson-Haskell comparison solver</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="python/index.html#specd.THSolver"><code class="docutils literal notranslate"><span class="pre">THSolver</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="python/torch.html">PyTorch API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python/torch.html#solver-workspace">Solver workspace</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/torch.html#specd.torch.SpecWorkSpace"><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="python/torch.html#tensor-dispersion-tables">Tensor dispersion tables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/torch.html#specd.torch.DispersionTable"><code class="docutils literal notranslate"><span class="pre">DispersionTable</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="python/torch.html#material-helpers">Material helpers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/torch.html#specd.torch.constant_q_response"><code class="docutils literal notranslate"><span class="pre">constant_q_response()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/torch.html#specd.torch.isotropic_c21"><code class="docutils literal notranslate"><span class="pre">isotropic_c21()</span></code></a></li>
 </ul>
 </li>
 </ul>

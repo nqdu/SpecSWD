@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>specd.io &mdash; SpecSWD  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
 
   
@@ -43,12 +43,15 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/readme.html">SpecSWD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../markdown/pytorch.html">PyTorch backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../markdown/benchmarks.html">C++ and PyTorch efficiency</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/io.html">NumPy and HDF5 output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/gallery.html">Gallery</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Native Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/torch.html">PyTorch API reference</a></li>
 </ul>
 
         </div>
@@ -76,27 +79,27 @@
            <div itemprop="articleBody">
              
   <h1>Source code for specd.io</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;NumPy containers and HDF5 IO for ragged dispersion results.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""NumPy containers and HDF5 IO for ragged dispersion results."""</span>
 
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 
 <div class="viewcode-block" id="ComplexCSR">
-<a class="viewcode-back" href="../../python/specd.html#specd.ComplexCSR">[docs]</a>
+<a class="viewcode-back" href="../../python/index.html#specd.ComplexCSR">[docs]</a>
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">ComplexCSR</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Complex CSR rows indexed by solve point and local mode number.&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ComplexCSR</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Complex CSR rows indexed by solve point and local mode number."""</span>
 
     <span class="n">indptr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
     <span class="n">mode_index</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
     <span class="n">values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
     <span class="n">component_names</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mode_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mode_index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
         <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
@@ -106,20 +109,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">component_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_names</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ComplexCSR.from_rows">
-<a class="viewcode-back" href="../../python/specd.html#specd.ComplexCSR.from_rows">[docs]</a>
+<a class="viewcode-back" href="../../python/index.html#specd.ComplexCSR.from_rows">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_rows</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_rows</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">rows</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
         <span class="n">component_names</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">mode_rows</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ComplexCSR&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pack variable-length NumPy rows into a CSR container.&quot;&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"ComplexCSR"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Pack variable-length NumPy rows into a CSR container."""</span>
         <span class="n">names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">component_names</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">names</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;component_names must not be empty&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"component_names must not be empty"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">mode_rows</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">mode_rows</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;mode_rows and rows must have the same length&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"mode_rows and rows must have the same length"</span><span class="p">)</span>
 
         <span class="n">indptr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
         <span class="n">indptr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
@@ -130,13 +133,13 @@
             <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;row </span><span class="si">{</span><span class="n">row_index</span><span class="si">}</span><span class="s2"> requires shape (n,</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+                        <span class="sa">f</span><span class="s2">"row </span><span class="si">{</span><span class="n">row_index</span><span class="si">}</span><span class="s2"> requires shape (n,</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span>
                     <span class="p">)</span>
                 <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;row </span><span class="si">{</span><span class="n">row_index</span><span class="si">}</span><span class="s2"> requires shape (n,</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s2">), &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;received </span><span class="si">{</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"row </span><span class="si">{</span><span class="n">row_index</span><span class="si">}</span><span class="s2"> requires shape (n,</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s2">), "</span>
+                    <span class="sa">f</span><span class="s2">"received </span><span class="si">{</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="n">mode_rows</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">modes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
@@ -144,7 +147,7 @@
                 <span class="n">modes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mode_rows</span><span class="p">[</span><span class="n">row_index</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">modes</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">modes</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;mode row </span><span class="si">{</span><span class="n">row_index</span><span class="si">}</span><span class="s2"> must have </span><span class="si">{</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> entries&quot;</span>
+                        <span class="sa">f</span><span class="s2">"mode row </span><span class="si">{</span><span class="n">row_index</span><span class="si">}</span><span class="s2"> must have </span><span class="si">{</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> entries"</span>
                     <span class="p">)</span>
             <span class="n">packed_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
             <span class="n">packed_modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modes</span><span class="p">)</span>
@@ -157,54 +160,54 @@
             <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
             <span class="n">modes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">indptr</span><span class="p">,</span> <span class="n">modes</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">),</span> <span class="s2">&quot;csr&quot;</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">),</span> <span class="s2">"csr"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">nrow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nrow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">nentry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nentry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode_index</span><span class="o">.</span><span class="n">size</span>
 
 <div class="viewcode-block" id="ComplexCSR.validate">
-<a class="viewcode-back" href="../../python/specd.html#specd.ComplexCSR.validate">[docs]</a>
-    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nrow</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;csr&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a class="viewcode-back" href="../../python/index.html#specd.ComplexCSR.validate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nrow</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"csr"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_names</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_names</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> component names must be nonempty&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> component names must be nonempty"</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">component_names</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">component_names</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> component names must be unique&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> component names must be unique"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">nrow</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> indptr must have nsolve+1 entries&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> indptr must have nsolve+1 entries"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> indptr must start at zero and be nondecreasing&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> indptr must start at zero and be nondecreasing"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nentry</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> indptr[-1] must equal the entry count&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> indptr[-1] must equal the entry count"</span><span class="p">)</span>
         <span class="n">required_shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nentry</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">component_names</span><span class="p">))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">required_shape</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> values require shape </span><span class="si">{</span><span class="n">required_shape</span><span class="si">}</span><span class="s2">, &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;received </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> values require shape </span><span class="si">{</span><span class="n">required_shape</span><span class="si">}</span><span class="s2">, "</span>
+                <span class="sa">f</span><span class="s2">"received </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrow</span><span class="p">):</span>
             <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="n">row</span> <span class="p">:</span> <span class="n">row</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
             <span class="n">modes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode_index</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">end</span><span class="p">)]</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">modes</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">modes</span><span class="p">)</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">modes</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> mode indices must be unique and nonnegative per row&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> mode indices must be unique and nonnegative per row"</span>
                 <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ComplexCSR.row">
-<a class="viewcode-back" href="../../python/specd.html#specd.ComplexCSR.row">[docs]</a>
-    <span class="k">def</span> <span class="nf">row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return ``(mode_index, values)`` as zero-copy NumPy views.&quot;&quot;&quot;</span>
+<a class="viewcode-back" href="../../python/index.html#specd.ComplexCSR.row">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Return ``(mode_index, values)`` as zero-copy NumPy views."""</span>
         <span class="k">if</span> <span class="n">row</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">row</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrow</span>
         <span class="k">if</span> <span class="n">row</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">row</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;CSR row out of range&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">"CSR row out of range"</span><span class="p">)</span>
         <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="n">row</span> <span class="p">:</span> <span class="n">row</span> <span class="o">+</span> <span class="mi">2</span><span class="p">])</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode_index</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span></div>
 </div>
@@ -212,18 +215,18 @@
 
 
 <div class="viewcode-block" id="DispersionTable">
-<a class="viewcode-back" href="../../python/specd.html#specd.DispersionTable">[docs]</a>
+<a class="viewcode-back" href="../../python/index.html#specd.DispersionTable">[docs]</a>
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">DispersionTable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;CSR dispersion data on a frequency/azimuth grid.&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DispersionTable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""CSR dispersion data on a frequency/azimuth grid."""</span>
 
     <span class="n">frequency_hz</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
     <span class="n">azimuth_deg</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
     <span class="n">phase_velocity</span><span class="p">:</span> <span class="n">ComplexCSR</span>
     <span class="n">group_velocity</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ComplexCSR</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">velocity_units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;km/s&quot;</span>
+    <span class="n">velocity_units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"km/s"</span>
 
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frequency_hz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">frequency_hz</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
         <span class="p">)</span>
@@ -232,9 +235,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
 
 <div class="viewcode-block" id="DispersionTable.from_rows">
-<a class="viewcode-back" href="../../python/specd.html#specd.DispersionTable.from_rows">[docs]</a>
+<a class="viewcode-back" href="../../python/index.html#specd.DispersionTable.from_rows">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_rows</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_rows</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">frequency_hz</span><span class="p">,</span>
         <span class="n">phase_rows</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
@@ -242,23 +245,23 @@
         <span class="n">azimuth_deg</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,),</span>
         <span class="n">phase_mode_rows</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">group_rows</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">group_components</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;radial&quot;</span><span class="p">,),</span>
+        <span class="n">group_components</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"radial"</span><span class="p">,),</span>
         <span class="n">group_mode_rows</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">velocity_units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;km/s&quot;</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DispersionTable&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a table directly from variable-length solver outputs.&quot;&quot;&quot;</span>
+        <span class="n">velocity_units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"km/s"</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"DispersionTable"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create a table directly from variable-length solver outputs."""</span>
         <span class="n">frequencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">frequency_hz</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="n">azimuths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">azimuth_deg</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
         <span class="n">nsolve</span> <span class="o">=</span> <span class="n">frequencies</span><span class="o">.</span><span class="n">size</span> <span class="o">*</span> <span class="n">azimuths</span><span class="o">.</span><span class="n">size</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">phase_rows</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nsolve</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;phase_rows must contain </span><span class="si">{</span><span class="n">nsolve</span><span class="si">}</span><span class="s2"> solve-point rows&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"phase_rows must contain </span><span class="si">{</span><span class="n">nsolve</span><span class="si">}</span><span class="s2"> solve-point rows"</span><span class="p">)</span>
         <span class="n">phase</span> <span class="o">=</span> <span class="n">ComplexCSR</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span>
-            <span class="n">phase_rows</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;phase&quot;</span><span class="p">,),</span> <span class="n">phase_mode_rows</span>
+            <span class="n">phase_rows</span><span class="p">,</span> <span class="p">(</span><span class="s2">"phase"</span><span class="p">,),</span> <span class="n">phase_mode_rows</span>
         <span class="p">)</span>
         <span class="n">group</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">group_rows</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">group_rows</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nsolve</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;group_rows must contain </span><span class="si">{</span><span class="n">nsolve</span><span class="si">}</span><span class="s2"> solve-point rows&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"group_rows must contain </span><span class="si">{</span><span class="n">nsolve</span><span class="si">}</span><span class="s2"> solve-point rows"</span><span class="p">)</span>
             <span class="n">group</span> <span class="o">=</span> <span class="n">ComplexCSR</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span>
                 <span class="n">group_rows</span><span class="p">,</span> <span class="n">group_components</span><span class="p">,</span> <span class="n">group_mode_rows</span>
             <span class="p">)</span>
@@ -266,47 +269,47 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">nsolve</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nsolve</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_hz</span><span class="o">.</span><span class="n">size</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">azimuth_deg</span><span class="o">.</span><span class="n">size</span>
 
 <div class="viewcode-block" id="DispersionTable.solve_row">
-<a class="viewcode-back" href="../../python/specd.html#specd.DispersionTable.solve_row">[docs]</a>
-    <span class="k">def</span> <span class="nf">solve_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequency_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">azimuth_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Map grid indices to the frequency-major CSR row.&quot;&quot;&quot;</span>
+<a class="viewcode-back" href="../../python/index.html#specd.DispersionTable.solve_row">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">solve_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequency_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">azimuth_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Map grid indices to the frequency-major CSR row."""</span>
         <span class="k">if</span> <span class="n">frequency_index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">frequency_index</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_hz</span><span class="o">.</span><span class="n">size</span>
         <span class="k">if</span> <span class="n">azimuth_index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">azimuth_index</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">azimuth_deg</span><span class="o">.</span><span class="n">size</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">frequency_index</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_hz</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;frequency index out of range&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">"frequency index out of range"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">azimuth_index</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">azimuth_deg</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;azimuth index out of range&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">"azimuth index out of range"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">frequency_index</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">azimuth_deg</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="n">azimuth_index</span></div>
 
 
 <div class="viewcode-block" id="DispersionTable.validate">
-<a class="viewcode-back" href="../../python/specd.html#specd.DispersionTable.validate">[docs]</a>
-    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a class="viewcode-back" href="../../python/index.html#specd.DispersionTable.validate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_hz</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_hz</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;frequency_hz must be a nonempty one-dimensional array&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"frequency_hz must be a nonempty one-dimensional array"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_hz</span><span class="p">))</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_hz</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;frequencies must be finite and positive&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"frequencies must be finite and positive"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">azimuth_deg</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">azimuth_deg</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;azimuth_deg must be a nonempty one-dimensional array&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"azimuth_deg must be a nonempty one-dimensional array"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">azimuth_deg</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;azimuths must be finite&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"azimuths must be finite"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity_units</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;velocity_units must not be empty&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">phase_velocity</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsolve</span><span class="p">,</span> <span class="s2">&quot;phase_velocity&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_velocity</span><span class="o">.</span><span class="n">component_names</span> <span class="o">!=</span> <span class="p">(</span><span class="s2">&quot;phase&quot;</span><span class="p">,):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;phase_velocity must have the single component &#39;phase&#39;&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"velocity_units must not be empty"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase_velocity</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsolve</span><span class="p">,</span> <span class="s2">"phase_velocity"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_velocity</span><span class="o">.</span><span class="n">component_names</span> <span class="o">!=</span> <span class="p">(</span><span class="s2">"phase"</span><span class="p">,):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"phase_velocity must have the single component 'phase'"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_velocity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">group_velocity</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsolve</span><span class="p">,</span> <span class="s2">&quot;group_velocity&quot;</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">group_velocity</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsolve</span><span class="p">,</span> <span class="s2">"group_velocity"</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DispersionTable.phase_row">
-<a class="viewcode-back" href="../../python/specd.html#specd.DispersionTable.phase_row">[docs]</a>
-    <span class="k">def</span> <span class="nf">phase_row</span><span class="p">(</span>
+<a class="viewcode-back" href="../../python/index.html#specd.DispersionTable.phase_row">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">phase_row</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">frequency_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">azimuth_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="n">modes</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_velocity</span><span class="o">.</span><span class="n">row</span><span class="p">(</span>
@@ -316,82 +319,82 @@
 
 
 <div class="viewcode-block" id="DispersionTable.group_row">
-<a class="viewcode-back" href="../../python/specd.html#specd.DispersionTable.group_row">[docs]</a>
-    <span class="k">def</span> <span class="nf">group_row</span><span class="p">(</span>
+<a class="viewcode-back" href="../../python/index.html#specd.DispersionTable.group_row">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">group_row</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">frequency_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">azimuth_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_velocity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;group velocity was not saved&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"group velocity was not saved"</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_velocity</span><span class="o">.</span><span class="n">row</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">solve_row</span><span class="p">(</span><span class="n">frequency_index</span><span class="p">,</span> <span class="n">azimuth_index</span><span class="p">)</span>
         <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DispersionTable.to_hdf5">
-<a class="viewcode-back" href="../../python/specd.html#specd.DispersionTable.to_hdf5">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write schema-versioned CSR data using HDF5 compound complex values.&quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">h5py</span>
+<a class="viewcode-back" href="../../python/index.html#specd.DispersionTable.to_hdf5">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Write schema-versioned CSR data using HDF5 compound complex values."""</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
-        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
-            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;schema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;specswd-dispersion&quot;</span>
-            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;schema_version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;layout&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;csr&quot;</span>
-            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;complex_encoding&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;compound-r-i-f64&quot;</span>
-            <span class="n">solutions</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;solutions&quot;</span><span class="p">)</span>
-            <span class="n">frequency</span> <span class="o">=</span> <span class="n">solutions</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;frequency_hz&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_hz</span><span class="p">)</span>
-            <span class="n">frequency</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Hz&quot;</span>
-            <span class="n">azimuth</span> <span class="o">=</span> <span class="n">solutions</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;azimuth_deg&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">azimuth_deg</span><span class="p">)</span>
-            <span class="n">azimuth</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;degree&quot;</span>
-            <span class="n">solutions</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;row_order&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;frequency-major,azimuth-minor&quot;</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"schema"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"specswd-dispersion"</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"schema_version"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"layout"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"csr"</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"complex_encoding"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"compound-r-i-f64"</span>
+            <span class="n">solutions</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">"solutions"</span><span class="p">)</span>
+            <span class="n">frequency</span> <span class="o">=</span> <span class="n">solutions</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">"frequency_hz"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_hz</span><span class="p">)</span>
+            <span class="n">frequency</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"units"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"Hz"</span>
+            <span class="n">azimuth</span> <span class="o">=</span> <span class="n">solutions</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">"azimuth_deg"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">azimuth_deg</span><span class="p">)</span>
+            <span class="n">azimuth</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"units"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"degree"</span>
+            <span class="n">solutions</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"row_order"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"frequency-major,azimuth-minor"</span>
             <span class="n">_write_csr</span><span class="p">(</span>
-                <span class="n">solutions</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;phase&quot;</span><span class="p">),</span>
+                <span class="n">solutions</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">"phase"</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">phase_velocity</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">velocity_units</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_velocity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">_write_csr</span><span class="p">(</span>
-                    <span class="n">solutions</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;group&quot;</span><span class="p">),</span>
+                    <span class="n">solutions</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">"group"</span><span class="p">),</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">group_velocity</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">velocity_units</span><span class="p">,</span>
                 <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DispersionTable.from_hdf5">
-<a class="viewcode-back" href="../../python/specd.html#specd.DispersionTable.from_hdf5">[docs]</a>
+<a class="viewcode-back" href="../../python/index.html#specd.DispersionTable.from_hdf5">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_hdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DispersionTable&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read and validate a version-1 SpecSWD CSR HDF5 file.&quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">h5py</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_hdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"DispersionTable"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read and validate a version-1 SpecSWD CSR HDF5 file."""</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
 
-        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
             <span class="n">expected</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="s2">&quot;specswd-dispersion&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;schema_version&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="s2">&quot;layout&quot;</span><span class="p">:</span> <span class="s2">&quot;csr&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;complex_encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;compound-r-i-f64&quot;</span><span class="p">,</span>
+                <span class="s2">"schema"</span><span class="p">:</span> <span class="s2">"specswd-dispersion"</span><span class="p">,</span>
+                <span class="s2">"schema_version"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">"layout"</span><span class="p">:</span> <span class="s2">"csr"</span><span class="p">,</span>
+                <span class="s2">"complex_encoding"</span><span class="p">:</span> <span class="s2">"compound-r-i-f64"</span><span class="p">,</span>
             <span class="p">}</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">expected</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="n">value</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unsupported HDF5 </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">solutions</span> <span class="o">=</span> <span class="n">handle</span><span class="p">[</span><span class="s2">&quot;solutions&quot;</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">solutions</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;row_order&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;frequency-major,azimuth-minor&quot;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;unsupported solution row order&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">solutions</span><span class="p">[</span><span class="s2">&quot;frequency_hz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;Hz&quot;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;frequency_hz has unsupported units&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">solutions</span><span class="p">[</span><span class="s2">&quot;azimuth_deg&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;degree&quot;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;azimuth_deg has unsupported units&quot;</span><span class="p">)</span>
-            <span class="n">phase</span> <span class="o">=</span> <span class="n">_read_csr</span><span class="p">(</span><span class="n">solutions</span><span class="p">[</span><span class="s2">&quot;phase&quot;</span><span class="p">])</span>
-            <span class="n">group</span> <span class="o">=</span> <span class="n">_read_csr</span><span class="p">(</span><span class="n">solutions</span><span class="p">[</span><span class="s2">&quot;group&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="s2">&quot;group&quot;</span> <span class="ow">in</span> <span class="n">solutions</span> <span class="k">else</span> <span class="kc">None</span>
-            <span class="n">velocity_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">solutions</span><span class="p">[</span><span class="s2">&quot;phase/values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unsupported HDF5 </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">solutions</span> <span class="o">=</span> <span class="n">handle</span><span class="p">[</span><span class="s2">"solutions"</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">solutions</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"row_order"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"frequency-major,azimuth-minor"</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"unsupported solution row order"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">solutions</span><span class="p">[</span><span class="s2">"frequency_hz"</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"units"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"Hz"</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"frequency_hz has unsupported units"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">solutions</span><span class="p">[</span><span class="s2">"azimuth_deg"</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"units"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"degree"</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"azimuth_deg has unsupported units"</span><span class="p">)</span>
+            <span class="n">phase</span> <span class="o">=</span> <span class="n">_read_csr</span><span class="p">(</span><span class="n">solutions</span><span class="p">[</span><span class="s2">"phase"</span><span class="p">])</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="n">_read_csr</span><span class="p">(</span><span class="n">solutions</span><span class="p">[</span><span class="s2">"group"</span><span class="p">])</span> <span class="k">if</span> <span class="s2">"group"</span> <span class="ow">in</span> <span class="n">solutions</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">velocity_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">solutions</span><span class="p">[</span><span class="s2">"phase/values"</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"units"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">group_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">solutions</span><span class="p">[</span><span class="s2">&quot;group/values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+                <span class="n">group_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">solutions</span><span class="p">[</span><span class="s2">"group/values"</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"units"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">group_units</span> <span class="o">!=</span> <span class="n">velocity_units</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;phase and group velocity units must match&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"phase and group velocity units must match"</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
-                <span class="n">solutions</span><span class="p">[</span><span class="s2">&quot;frequency_hz&quot;</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
-                <span class="n">solutions</span><span class="p">[</span><span class="s2">&quot;azimuth_deg&quot;</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
+                <span class="n">solutions</span><span class="p">[</span><span class="s2">"frequency_hz"</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
+                <span class="n">solutions</span><span class="p">[</span><span class="s2">"azimuth_deg"</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
                 <span class="n">phase</span><span class="p">,</span>
                 <span class="n">group</span><span class="p">,</span>
                 <span class="n">velocity_units</span><span class="p">,</span>
@@ -401,17 +404,17 @@
 
 
 <div class="viewcode-block" id="RaggedComplexField">
-<a class="viewcode-back" href="../../python/specd.html#specd.RaggedComplexField">[docs]</a>
+<a class="viewcode-back" href="../../python/index.html#specd.RaggedComplexField">[docs]</a>
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">RaggedComplexField</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Variable-length complex samples with a fixed component dimension.&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RaggedComplexField</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Variable-length complex samples with a fixed component dimension."""</span>
 
     <span class="n">indptr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
     <span class="n">values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
     <span class="n">component_names</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-    <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;normalized&quot;</span>
+    <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"normalized"</span>
 
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
         <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -422,37 +425,37 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">nrow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nrow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
 <div class="viewcode-block" id="RaggedComplexField.validate">
-<a class="viewcode-back" href="../../python/specd.html#specd.RaggedComplexField.validate">[docs]</a>
-    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nrow</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a class="viewcode-back" href="../../python/index.html#specd.RaggedComplexField.validate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nrow</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">expected_rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrow</span> <span class="k">if</span> <span class="n">nrow</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">nrow</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_names</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">component_names</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">component_names</span>
         <span class="p">)</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_names</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;field component names must be unique and nonempty&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"field component names must be unique and nonempty"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;field units must not be empty&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"field units must not be empty"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">expected_rows</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;field indptr must have nrow+1 entries&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"field indptr must have nrow+1 entries"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;field indptr must start at zero and be nondecreasing&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"field indptr must start at zero and be nondecreasing"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">component_names</span>
         <span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;field values have an inconsistent shape&quot;</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"field values have an inconsistent shape"</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="RaggedComplexField.row">
-<a class="viewcode-back" href="../../python/specd.html#specd.RaggedComplexField.row">[docs]</a>
-    <span class="k">def</span> <span class="nf">row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return one field as a zero-copy ``(npoint,ncomponent)`` view.&quot;&quot;&quot;</span>
+<a class="viewcode-back" href="../../python/index.html#specd.RaggedComplexField.row">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return one field as a zero-copy ``(npoint,ncomponent)`` view."""</span>
         <span class="k">if</span> <span class="n">row</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">row</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrow</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">row</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;field row out of range&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">"field row out of range"</span><span class="p">)</span>
         <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="n">row</span> <span class="p">:</span> <span class="n">row</span> <span class="o">+</span> <span class="mi">2</span><span class="p">])</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span></div>
 </div>
@@ -460,16 +463,16 @@
 
 
 <div class="viewcode-block" id="KernelTable">
-<a class="viewcode-back" href="../../python/specd.html#specd.KernelTable">[docs]</a>
+<a class="viewcode-back" href="../../python/index.html#specd.KernelTable">[docs]</a>
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">KernelTable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Projected kernels with shape ``(nmode,nparameter,ndepth)``.&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">KernelTable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Projected kernels with shape ``(nmode,nparameter,ndepth)``."""</span>
 
     <span class="n">parameter_names</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
     <span class="n">velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
     <span class="n">propagation_q_inverse</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameter_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_names</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagation_q_inverse</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -477,25 +480,25 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">propagation_q_inverse</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_names</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_names</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;kernel parameter names must be nonempty&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"kernel parameter names must be nonempty"</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_names</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_names</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;kernel parameter names must be unique&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"kernel parameter names must be unique"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameter_names</span>
         <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;kernel velocity values have an inconsistent shape&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"kernel velocity values have an inconsistent shape"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagation_q_inverse</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">propagation_q_inverse</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="o">.</span><span class="n">shape</span>
         <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;propagation-Q-inverse kernel shape differs&quot;</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"propagation-Q-inverse kernel shape differs"</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="SolverOutput">
-<a class="viewcode-back" href="../../python/specd.html#specd.SolverOutput">[docs]</a>
+<a class="viewcode-back" href="../../python/index.html#specd.SolverOutput">[docs]</a>
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">SolverOutput</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Complete command-line result backed only by NumPy containers.&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SolverOutput</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Complete command-line result backed only by NumPy containers."""</span>
 
     <span class="n">dispersion</span><span class="p">:</span> <span class="n">DispersionTable</span>
     <span class="n">wave_type</span><span class="p">:</span> <span class="nb">int</span>
@@ -509,7 +512,7 @@
     <span class="n">elastic_kernels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">KernelTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">acoustic_kernels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">KernelTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wave_type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_type</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attenuation</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attenuation</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kernel_type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_type</span><span class="p">)</span>
@@ -524,17 +527,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
 
 <div class="viewcode-block" id="SolverOutput.validate">
-<a class="viewcode-back" href="../../python/specd.html#specd.SolverOutput.validate">[docs]</a>
-    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a class="viewcode-back" href="../../python/index.html#specd.SolverOutput.validate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispersion</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;wave_type must be 0, 1, or 2&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"wave_type must be 0, 1, or 2"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;kernel_type must be 0 or 1&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"kernel_type must be 0 or 1"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_observable</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_depth</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model_depth</span>
         <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;kernel observable and model depth are required&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"kernel observable and model depth are required"</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sem_depth_indptr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span>
             <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">sem_depth_indptr</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dispersion</span><span class="o">.</span><span class="n">nsolve</span> <span class="o">+</span> <span class="mi">1</span>
@@ -542,7 +545,7 @@
             <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sem_depth_indptr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">sem_depth_indptr</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">sem_depth_indptr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sem_depth_values</span><span class="o">.</span><span class="n">size</span>
         <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;SEM depth CSR has an inconsistent shape&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"SEM depth CSR has an inconsistent shape"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eigenfunctions</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dispersion</span><span class="o">.</span><span class="n">phase_velocity</span><span class="o">.</span><span class="n">nentry</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">solve_row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dispersion</span><span class="o">.</span><span class="n">nsolve</span><span class="p">):</span>
             <span class="n">depth_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
@@ -558,7 +561,7 @@
                     <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">eigenfunctions</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="n">entry</span><span class="p">]</span>
                     <span class="o">!=</span> <span class="n">depth_count</span>
                 <span class="p">):</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;eigenfunction and SEM depth lengths differ&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"eigenfunction and SEM depth lengths differ"</span><span class="p">)</span>
         <span class="n">expected</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dispersion</span><span class="o">.</span><span class="n">phase_velocity</span><span class="o">.</span><span class="n">nentry</span><span class="p">,</span>
             <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_depth</span><span class="p">),</span>
@@ -567,19 +570,19 @@
             <span class="k">if</span> <span class="n">kernels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">kernels</span><span class="o">.</span><span class="n">velocity</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">kernels</span><span class="o">.</span><span class="n">velocity</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">!=</span> <span class="n">expected</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;kernel mode/depth dimensions are inconsistent&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"kernel mode/depth dimensions are inconsistent"</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">attenuation</span> <span class="o">!=</span> <span class="p">(</span><span class="n">kernels</span><span class="o">.</span><span class="n">propagation_q_inverse</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;kernel attenuation fields are inconsistent&quot;</span><span class="p">)</span></div>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"kernel attenuation fields are inconsistent"</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SolverOutput.sem_depth_row">
-<a class="viewcode-back" href="../../python/specd.html#specd.SolverOutput.sem_depth_row">[docs]</a>
-    <span class="k">def</span> <span class="nf">sem_depth_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solve_row</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the physical SEM depth coordinates for one solve row.&quot;&quot;&quot;</span>
+<a class="viewcode-back" href="../../python/index.html#specd.SolverOutput.sem_depth_row">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sem_depth_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solve_row</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return the physical SEM depth coordinates for one solve row."""</span>
         <span class="k">if</span> <span class="n">solve_row</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">solve_row</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dispersion</span><span class="o">.</span><span class="n">nsolve</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">solve_row</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">dispersion</span><span class="o">.</span><span class="n">nsolve</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;solve row out of range&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">"solve row out of range"</span><span class="p">)</span>
         <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span>
             <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sem_depth_indptr</span><span class="p">[</span><span class="n">solve_row</span> <span class="p">:</span> <span class="n">solve_row</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
         <span class="p">)</span>
@@ -587,142 +590,142 @@
 
 
 <div class="viewcode-block" id="SolverOutput.to_hdf5">
-<a class="viewcode-back" href="../../python/specd.html#specd.SolverOutput.to_hdf5">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the complete version-1 solver output.&quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">h5py</span>
+<a class="viewcode-back" href="../../python/index.html#specd.SolverOutput.to_hdf5">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Write the complete version-1 solver output."""</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispersion</span><span class="o">.</span><span class="n">to_hdf5</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">&quot;r+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
-            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;solver-output&quot;</span>
-            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;wave_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_type</span><span class="p">)</span>
-            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;attenuation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attenuation</span><span class="p">)</span>
-            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;kernel_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_type</span><span class="p">)</span>
-            <span class="n">model</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">)</span>
-            <span class="n">depth</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;depth&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_depth</span><span class="p">)</span>
-            <span class="n">depth</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;km&quot;</span>
-            <span class="n">mesh</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;mesh&quot;</span><span class="p">)</span>
-            <span class="n">mesh</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;depth_indptr&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sem_depth_indptr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;&lt;u8&quot;</span><span class="p">)</span>
-            <span class="n">values</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;depth_values&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sem_depth_values</span><span class="p">)</span>
-            <span class="n">values</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;km&quot;</span>
-            <span class="n">mesh</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;row_alignment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;solutions&quot;</span>
-            <span class="n">eigenfunctions</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;eigenfunctions&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">"r+"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"content"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"solver-output"</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"wave_type"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_type</span><span class="p">)</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"attenuation"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attenuation</span><span class="p">)</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"kernel_type"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_type</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">"model"</span><span class="p">)</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">"depth"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_depth</span><span class="p">)</span>
+            <span class="n">depth</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"units"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"km"</span>
+            <span class="n">mesh</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">"mesh"</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">"depth_indptr"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sem_depth_indptr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"&lt;u8"</span><span class="p">)</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">"depth_values"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sem_depth_values</span><span class="p">)</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"units"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"km"</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"row_alignment"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"solutions"</span>
+            <span class="n">eigenfunctions</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">"eigenfunctions"</span><span class="p">)</span>
             <span class="n">eigenfunctions</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
-                <span class="s2">&quot;indptr&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eigenfunctions</span><span class="o">.</span><span class="n">indptr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;&lt;u8&quot;</span>
+                <span class="s2">"indptr"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eigenfunctions</span><span class="o">.</span><span class="n">indptr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"&lt;u8"</span>
             <span class="p">)</span>
             <span class="n">eigenfunctions</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
-                <span class="s2">&quot;component_names&quot;</span><span class="p">,</span>
+                <span class="s2">"component_names"</span><span class="p">,</span>
                 <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">eigenfunctions</span><span class="o">.</span><span class="n">component_names</span><span class="p">,</span>
-                    <span class="n">dtype</span><span class="o">=</span><span class="n">h5py</span><span class="o">.</span><span class="n">string_dtype</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
+                    <span class="n">dtype</span><span class="o">=</span><span class="n">h5py</span><span class="o">.</span><span class="n">string_dtype</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span>
                 <span class="p">),</span>
             <span class="p">)</span>
             <span class="n">eigenvalues</span> <span class="o">=</span> <span class="n">eigenfunctions</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
-                <span class="s2">&quot;values&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eigenfunctions</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span>
+                <span class="s2">"values"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eigenfunctions</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span>
             <span class="p">)</span>
-            <span class="n">eigenvalues</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eigenfunctions</span><span class="o">.</span><span class="n">units</span>
-            <span class="n">kernel_group</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;kernels&quot;</span><span class="p">)</span>
-            <span class="n">kernel_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;observable&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_observable</span>
-            <span class="n">kernel_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;entry_alignment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;solutions/phase&quot;</span>
-            <span class="n">_write_kernel</span><span class="p">(</span><span class="n">kernel_group</span><span class="p">,</span> <span class="s2">&quot;elastic&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_kernels</span><span class="p">)</span>
-            <span class="n">_write_kernel</span><span class="p">(</span><span class="n">kernel_group</span><span class="p">,</span> <span class="s2">&quot;acoustic&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acoustic_kernels</span><span class="p">)</span></div>
+            <span class="n">eigenvalues</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"units"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eigenfunctions</span><span class="o">.</span><span class="n">units</span>
+            <span class="n">kernel_group</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">"kernels"</span><span class="p">)</span>
+            <span class="n">kernel_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"observable"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_observable</span>
+            <span class="n">kernel_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"entry_alignment"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"solutions/phase"</span>
+            <span class="n">_write_kernel</span><span class="p">(</span><span class="n">kernel_group</span><span class="p">,</span> <span class="s2">"elastic"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elastic_kernels</span><span class="p">)</span>
+            <span class="n">_write_kernel</span><span class="p">(</span><span class="n">kernel_group</span><span class="p">,</span> <span class="s2">"acoustic"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acoustic_kernels</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SolverOutput.from_hdf5">
-<a class="viewcode-back" href="../../python/specd.html#specd.SolverOutput.from_hdf5">[docs]</a>
+<a class="viewcode-back" href="../../python/index.html#specd.SolverOutput.from_hdf5">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_hdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SolverOutput&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read complete output written by a C++ or Python solver.&quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">h5py</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_hdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"SolverOutput"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read complete output written by a C++ or Python solver."""</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
 
         <span class="n">dispersion</span> <span class="o">=</span> <span class="n">DispersionTable</span><span class="o">.</span><span class="n">from_hdf5</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;solver-output&quot;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;HDF5 file does not contain complete solver output&quot;</span><span class="p">)</span>
-            <span class="n">eigenfunctions</span> <span class="o">=</span> <span class="n">handle</span><span class="p">[</span><span class="s2">&quot;eigenfunctions&quot;</span><span class="p">]</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"content"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"solver-output"</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"HDF5 file does not contain complete solver output"</span><span class="p">)</span>
+            <span class="n">eigenfunctions</span> <span class="o">=</span> <span class="n">handle</span><span class="p">[</span><span class="s2">"eigenfunctions"</span><span class="p">]</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">RaggedComplexField</span><span class="p">(</span>
-                <span class="n">eigenfunctions</span><span class="p">[</span><span class="s2">&quot;indptr&quot;</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
-                <span class="n">eigenfunctions</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
-                <span class="n">_read_strings</span><span class="p">(</span><span class="n">eigenfunctions</span><span class="p">[</span><span class="s2">&quot;component_names&quot;</span><span class="p">]),</span>
-                <span class="nb">str</span><span class="p">(</span><span class="n">eigenfunctions</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)),</span>
+                <span class="n">eigenfunctions</span><span class="p">[</span><span class="s2">"indptr"</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
+                <span class="n">eigenfunctions</span><span class="p">[</span><span class="s2">"values"</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
+                <span class="n">_read_strings</span><span class="p">(</span><span class="n">eigenfunctions</span><span class="p">[</span><span class="s2">"component_names"</span><span class="p">]),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">eigenfunctions</span><span class="p">[</span><span class="s2">"values"</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"units"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)),</span>
             <span class="p">)</span>
-            <span class="n">kernels</span> <span class="o">=</span> <span class="n">handle</span><span class="p">[</span><span class="s2">&quot;kernels&quot;</span><span class="p">]</span>
+            <span class="n">kernels</span> <span class="o">=</span> <span class="n">handle</span><span class="p">[</span><span class="s2">"kernels"</span><span class="p">]</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
                 <span class="n">dispersion</span><span class="o">=</span><span class="n">dispersion</span><span class="p">,</span>
-                <span class="n">wave_type</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;wave_type&quot;</span><span class="p">]),</span>
-                <span class="n">attenuation</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;attenuation&quot;</span><span class="p">]),</span>
-                <span class="n">kernel_type</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;kernel_type&quot;</span><span class="p">]),</span>
-                <span class="n">kernel_observable</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">kernels</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;observable&quot;</span><span class="p">]),</span>
-                <span class="n">model_depth</span><span class="o">=</span><span class="n">handle</span><span class="p">[</span><span class="s2">&quot;model/depth&quot;</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
-                <span class="n">sem_depth_indptr</span><span class="o">=</span><span class="n">handle</span><span class="p">[</span><span class="s2">&quot;mesh/depth_indptr&quot;</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
-                <span class="n">sem_depth_values</span><span class="o">=</span><span class="n">handle</span><span class="p">[</span><span class="s2">&quot;mesh/depth_values&quot;</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
+                <span class="n">wave_type</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"wave_type"</span><span class="p">]),</span>
+                <span class="n">attenuation</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"attenuation"</span><span class="p">]),</span>
+                <span class="n">kernel_type</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"kernel_type"</span><span class="p">]),</span>
+                <span class="n">kernel_observable</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">kernels</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"observable"</span><span class="p">]),</span>
+                <span class="n">model_depth</span><span class="o">=</span><span class="n">handle</span><span class="p">[</span><span class="s2">"model/depth"</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
+                <span class="n">sem_depth_indptr</span><span class="o">=</span><span class="n">handle</span><span class="p">[</span><span class="s2">"mesh/depth_indptr"</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
+                <span class="n">sem_depth_values</span><span class="o">=</span><span class="n">handle</span><span class="p">[</span><span class="s2">"mesh/depth_values"</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
                 <span class="n">eigenfunctions</span><span class="o">=</span><span class="n">field</span><span class="p">,</span>
-                <span class="n">elastic_kernels</span><span class="o">=</span><span class="n">_read_kernel</span><span class="p">(</span><span class="n">kernels</span><span class="p">,</span> <span class="s2">&quot;elastic&quot;</span><span class="p">),</span>
-                <span class="n">acoustic_kernels</span><span class="o">=</span><span class="n">_read_kernel</span><span class="p">(</span><span class="n">kernels</span><span class="p">,</span> <span class="s2">&quot;acoustic&quot;</span><span class="p">),</span>
+                <span class="n">elastic_kernels</span><span class="o">=</span><span class="n">_read_kernel</span><span class="p">(</span><span class="n">kernels</span><span class="p">,</span> <span class="s2">"elastic"</span><span class="p">),</span>
+                <span class="n">acoustic_kernels</span><span class="o">=</span><span class="n">_read_kernel</span><span class="p">(</span><span class="n">kernels</span><span class="p">,</span> <span class="s2">"acoustic"</span><span class="p">),</span>
             <span class="p">)</span></div>
 </div>
 
 
 
-<span class="k">def</span> <span class="nf">_write_csr</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">csr</span><span class="p">:</span> <span class="n">ComplexCSR</span><span class="p">,</span> <span class="n">units</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;indptr&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">csr</span><span class="o">.</span><span class="n">indptr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;&lt;u8&quot;</span><span class="p">)</span>
-    <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;mode_index&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">csr</span><span class="o">.</span><span class="n">mode_index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;&lt;i4&quot;</span><span class="p">)</span>
-    <span class="kn">import</span> <span class="nn">h5py</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_csr</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">csr</span><span class="p">:</span> <span class="n">ComplexCSR</span><span class="p">,</span> <span class="n">units</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">"indptr"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">csr</span><span class="o">.</span><span class="n">indptr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"&lt;u8"</span><span class="p">)</span>
+    <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">"mode_index"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">csr</span><span class="o">.</span><span class="n">mode_index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"&lt;i4"</span><span class="p">)</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
 
     <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
-        <span class="s2">&quot;component_names&quot;</span><span class="p">,</span>
-        <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">csr</span><span class="o">.</span><span class="n">component_names</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">h5py</span><span class="o">.</span><span class="n">string_dtype</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)),</span>
+        <span class="s2">"component_names"</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">csr</span><span class="o">.</span><span class="n">component_names</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">h5py</span><span class="o">.</span><span class="n">string_dtype</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)),</span>
     <span class="p">)</span>
-    <span class="n">values</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;values&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">csr</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
-    <span class="n">values</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">"values"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">csr</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+    <span class="n">values</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"units"</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
 
 
-<span class="k">def</span> <span class="nf">_read_csr</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ComplexCSR</span><span class="p">:</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="n">_read_strings</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s2">&quot;component_names&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_csr</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ComplexCSR</span><span class="p">:</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">_read_strings</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s2">"component_names"</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">ComplexCSR</span><span class="p">(</span>
-        <span class="n">group</span><span class="p">[</span><span class="s2">&quot;indptr&quot;</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
-        <span class="n">group</span><span class="p">[</span><span class="s2">&quot;mode_index&quot;</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
-        <span class="n">group</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
+        <span class="n">group</span><span class="p">[</span><span class="s2">"indptr"</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
+        <span class="n">group</span><span class="p">[</span><span class="s2">"mode_index"</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
+        <span class="n">group</span><span class="p">[</span><span class="s2">"values"</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
         <span class="n">names</span><span class="p">,</span>
     <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_read_strings</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_strings</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
-        <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">[</span><span class="o">...</span><span class="p">]</span>
     <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_write_kernel</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">kernels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">KernelTable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_kernel</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">kernels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">KernelTable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">kernels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span>
-    <span class="kn">import</span> <span class="nn">h5py</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
 
     <span class="n">group</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
-        <span class="s2">&quot;parameter_names&quot;</span><span class="p">,</span>
-        <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">kernels</span><span class="o">.</span><span class="n">parameter_names</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">h5py</span><span class="o">.</span><span class="n">string_dtype</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)),</span>
+        <span class="s2">"parameter_names"</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">kernels</span><span class="o">.</span><span class="n">parameter_names</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">h5py</span><span class="o">.</span><span class="n">string_dtype</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)),</span>
     <span class="p">)</span>
-    <span class="n">velocity</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;velocity&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">kernels</span><span class="o">.</span><span class="n">velocity</span><span class="p">)</span>
-    <span class="n">velocity</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;kernel&quot;</span>
+    <span class="n">velocity</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">"velocity"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">kernels</span><span class="o">.</span><span class="n">velocity</span><span class="p">)</span>
+    <span class="n">velocity</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"units"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"kernel"</span>
     <span class="k">if</span> <span class="n">kernels</span><span class="o">.</span><span class="n">propagation_q_inverse</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">quality</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
-            <span class="s2">&quot;propagation_q_inverse&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">kernels</span><span class="o">.</span><span class="n">propagation_q_inverse</span>
+            <span class="s2">"propagation_q_inverse"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">kernels</span><span class="o">.</span><span class="n">propagation_q_inverse</span>
         <span class="p">)</span>
-        <span class="n">quality</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;kernel&quot;</span>
+        <span class="n">quality</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"units"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"kernel"</span>
 
 
-<span class="k">def</span> <span class="nf">_read_kernel</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">KernelTable</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_kernel</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">KernelTable</span><span class="p">]:</span>
     <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parent</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="n">group</span> <span class="o">=</span> <span class="n">parent</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">KernelTable</span><span class="p">(</span>
-        <span class="n">_read_strings</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s2">&quot;parameter_names&quot;</span><span class="p">]),</span>
-        <span class="n">group</span><span class="p">[</span><span class="s2">&quot;velocity&quot;</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
-        <span class="n">group</span><span class="p">[</span><span class="s2">&quot;propagation_q_inverse&quot;</span><span class="p">][</span><span class="o">...</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s2">&quot;propagation_q_inverse&quot;</span> <span class="ow">in</span> <span class="n">group</span>
+        <span class="n">_read_strings</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s2">"parameter_names"</span><span class="p">]),</span>
+        <span class="n">group</span><span class="p">[</span><span class="s2">"velocity"</span><span class="p">][</span><span class="o">...</span><span class="p">],</span>
+        <span class="n">group</span><span class="p">[</span><span class="s2">"propagation_q_inverse"</span><span class="p">][</span><span class="o">...</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">"propagation_q_inverse"</span> <span class="ow">in</span> <span class="n">group</span>
         <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 </pre></div>

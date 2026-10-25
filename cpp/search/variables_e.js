@@ -1,0 +1,22 @@
+var searchData=
+[
+  ['ndof_0',['ndof',['../classspecswd_1_1SolverLove.html#a0e5cc461b151a6b2935eef47a58929a5',1,'specswd::SolverLove::ndof'],['../classspecswd_1_1SolverRayl.html#ad94cc68cb4769bf52ea248f82a285857',1,'specswd::SolverRayl::ndof'],['../classspecswd_1_1SolverAniso.html#aada0d010ea449c28a2fa4f89194dae2e',1,'specswd::SolverAniso::ndof']]],
+  ['nfaces_5fbdry_1',['nfaces_bdry',['../structspecswd_1_1Mesh.html#a7a34c6742a33f5d6003ed4b16bc5bfa8',1,'specswd::Mesh']]],
+  ['ngll_2',['NGLL',['../namespaceGQTable.html#a19ca65c75bbc2ee01bdfa1b8d3bdc9aa',1,'GQTable']]],
+  ['nglob_3',['nglob',['../structspecswd_1_1Mesh.html#ab5aff842625d193e6eea1a3bc2398b6f',1,'specswd::Mesh']]],
+  ['nglob_5fac_4',['nglob_ac',['../structspecswd_1_1Mesh.html#a49e78d68b7c27bb8a676bba2f6aae134',1,'specswd::Mesh']]],
+  ['nglob_5fel_5',['nglob_el',['../structspecswd_1_1Mesh.html#a2bc632fbce2b06bbc0874d2358b4ad8e',1,'specswd::Mesh']]],
+  ['ngrl_6',['NGRL',['../namespaceGQTable.html#a66d1dbef95359ebf0487d2a19fb9334b',1,'GQTable']]],
+  ['nkers_7',['nkers',['../classspecswd_1_1SolverLove.html#aff2ef4f473e36f04bab26bffacfea7cf',1,'specswd::SolverLove']]],
+  ['nkers_5fac_8',['nkers_ac',['../classspecswd_1_1SolverRayl.html#a3c29a27e1679e40b7921ad6d9698b4f4',1,'specswd::SolverRayl::nkers_ac'],['../classspecswd_1_1SolverAniso.html#a78db69ba4606ff1989f229b894146e49',1,'specswd::SolverAniso::nkers_ac']]],
+  ['nkers_5fel_9',['nkers_el',['../classspecswd_1_1SolverRayl.html#ab8d9ffad4079b83dc9c92b637f4e9832',1,'specswd::SolverRayl::nkers_el'],['../classspecswd_1_1SolverAniso.html#ac0710c437aa30959b3129ea3019a9b50',1,'specswd::SolverAniso::nkers_el']]],
+  ['nqani_10',['nQani',['../structspecswd_1_1Mesh.html#aa69cab38f046d4ac8c1edca968b87dae',1,'specswd::Mesh']]],
+  ['nregions_11',['nregions',['../structspecswd_1_1Mesh.html#ab2a3a17e00ee2f22ec6928c56e860de6',1,'specswd::Mesh']]],
+  ['nspec_12',['nspec',['../structspecswd_1_1Mesh.html#aa9dce71c6b76d5b110a355bd6de53941',1,'specswd::Mesh']]],
+  ['nspec_5fac_13',['nspec_ac',['../structspecswd_1_1Mesh.html#a98cf532603963f901c2149115757e347',1,'specswd::Mesh']]],
+  ['nspec_5fac_5fgrl_14',['nspec_ac_grl',['../structspecswd_1_1Mesh.html#a631d9481ec539974a56d78b4f49bc492',1,'specswd::Mesh']]],
+  ['nspec_5fel_15',['nspec_el',['../structspecswd_1_1Mesh.html#a20b81da408f5dd7ed8acd56260af1508',1,'specswd::Mesh']]],
+  ['nspec_5fel_5fgrl_16',['nspec_el_grl',['../structspecswd_1_1Mesh.html#a777725557f4b6ec54976cad0bffb18ed',1,'specswd::Mesh']]],
+  ['nspec_5fgrl_17',['nspec_grl',['../structspecswd_1_1Mesh.html#af3fa1897e6fcf72a6a632aa85983e1be',1,'specswd::Mesh']]],
+  ['nz_5ftomo_18',['nz_tomo',['../structspecswd_1_1Mesh.html#a7a9c860e1f9cd9035260b3c927005dde',1,'specswd::Mesh']]]
+];

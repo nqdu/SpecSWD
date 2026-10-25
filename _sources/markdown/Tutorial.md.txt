@@ -1,5 +1,8 @@
 # Tutorial
 
+This page describes the native NumPy API. For tensor inputs and automatic
+differentiation, see the [PyTorch backend](pytorch.md).
+
 ## Layered model convention
 
 SpecSWD represents piecewise-linear one-dimensional models. Depth increases

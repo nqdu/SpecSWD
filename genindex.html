@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Index &mdash; SpecSWD  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
@@ -43,12 +43,15 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="markdown/readme.html">SpecSWD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="markdown/Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="markdown/pytorch.html">PyTorch backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="markdown/benchmarks.html">C++ and PyTorch efficiency</a></li>
 <li class="toctree-l1"><a class="reference internal" href="markdown/io.html">NumPy and HDF5 output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="markdown/gallery.html">Gallery</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="python/index.html">Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python/index.html">Native Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python/torch.html">PyTorch API reference</a></li>
 </ul>
 
         </div>
@@ -100,24 +103,16 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python/specd.html#specd.io.SolverOutput.acoustic_kernels">acoustic_kernels (specd.io.SolverOutput attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.SolverOutput.acoustic_kernels">(specd.SolverOutput attribute)</a>
+      <li><a href="python/index.html#specd.SolverOutput.acoustic_kernels">acoustic_kernels (specd.SolverOutput attribute)</a>
 </li>
-      </ul></li>
-      <li><a href="python/specd.html#specd.io.SolverOutput.attenuation">attenuation (specd.io.SolverOutput attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.SolverOutput.attenuation">(specd.SolverOutput attribute)</a>
+      <li><a href="python/index.html#specd.SolverOutput.attenuation">attenuation (specd.SolverOutput attribute)</a>
 </li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python/index.html#specd.DispersionTable.azimuth_deg">azimuth_deg (specd.DispersionTable attribute)</a>
 
       <ul>
-        <li><a href="python/specd.html#specd.io.DispersionTable.azimuth_deg">(specd.io.DispersionTable attribute)</a>
+        <li><a href="python/torch.html#specd.torch.DispersionTable.azimuth_deg">(specd.torch.DispersionTable attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -127,71 +122,51 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python/index.html#specd.ComplexCSR">ComplexCSR (class in specd)</a>
-
-      <ul>
-        <li><a href="python/specd.html#specd.io.ComplexCSR">(class in specd.io)</a>
 </li>
-      </ul></li>
       <li><a href="python/index.html#specd.ComplexCSR.component_names">component_names (specd.ComplexCSR attribute)</a>
 
       <ul>
-        <li><a href="python/specd.html#specd.io.ComplexCSR.component_names">(specd.io.ComplexCSR attribute)</a>
-</li>
-        <li><a href="python/specd.html#specd.io.RaggedComplexField.component_names">(specd.io.RaggedComplexField attribute)</a>
-</li>
         <li><a href="python/index.html#specd.RaggedComplexField.component_names">(specd.RaggedComplexField attribute)</a>
 </li>
       </ul></li>
-      <li><a href="python/specd.html#specd.specd.SpecWorkSpace.compute_dispersion">compute_dispersion() (specd.specd.SpecWorkSpace method)</a>
+      <li><a href="python/index.html#specd.SpecWorkSpace.compute_dispersion">compute_dispersion() (specd.SpecWorkSpace method)</a>
 
       <ul>
-        <li><a href="python/index.html#specd.SpecWorkSpace.compute_dispersion">(specd.SpecWorkSpace method)</a>
+        <li><a href="python/torch.html#specd.torch.SpecWorkSpace.compute_dispersion">(specd.torch.SpecWorkSpace method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python/specd.html#specd.specd.SpecWorkSpace.compute_egn">compute_egn() (specd.specd.SpecWorkSpace method)</a>
+      <li><a href="python/index.html#specd.SpecWorkSpace.compute_egn">compute_egn() (specd.SpecWorkSpace method)</a>
 
       <ul>
-        <li><a href="python/index.html#specd.SpecWorkSpace.compute_egn">(specd.SpecWorkSpace method)</a>
+        <li><a href="python/torch.html#specd.torch.SpecWorkSpace.compute_egn">(specd.torch.SpecWorkSpace method)</a>
 </li>
       </ul></li>
       <li><a href="python/index.html#specd.THSolver.compute_swd">compute_swd() (specd.THSolver method)</a>
-
-      <ul>
-        <li><a href="python/specd.html#specd.THSolver.THSolver.compute_swd">(specd.THSolver.THSolver method)</a>
 </li>
-      </ul></li>
       <li><a href="python/index.html#specd.constant_q_response">constant_q_response() (in module specd)</a>
 
       <ul>
-        <li><a href="python/specd.html#specd.attenuation.constant_q_response">(in module specd.attenuation)</a>
+        <li><a href="python/torch.html#specd.torch.constant_q_response">(in module specd.torch)</a>
 </li>
       </ul></li>
       <li><a href="python/index.html#specd.constant_q_response_derivatives">constant_q_response_derivatives() (in module specd)</a>
-
-      <ul>
-        <li><a href="python/specd.html#specd.attenuation.constant_q_response_derivatives">(in module specd.attenuation)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python/specd.html#specd.io.SolverOutput.dispersion">dispersion (specd.io.SolverOutput attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.SolverOutput.dispersion">(specd.SolverOutput attribute)</a>
+      <li><a href="python/index.html#specd.SolverOutput.dispersion">dispersion (specd.SolverOutput attribute)</a>
 </li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python/index.html#specd.DispersionTable">DispersionTable (class in specd)</a>
 
       <ul>
-        <li><a href="python/specd.html#specd.io.DispersionTable">(class in specd.io)</a>
+        <li><a href="python/torch.html#specd.torch.DispersionTable">(class in specd.torch)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -200,20 +175,12 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python/specd.html#specd.io.SolverOutput.eigenfunctions">eigenfunctions (specd.io.SolverOutput attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.SolverOutput.eigenfunctions">(specd.SolverOutput attribute)</a>
+      <li><a href="python/index.html#specd.SolverOutput.eigenfunctions">eigenfunctions (specd.SolverOutput attribute)</a>
 </li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python/specd.html#specd.io.SolverOutput.elastic_kernels">elastic_kernels (specd.io.SolverOutput attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.SolverOutput.elastic_kernels">(specd.SolverOutput attribute)</a>
+      <li><a href="python/index.html#specd.SolverOutput.elastic_kernels">elastic_kernels (specd.SolverOutput attribute)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -223,17 +190,15 @@
       <li><a href="python/index.html#specd.DispersionTable.frequency_hz">frequency_hz (specd.DispersionTable attribute)</a>
 
       <ul>
-        <li><a href="python/specd.html#specd.io.DispersionTable.frequency_hz">(specd.io.DispersionTable attribute)</a>
+        <li><a href="python/torch.html#specd.torch.DispersionTable.frequency_hz">(specd.torch.DispersionTable attribute)</a>
 </li>
       </ul></li>
       <li><a href="python/index.html#specd.DispersionTable.from_hdf5">from_hdf5() (specd.DispersionTable class method)</a>
 
       <ul>
-        <li><a href="python/specd.html#specd.io.DispersionTable.from_hdf5">(specd.io.DispersionTable class method)</a>
-</li>
-        <li><a href="python/specd.html#specd.io.SolverOutput.from_hdf5">(specd.io.SolverOutput class method)</a>
-</li>
         <li><a href="python/index.html#specd.SolverOutput.from_hdf5">(specd.SolverOutput class method)</a>
+</li>
+        <li><a href="python/torch.html#specd.torch.DispersionTable.from_hdf5">(specd.torch.DispersionTable class method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -243,10 +208,6 @@
       <ul>
         <li><a href="python/index.html#specd.DispersionTable.from_rows">(specd.DispersionTable class method)</a>
 </li>
-        <li><a href="python/specd.html#specd.io.ComplexCSR.from_rows">(specd.io.ComplexCSR class method)</a>
-</li>
-        <li><a href="python/specd.html#specd.io.DispersionTable.from_rows">(specd.io.DispersionTable class method)</a>
-</li>
       </ul></li>
   </ul></td>
 </tr></table>
@@ -254,54 +215,52 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python/specd.html#specd.specd.SpecWorkSpace.get_egnfunc">get_egnfunc() (specd.specd.SpecWorkSpace method)</a>
+      <li><a href="python/index.html#specd.SpecWorkSpace.get_egnfunc">get_egnfunc() (specd.SpecWorkSpace method)</a>
 
       <ul>
-        <li><a href="python/index.html#specd.SpecWorkSpace.get_egnfunc">(specd.SpecWorkSpace method)</a>
+        <li><a href="python/torch.html#specd.torch.SpecWorkSpace.get_egnfunc">(specd.torch.SpecWorkSpace method)</a>
 </li>
       </ul></li>
-      <li><a href="python/specd.html#specd.specd.SpecWorkSpace.get_group_kl">get_group_kl() (specd.specd.SpecWorkSpace method)</a>
+      <li><a href="python/index.html#specd.SpecWorkSpace.get_group_kl">get_group_kl() (specd.SpecWorkSpace method)</a>
 
       <ul>
-        <li><a href="python/index.html#specd.SpecWorkSpace.get_group_kl">(specd.SpecWorkSpace method)</a>
+        <li><a href="python/torch.html#specd.torch.SpecWorkSpace.get_group_kl">(specd.torch.SpecWorkSpace method)</a>
 </li>
       </ul></li>
-      <li><a href="python/specd.html#specd.specd.SpecWorkSpace.get_kernel_names">get_kernel_names() (specd.specd.SpecWorkSpace method)</a>
+      <li><a href="python/index.html#specd.SpecWorkSpace.get_kernel_names">get_kernel_names() (specd.SpecWorkSpace method)</a>
 
       <ul>
-        <li><a href="python/index.html#specd.SpecWorkSpace.get_kernel_names">(specd.SpecWorkSpace method)</a>
+        <li><a href="python/torch.html#specd.torch.SpecWorkSpace.get_kernel_names">(specd.torch.SpecWorkSpace method)</a>
 </li>
       </ul></li>
-      <li><a href="python/specd.html#specd.specd.SpecWorkSpace.get_phase_kl">get_phase_kl() (specd.specd.SpecWorkSpace method)</a>
+      <li><a href="python/index.html#specd.SpecWorkSpace.get_phase_kl">get_phase_kl() (specd.SpecWorkSpace method)</a>
 
       <ul>
-        <li><a href="python/index.html#specd.SpecWorkSpace.get_phase_kl">(specd.SpecWorkSpace method)</a>
+        <li><a href="python/torch.html#specd.torch.SpecWorkSpace.get_phase_kl">(specd.torch.SpecWorkSpace method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python/specd.html#specd.specd.SpecWorkSpace.get_znodes">get_znodes() (specd.specd.SpecWorkSpace method)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.SpecWorkSpace.get_znodes">(specd.SpecWorkSpace method)</a>
+      <li><a href="python/index.html#specd.SpecWorkSpace.get_znodes">get_znodes() (specd.SpecWorkSpace method)</a>
 </li>
-      </ul></li>
+      <li><a href="python/torch.html#specd.torch.DispersionTable.group_components">group_components (specd.torch.DispersionTable attribute)</a>
+</li>
+      <li><a href="python/torch.html#specd.torch.DispersionTable.group_mode_rows">group_mode_rows (specd.torch.DispersionTable attribute)</a>
+</li>
       <li><a href="python/index.html#specd.DispersionTable.group_row">group_row() (specd.DispersionTable method)</a>
 
       <ul>
-        <li><a href="python/specd.html#specd.io.DispersionTable.group_row">(specd.io.DispersionTable method)</a>
+        <li><a href="python/torch.html#specd.torch.DispersionTable.group_row">(specd.torch.DispersionTable method)</a>
 </li>
       </ul></li>
+      <li><a href="python/torch.html#specd.torch.DispersionTable.group_rows">group_rows (specd.torch.DispersionTable attribute)</a>
+</li>
       <li><a href="python/index.html#specd.DispersionTable.group_velocity">group_velocity (specd.DispersionTable attribute)</a>
-
-      <ul>
-        <li><a href="python/specd.html#specd.io.DispersionTable.group_velocity">(specd.io.DispersionTable attribute)</a>
 </li>
-      </ul></li>
-      <li><a href="python/specd.html#specd.specd.SpecWorkSpace.group_velocity">group_velocity() (specd.specd.SpecWorkSpace method)</a>
+      <li><a href="python/index.html#specd.SpecWorkSpace.group_velocity">group_velocity() (specd.SpecWorkSpace method)</a>
 
       <ul>
-        <li><a href="python/index.html#specd.SpecWorkSpace.group_velocity">(specd.SpecWorkSpace method)</a>
+        <li><a href="python/torch.html#specd.torch.SpecWorkSpace.group_velocity">(specd.torch.SpecWorkSpace method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -313,47 +272,35 @@
       <li><a href="python/index.html#specd.ComplexCSR.indptr">indptr (specd.ComplexCSR attribute)</a>
 
       <ul>
-        <li><a href="python/specd.html#specd.io.ComplexCSR.indptr">(specd.io.ComplexCSR attribute)</a>
-</li>
-        <li><a href="python/specd.html#specd.io.RaggedComplexField.indptr">(specd.io.RaggedComplexField attribute)</a>
-</li>
         <li><a href="python/index.html#specd.RaggedComplexField.indptr">(specd.RaggedComplexField attribute)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python/specd.html#specd.specd.SpecWorkSpace.initialize">initialize() (specd.specd.SpecWorkSpace method)</a>
+      <li><a href="python/index.html#specd.SpecWorkSpace.initialize">initialize() (specd.SpecWorkSpace method)</a>
 
       <ul>
-        <li><a href="python/index.html#specd.SpecWorkSpace.initialize">(specd.SpecWorkSpace method)</a>
+        <li><a href="python/torch.html#specd.torch.SpecWorkSpace.initialize">(specd.torch.SpecWorkSpace method)</a>
 </li>
       </ul></li>
+      <li><a href="python/torch.html#specd.torch.isotropic_c21">isotropic_c21() (in module specd.torch)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="K">K</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python/specd.html#specd.io.SolverOutput.kernel_observable">kernel_observable (specd.io.SolverOutput attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.SolverOutput.kernel_observable">(specd.SolverOutput attribute)</a>
+      <li><a href="python/index.html#specd.SolverOutput.kernel_observable">kernel_observable (specd.SolverOutput attribute)</a>
 </li>
-      </ul></li>
-      <li><a href="python/specd.html#specd.io.SolverOutput.kernel_type">kernel_type (specd.io.SolverOutput attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.SolverOutput.kernel_type">(specd.SolverOutput attribute)</a>
+      <li><a href="python/index.html#specd.SolverOutput.kernel_type">kernel_type (specd.SolverOutput attribute)</a>
 </li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python/index.html#specd.KernelTable">KernelTable (class in specd)</a>
-
-      <ul>
-        <li><a href="python/specd.html#specd.io.KernelTable">(class in specd.io)</a>
+      <li><a href="python/torch.html#specd.torch.SpecWorkSpace.kernels">kernels() (specd.torch.SpecWorkSpace method)</a>
 </li>
-      </ul></li>
+      <li><a href="python/index.html#specd.KernelTable">KernelTable (class in specd)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -361,38 +308,11 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python/index.html#specd.ComplexCSR.mode_index">mode_index (specd.ComplexCSR attribute)</a>
-
-      <ul>
-        <li><a href="python/specd.html#specd.io.ComplexCSR.mode_index">(specd.io.ComplexCSR attribute)</a>
 </li>
-      </ul></li>
-      <li><a href="python/specd.html#specd.io.SolverOutput.model_depth">model_depth (specd.io.SolverOutput attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.SolverOutput.model_depth">(specd.SolverOutput attribute)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="python/index.html#specd.SolverOutput.model_depth">model_depth (specd.SolverOutput attribute)</a>
 </li>
-      </ul></li>
-      <li>
-    module
-
-      <ul>
-        <li><a href="python/specd.html#module-specd">specd</a>
-</li>
-        <li><a href="python/specd.html#module-specd.attenuation">specd.attenuation</a>
-</li>
-        <li><a href="python/specd.html#module-specd.io">specd.io</a>
-</li>
-        <li><a href="python/specd.lib.html#module-specd.lib">specd.lib</a>
-</li>
-        <li><a href="python/specd.lib.html#module-specd.lib.cps330">specd.lib.cps330</a>
-</li>
-        <li><a href="python/specd.lib.html#module-specd.lib.libswd">specd.lib.libswd</a>
-</li>
-        <li><a href="python/specd.html#module-specd.specd">specd.specd</a>
-</li>
-        <li><a href="python/specd.html#module-specd.THSolver">specd.THSolver</a>
-</li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -400,61 +320,43 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python/index.html#specd.ComplexCSR.nentry">nentry (specd.ComplexCSR property)</a>
-
-      <ul>
-        <li><a href="python/specd.html#specd.io.ComplexCSR.nentry">(specd.io.ComplexCSR property)</a>
 </li>
-      </ul></li>
       <li><a href="python/index.html#specd.ComplexCSR.nrow">nrow (specd.ComplexCSR property)</a>
 
       <ul>
-        <li><a href="python/specd.html#specd.io.ComplexCSR.nrow">(specd.io.ComplexCSR property)</a>
-</li>
-        <li><a href="python/specd.html#specd.io.RaggedComplexField.nrow">(specd.io.RaggedComplexField property)</a>
-</li>
         <li><a href="python/index.html#specd.RaggedComplexField.nrow">(specd.RaggedComplexField property)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python/index.html#specd.DispersionTable.nsolve">nsolve (specd.DispersionTable property)</a>
-
-      <ul>
-        <li><a href="python/specd.html#specd.io.DispersionTable.nsolve">(specd.io.DispersionTable property)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python/specd.html#specd.io.KernelTable.parameter_names">parameter_names (specd.io.KernelTable attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.KernelTable.parameter_names">(specd.KernelTable attribute)</a>
+      <li><a href="python/index.html#specd.KernelTable.parameter_names">parameter_names (specd.KernelTable attribute)</a>
 </li>
-      </ul></li>
+      <li><a href="python/torch.html#specd.torch.SpecWorkSpace.parameters">parameters (specd.torch.SpecWorkSpace property)</a>
+</li>
+      <li><a href="python/torch.html#specd.torch.DispersionTable.phase_mode_rows">phase_mode_rows (specd.torch.DispersionTable attribute)</a>
+</li>
       <li><a href="python/index.html#specd.DispersionTable.phase_row">phase_row() (specd.DispersionTable method)</a>
 
       <ul>
-        <li><a href="python/specd.html#specd.io.DispersionTable.phase_row">(specd.io.DispersionTable method)</a>
+        <li><a href="python/torch.html#specd.torch.DispersionTable.phase_row">(specd.torch.DispersionTable method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="python/torch.html#specd.torch.DispersionTable.phase_rows">phase_rows (specd.torch.DispersionTable attribute)</a>
+</li>
       <li><a href="python/index.html#specd.DispersionTable.phase_velocity">phase_velocity (specd.DispersionTable attribute)</a>
-
-      <ul>
-        <li><a href="python/specd.html#specd.io.DispersionTable.phase_velocity">(specd.io.DispersionTable attribute)</a>
 </li>
-      </ul></li>
-      <li><a href="python/specd.html#specd.io.KernelTable.propagation_q_inverse">propagation_q_inverse (specd.io.KernelTable attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.KernelTable.propagation_q_inverse">(specd.KernelTable attribute)</a>
+      <li><a href="python/index.html#specd.KernelTable.propagation_q_inverse">propagation_q_inverse (specd.KernelTable attribute)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -462,18 +364,12 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python/index.html#specd.RaggedComplexField">RaggedComplexField (class in specd)</a>
-
-      <ul>
-        <li><a href="python/specd.html#specd.io.RaggedComplexField">(class in specd.io)</a>
 </li>
-      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python/index.html#specd.ComplexCSR.row">row() (specd.ComplexCSR method)</a>
 
       <ul>
-        <li><a href="python/specd.html#specd.io.ComplexCSR.row">(specd.io.ComplexCSR method)</a>
-</li>
-        <li><a href="python/specd.html#specd.io.RaggedComplexField.row">(specd.io.RaggedComplexField method)</a>
-</li>
         <li><a href="python/index.html#specd.RaggedComplexField.row">(specd.RaggedComplexField method)</a>
 </li>
       </ul></li>
@@ -483,98 +379,22 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python/specd.html#specd.io.SolverOutput.sem_depth_indptr">sem_depth_indptr (specd.io.SolverOutput attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.SolverOutput.sem_depth_indptr">(specd.SolverOutput attribute)</a>
+      <li><a href="python/index.html#specd.SolverOutput.sem_depth_indptr">sem_depth_indptr (specd.SolverOutput attribute)</a>
 </li>
-      </ul></li>
-      <li><a href="python/specd.html#specd.io.SolverOutput.sem_depth_row">sem_depth_row() (specd.io.SolverOutput method)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.SolverOutput.sem_depth_row">(specd.SolverOutput method)</a>
+      <li><a href="python/index.html#specd.SolverOutput.sem_depth_row">sem_depth_row() (specd.SolverOutput method)</a>
 </li>
-      </ul></li>
-      <li><a href="python/specd.html#specd.io.SolverOutput.sem_depth_values">sem_depth_values (specd.io.SolverOutput attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.SolverOutput.sem_depth_values">(specd.SolverOutput attribute)</a>
+      <li><a href="python/index.html#specd.SolverOutput.sem_depth_values">sem_depth_values (specd.SolverOutput attribute)</a>
 </li>
-      </ul></li>
-      <li><a href="python/index.html#specd.DispersionTable.solve_row">solve_row() (specd.DispersionTable method)</a>
-
-      <ul>
-        <li><a href="python/specd.html#specd.io.DispersionTable.solve_row">(specd.io.DispersionTable method)</a>
-</li>
-      </ul></li>
-      <li><a href="python/index.html#specd.SolverOutput">SolverOutput (class in specd)</a>
-
-      <ul>
-        <li><a href="python/specd.html#specd.io.SolverOutput">(class in specd.io)</a>
-</li>
-      </ul></li>
-      <li>
-    specd
-
-      <ul>
-        <li><a href="python/specd.html#module-specd">module</a>
-</li>
-      </ul></li>
-      <li>
-    specd.attenuation
-
-      <ul>
-        <li><a href="python/specd.html#module-specd.attenuation">module</a>
-</li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li>
-    specd.io
-
-      <ul>
-        <li><a href="python/specd.html#module-specd.io">module</a>
+      <li><a href="python/index.html#specd.DispersionTable.solve_row">solve_row() (specd.DispersionTable method)</a>
 </li>
-      </ul></li>
-      <li>
-    specd.lib
-
-      <ul>
-        <li><a href="python/specd.lib.html#module-specd.lib">module</a>
+      <li><a href="python/index.html#specd.SolverOutput">SolverOutput (class in specd)</a>
 </li>
-      </ul></li>
-      <li>
-    specd.lib.cps330
-
-      <ul>
-        <li><a href="python/specd.lib.html#module-specd.lib.cps330">module</a>
-</li>
-      </ul></li>
-      <li>
-    specd.lib.libswd
-
-      <ul>
-        <li><a href="python/specd.lib.html#module-specd.lib.libswd">module</a>
-</li>
-      </ul></li>
-      <li>
-    specd.specd
-
-      <ul>
-        <li><a href="python/specd.html#module-specd.specd">module</a>
-</li>
-      </ul></li>
-      <li>
-    specd.THSolver
-
-      <ul>
-        <li><a href="python/specd.html#module-specd.THSolver">module</a>
-</li>
-      </ul></li>
       <li><a href="python/index.html#specd.SpecWorkSpace">SpecWorkSpace (class in specd)</a>
 
       <ul>
-        <li><a href="python/specd.html#specd.specd.SpecWorkSpace">(class in specd.specd)</a>
+        <li><a href="python/torch.html#specd.torch.SpecWorkSpace">(class in specd.torch)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -584,19 +404,13 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python/index.html#specd.THSolver">THSolver (class in specd)</a>
-
-      <ul>
-        <li><a href="python/specd.html#specd.THSolver.THSolver">(class in specd.THSolver)</a>
 </li>
-      </ul></li>
       <li><a href="python/index.html#specd.DispersionTable.to_hdf5">to_hdf5() (specd.DispersionTable method)</a>
 
       <ul>
-        <li><a href="python/specd.html#specd.io.DispersionTable.to_hdf5">(specd.io.DispersionTable method)</a>
-</li>
-        <li><a href="python/specd.html#specd.io.SolverOutput.to_hdf5">(specd.io.SolverOutput method)</a>
-</li>
         <li><a href="python/index.html#specd.SolverOutput.to_hdf5">(specd.SolverOutput method)</a>
+</li>
+        <li><a href="python/torch.html#specd.torch.DispersionTable.to_hdf5">(specd.torch.DispersionTable method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -605,12 +419,8 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python/specd.html#specd.io.RaggedComplexField.units">units (specd.io.RaggedComplexField attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.RaggedComplexField.units">(specd.RaggedComplexField attribute)</a>
+      <li><a href="python/index.html#specd.RaggedComplexField.units">units (specd.RaggedComplexField attribute)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -622,14 +432,6 @@
       <ul>
         <li><a href="python/index.html#specd.DispersionTable.validate">(specd.DispersionTable method)</a>
 </li>
-        <li><a href="python/specd.html#specd.io.ComplexCSR.validate">(specd.io.ComplexCSR method)</a>
-</li>
-        <li><a href="python/specd.html#specd.io.DispersionTable.validate">(specd.io.DispersionTable method)</a>
-</li>
-        <li><a href="python/specd.html#specd.io.RaggedComplexField.validate">(specd.io.RaggedComplexField method)</a>
-</li>
-        <li><a href="python/specd.html#specd.io.SolverOutput.validate">(specd.io.SolverOutput method)</a>
-</li>
         <li><a href="python/index.html#specd.RaggedComplexField.validate">(specd.RaggedComplexField method)</a>
 </li>
         <li><a href="python/index.html#specd.SolverOutput.validate">(specd.SolverOutput method)</a>
@@ -640,37 +442,21 @@
       <li><a href="python/index.html#specd.ComplexCSR.values">values (specd.ComplexCSR attribute)</a>
 
       <ul>
-        <li><a href="python/specd.html#specd.io.ComplexCSR.values">(specd.io.ComplexCSR attribute)</a>
-</li>
-        <li><a href="python/specd.html#specd.io.RaggedComplexField.values">(specd.io.RaggedComplexField attribute)</a>
-</li>
         <li><a href="python/index.html#specd.RaggedComplexField.values">(specd.RaggedComplexField attribute)</a>
 </li>
       </ul></li>
-      <li><a href="python/specd.html#specd.io.KernelTable.velocity">velocity (specd.io.KernelTable attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.KernelTable.velocity">(specd.KernelTable attribute)</a>
+      <li><a href="python/index.html#specd.KernelTable.velocity">velocity (specd.KernelTable attribute)</a>
 </li>
-      </ul></li>
       <li><a href="python/index.html#specd.DispersionTable.velocity_units">velocity_units (specd.DispersionTable attribute)</a>
-
-      <ul>
-        <li><a href="python/specd.html#specd.io.DispersionTable.velocity_units">(specd.io.DispersionTable attribute)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python/specd.html#specd.io.SolverOutput.wave_type">wave_type (specd.io.SolverOutput attribute)</a>
-
-      <ul>
-        <li><a href="python/index.html#specd.SolverOutput.wave_type">(specd.SolverOutput attribute)</a>
+      <li><a href="python/index.html#specd.SolverOutput.wave_type">wave_type (specd.SolverOutput attribute)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 

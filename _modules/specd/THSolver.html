@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>specd.THSolver &mdash; SpecSWD  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
 
   
@@ -43,12 +43,15 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/readme.html">SpecSWD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../markdown/pytorch.html">PyTorch backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../markdown/benchmarks.html">C++ and PyTorch efficiency</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/io.html">NumPy and HDF5 output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/gallery.html">Gallery</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Native Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/torch.html">PyTorch API reference</a></li>
 </ul>
 
         </div>
@@ -76,16 +79,16 @@
            <div itemprop="articleBody">
              
   <h1>Source code for specd.THSolver</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">.lib</span> <span class="kn">import</span> <span class="n">cps330</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">.lib</span><span class="w"> </span><span class="kn">import</span> <span class="n">cps330</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span> 
 
 <div class="viewcode-block" id="THSolver">
-<a class="viewcode-back" href="../../python/specd.html#specd.THSolver">[docs]</a>
-<span class="k">class</span> <span class="nc">THSolver</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">thick</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">vp</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+<a class="viewcode-back" href="../../python/index.html#specd.THSolver">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">THSolver</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">thick</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">vp</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                  <span class="n">vs</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">rho</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">spherical</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span>
                  <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Initialize Thompson-Haskell Matrix Dispersion Solver</span>
 
 <span class="sd">        Parameters</span>
@@ -98,7 +101,7 @@
 <span class="sd">            S wave velocity, km/s</span>
 <span class="sd">        rho: np.ndarray</span>
 <span class="sd">            density</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># backup input params</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_thick</span> <span class="o">=</span> <span class="n">thick</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vp</span> <span class="o">=</span> <span class="n">vp</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -107,15 +110,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_spherical</span> <span class="o">=</span> <span class="n">spherical</span>
     
 <div class="viewcode-block" id="THSolver.compute_swd">
-<a class="viewcode-back" href="../../python/specd.html#specd.THSolver.compute_swd">[docs]</a>
-    <span class="k">def</span> <span class="nf">compute_swd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">wavetype</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">mode</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">T</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<a class="viewcode-back" href="../../python/index.html#specd.THSolver.compute_swd">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_swd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">wavetype</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">mode</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">T</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        compute dispersion (phase/group) for a give wavetype</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ------------</span>
 <span class="sd">        wavetype: str</span>
-<span class="sd">            wave type, one of [&#39;Rc&#39;,&#39;Rg&#39;,&#39;Lc&#39;,&#39;Lg&#39;]</span>
+<span class="sd">            wave type, one of ['Rc','Rg','Lc','Lg']</span>
 <span class="sd">        mode: int</span>
 <span class="sd">            which mode it will return, &gt;=0</span>
 <span class="sd">        T: np.ndarray</span>
@@ -125,9 +128,9 @@
 <span class="sd">        -----------</span>
 <span class="sd">        cg: np.ndarray</span>
 <span class="sd">            phase velocity (for Rc,Lc) or group velocity (Rg,Lg)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># check input args</span>
-        <span class="k">assert</span> <span class="n">wavetype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Rc&#39;</span><span class="p">,</span><span class="s1">&#39;Rg&#39;</span><span class="p">,</span><span class="s1">&#39;Lc&#39;</span><span class="p">,</span><span class="s1">&#39;Lg&#39;</span><span class="p">],</span> <span class="s2">&quot;check wave type!&quot;</span>
+        <span class="k">assert</span> <span class="n">wavetype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">'Rc'</span><span class="p">,</span><span class="s1">'Rg'</span><span class="p">,</span><span class="s1">'Lc'</span><span class="p">,</span><span class="s1">'Lg'</span><span class="p">],</span> <span class="s2">"check wave type!"</span>
         <span class="n">c</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">cps330</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_thick</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_vp</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_vs</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_rho</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">wavetype</span><span class="p">,</span><span class="n">mode</span><span class="p">,</span>

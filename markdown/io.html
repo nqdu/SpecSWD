@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NumPy and HDF5 output &mdash; SpecSWD  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Gallery" href="gallery.html" />
-    <link rel="prev" title="Tutorial" href="Tutorial.html" /> 
+    <link rel="prev" title="C++ and PyTorch efficiency" href="benchmarks.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,6 +46,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="readme.html">SpecSWD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pytorch.html">PyTorch backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks.html">C++ and PyTorch efficiency</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">NumPy and HDF5 output</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#ragged-dispersion-rows">Ragged dispersion rows</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#python-api">Python API</a></li>
@@ -58,7 +60,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Native Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/torch.html">PyTorch API reference</a></li>
 </ul>
 
         </div>
@@ -87,6 +90,10 @@
              
   <section class="tex2jax_ignore mathjax_ignore" id="numpy-and-hdf5-output">
 <h1>NumPy and HDF5 output<a class="headerlink" href="#numpy-and-hdf5-output" title="Link to this heading"></a></h1>
+<p>This page describes the native NumPy containers and shared file format.
+The <a class="reference internal" href="pytorch.html#frequency-and-azimuth-sweeps"><span class="std std-ref">PyTorch backend</span></a> keeps tensor
+rows in memory and detaches them explicitly when exporting the same
+dispersion schema.</p>
 <section id="ragged-dispersion-rows">
 <h2>Ragged dispersion rows<a class="headerlink" href="#ragged-dispersion-rows" title="Link to this heading"></a></h2>
 <p>Each frequency and azimuth can produce a different number of valid modes.
@@ -111,22 +118,22 @@ point.</p>
 <section id="python-api">
 <h2>Python API<a class="headerlink" href="#python-api" title="Link to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">SpecWorkSpace.compute_dispersion</span></code> returns NumPy-backed data directly:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="n">table</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">compute_dispersion</span><span class="p">(</span>
     <span class="n">frequencies_hz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span>
     <span class="n">azimuths_deg</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">30.0</span><span class="p">,</span> <span class="mf">60.0</span><span class="p">]),</span>
     <span class="n">include_group</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">table</span><span class="o">.</span><span class="n">to_hdf5</span><span class="p">(</span><span class="s2">&quot;dispersion.h5&quot;</span><span class="p">)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">to_hdf5</span><span class="p">(</span><span class="s2">"dispersion.h5"</span><span class="p">)</span>
 
-<span class="n">restored</span> <span class="o">=</span> <span class="n">DispersionTable</span><span class="o">.</span><span class="n">from_hdf5</span><span class="p">(</span><span class="s2">&quot;dispersion.h5&quot;</span><span class="p">)</span>
+<span class="n">restored</span> <span class="o">=</span> <span class="n">DispersionTable</span><span class="o">.</span><span class="n">from_hdf5</span><span class="p">(</span><span class="s2">"dispersion.h5"</span><span class="p">)</span>
 <span class="n">modes</span><span class="p">,</span> <span class="n">phase</span> <span class="o">=</span> <span class="n">restored</span><span class="o">.</span><span class="n">phase_row</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">group_modes</span><span class="p">,</span> <span class="n">group_values</span> <span class="o">=</span> <span class="n">restored</span><span class="o">.</span><span class="n">group_row</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Use <code class="docutils literal notranslate"><span class="pre">DispersionTable.from_rows</span></code> to pack existing variable-length NumPy arrays:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">specd</span> <span class="kn">import</span> <span class="n">DispersionTable</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">specd</span><span class="w"> </span><span class="kn">import</span> <span class="n">DispersionTable</span>
 
 <span class="n">table</span> <span class="o">=</span> <span class="n">DispersionTable</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span>
     <span class="n">frequency_hz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">]),</span>
@@ -140,9 +147,9 @@ point.</p>
 </pre></div>
 </div>
 <p>The complete command-line result is available through <code class="docutils literal notranslate"><span class="pre">SolverOutput</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">specd</span> <span class="kn">import</span> <span class="n">SolverOutput</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">specd</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolverOutput</span>
 
-<span class="n">result</span> <span class="o">=</span> <span class="n">SolverOutput</span><span class="o">.</span><span class="n">from_hdf5</span><span class="p">(</span><span class="s2">&quot;out/specswd.h5&quot;</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">SolverOutput</span><span class="o">.</span><span class="n">from_hdf5</span><span class="p">(</span><span class="s2">"out/specswd.h5"</span><span class="p">)</span>
 <span class="n">solve_row</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">dispersion</span><span class="o">.</span><span class="n">solve_row</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="n">mode_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">dispersion</span><span class="o">.</span><span class="n">phase_velocity</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="n">solve_row</span><span class="p">])</span>
 
@@ -178,29 +185,29 @@ radial derivative. Each command writes <code class="docutils literal notranslate
   attrs: schema, schema_version, layout, complex_encoding
   attrs for complete output: content, wave_type, attenuation, kernel_type
   /solutions
-    frequency_hz                 float64 (nfreq), units=&quot;Hz&quot;
-    azimuth_deg                  float64 (nazimuth), units=&quot;degree&quot;
+    frequency_hz                 float64 (nfreq), units="Hz"
+    azimuth_deg                  float64 (nazimuth), units="degree"
     /phase
       indptr                     uint64 (nsolve+1)
       mode_index                 int32 (nphase)
-      component_names            [&quot;phase&quot;]
-      values                     complex (nphase,1), units=&quot;km/s&quot;
+      component_names            ["phase"]
+      values                     complex (nphase,1), units="km/s"
     /group                       optional, independent CSR
       indptr                     uint64 (nsolve+1)
       mode_index                 int32 (ngroup)
-      component_names            [&quot;radial&quot;] or [&quot;x&quot;,&quot;y&quot;]
-      values                     complex (ngroup,ncomponent), units=&quot;km/s&quot;
+      component_names            ["radial"] or ["x","y"]
+      values                     complex (ngroup,ncomponent), units="km/s"
   /model                         complete output only
-    depth                        float64 (n_model_depth), units=&quot;km&quot;
+    depth                        float64 (n_model_depth), units="km"
   /mesh
     depth_indptr                 uint64 (nsolve+1)
-    depth_values                 float64 (n_sem_point_total), units=&quot;km&quot;
+    depth_values                 float64 (n_sem_point_total), units="km"
   /eigenfunctions
     indptr                       uint64 (nphase+1)
     component_names              wave-dependent component labels
     values                       complex (n_eigen_point_total,ncomponent)
   /kernels
-    attrs: observable, entry_alignment=&quot;solutions/phase&quot;
+    attrs: observable, entry_alignment="solutions/phase"
     /elastic                     optional
       parameter_names
       velocity                   float64 (nphase,nparameter,n_model_depth)
@@ -220,7 +227,7 @@ as <code class="docutils literal notranslate"><span class="pre">numpy.complex128
 <section id="c-api">
 <h2>C++ API<a class="headerlink" href="#c-api" title="Link to this heading"></a></h2>
 <p>IO is declared in <code class="docutils literal notranslate"><span class="pre">shared/io.hpp</span></code> and is part of the <code class="docutils literal notranslate"><span class="pre">shared</span></code> target:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;shared/io.hpp&quot;</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">"shared/io.hpp"</span>
 
 <span class="k">using</span><span class="w"> </span><span class="n">specswd</span><span class="o">::</span><span class="n">Complex</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="n">specswd</span><span class="o">::</span><span class="n">io</span><span class="o">::</span><span class="n">ComplexCSR</span><span class="p">;</span>
@@ -231,12 +238,12 @@ as <code class="docutils literal notranslate"><span class="pre">numpy.complex128
 <span class="n">table</span><span class="p">.</span><span class="n">azimuth_deg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">0.0</span><span class="p">};</span>
 <span class="n">table</span><span class="p">.</span><span class="n">phase_velocity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ComplexCSR</span><span class="o">::</span><span class="n">from_rows</span><span class="p">(</span>
 <span class="w">    </span><span class="p">{{{</span><span class="mf">3.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.01</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mf">3.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.02</span><span class="p">}},</span><span class="w"> </span><span class="p">{{</span><span class="mf">3.1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.01</span><span class="p">}},</span><span class="w"> </span><span class="p">{}},</span>
-<span class="w">    </span><span class="p">{</span><span class="s">&quot;phase&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="s">"phase"</span><span class="p">},</span>
 <span class="w">    </span><span class="p">{{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">},</span><span class="w"> </span><span class="p">{}}</span>
 <span class="p">);</span>
 
-<span class="n">specswd</span><span class="o">::</span><span class="n">io</span><span class="o">::</span><span class="n">write_hdf5</span><span class="p">(</span><span class="s">&quot;dispersion.h5&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">table</span><span class="p">);</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">restored</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">specswd</span><span class="o">::</span><span class="n">io</span><span class="o">::</span><span class="n">read_hdf5</span><span class="p">(</span><span class="s">&quot;dispersion.h5&quot;</span><span class="p">);</span>
+<span class="n">specswd</span><span class="o">::</span><span class="n">io</span><span class="o">::</span><span class="n">write_hdf5</span><span class="p">(</span><span class="s">"dispersion.h5"</span><span class="p">,</span><span class="w"> </span><span class="n">table</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">restored</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">specswd</span><span class="o">::</span><span class="n">io</span><span class="o">::</span><span class="n">read_hdf5</span><span class="p">(</span><span class="s">"dispersion.h5"</span><span class="p">);</span>
 <span class="k">auto</span><span class="w"> </span><span class="p">[</span><span class="n">begin</span><span class="p">,</span><span class="w"> </span><span class="n">end</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">restored</span><span class="p">.</span><span class="n">phase_velocity</span><span class="p">.</span><span class="n">row_range</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -254,7 +261,7 @@ dimensions before accepting or writing data.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Tutorial.html" class="btn btn-neutral float-left" title="Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="benchmarks.html" class="btn btn-neutral float-left" title="C++ and PyTorch efficiency" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="gallery.html" class="btn btn-neutral float-right" title="Gallery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

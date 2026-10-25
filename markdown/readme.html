@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SpecSWD &mdash; SpecSWD  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
@@ -47,19 +47,22 @@
               <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">SpecSWD</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#native-build-requirements">Native build requirements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configure-and-build">Configure and build</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#numerical-types">Numerical types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#documentation">Documentation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pytorch.html">PyTorch backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks.html">C++ and PyTorch efficiency</a></li>
 <li class="toctree-l1"><a class="reference internal" href="io.html">NumPy and HDF5 output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Native Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/torch.html">PyTorch API reference</a></li>
 </ul>
 
         </div>
@@ -98,17 +101,23 @@ one-dimensional layered media. It supports:</p>
 <li><p>phase velocity, group velocity, eigenfunctions, and Fréchet kernels; and</p></li>
 <li><p>NumPy/CSR storage of variable-mode dispersion results in HDF5.</p></li>
 </ul>
+<p>The optional <a class="reference internal" href="pytorch.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">specd.torch</span></code> backend</span></a> implements the solver in
+PyTorch with automatic differentiation. It needs no native compilation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s1">'.[torch]'</span>
+</pre></div>
+</div>
 <p>The numerical core uses the spectral-element method in depth. Fully
 anisotropic dispersion is solved as a quadratic eigenvalue problem. Group
 kernels reuse the generalized Schur factors, so each constrained adjoint solve
 after the decomposition costs <span class="math notranslate nohighlight">\(O(n^2)\)</span>.</p>
-<section id="requirements">
-<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<section id="native-build-requirements">
+<h2>Native build requirements<a class="headerlink" href="#native-build-requirements" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>CMake 3.25 or newer;</p></li>
 <li><p>a C++17 compiler and a Fortran compiler;</p></li>
 <li><p>Eigen 5;</p></li>
-<li><p>LAPACK and LAPACKE through MKL, OpenBLAS, FlexiBLAS, or equivalent;</p></li>
+<li><p>LAPACK and LAPACKE through MKL, OpenBLAS, FlexiBLAS, or equivalent
+(macOS 13.3+ uses Apple Accelerate automatically);</p></li>
 <li><p>Python, NumPy, and pybind11 when <code class="docutils literal notranslate"><span class="pre">BUILD_LIBS=ON</span></code>;</p></li>
 <li><p>the HDF5 C library;</p></li>
 <li><p>h5py for Python HDF5 input and output; and</p></li>
@@ -123,7 +132,7 @@ after the decomposition costs <span class="math notranslate nohighlight">\(O(n^2
 <span class="w">    </span>-DBUILD_LIBS<span class="o">=</span>ON<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-DBUILD_TESTS<span class="o">=</span>ON
 cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"> </span>-j<span class="w"> </span><span class="m">8</span>
-ctest<span class="w"> </span>--test-dir<span class="w"> </span>build<span class="w"> </span>--output-on-failure
+<span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>ctest<span class="w"> </span>--test-dir<span class="w"> </span>build<span class="w"> </span>--output-on-failure
 </pre></div>
 </div>
 <p>Set <code class="docutils literal notranslate"><span class="pre">CC</span></code>, <code class="docutils literal notranslate"><span class="pre">CXX</span></code>, and <code class="docutils literal notranslate"><span class="pre">FC</span></code> in the environment when non-default compilers are
@@ -133,11 +142,12 @@ needed:</p>
 </div>
 <p>Install the Python extension into <code class="docutils literal notranslate"><span class="pre">specd/lib</span></code>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>--install<span class="w"> </span>build<span class="w"> </span>--component<span class="w"> </span>python
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </pre></div>
 </div>
 <p>Run Python from the repository root, or add the repository to <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span>/path/to/SpecSWD:<span class="si">${</span><span class="nv">PYTHONPATH</span><span class="si">}</span>
-python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import specd; print(specd.__file__)&quot;</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import specd; print(specd.__file__)"</span>
 </pre></div>
 </div>
 <p>HDF5 IO is part of the <code class="docutils literal notranslate"><span class="pre">shared</span></code> C++ target and uses the HDF5 C API. The command
@@ -152,6 +162,10 @@ outputs have been removed.</p>
 <p>Generalized Schur solves use double precision by default. Configure with
 <code class="docutils literal notranslate"><span class="pre">-DSPECSWD_EGN_DOUBLE=OFF</span></code> only when reduced eigensolver precision is an
 acceptable performance tradeoff.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SPECSWD_REGULAR_SCHUR=ON</span></code> (the default) enables ordinary Schur reduction
+for nonsingular pencils, with QZ fallback. Set it to <code class="docutils literal notranslate"><span class="pre">OFF</span></code> to use the
+generalized Schur/QZ path directly. Both paths retain factors for native
+group and kernel calculations.</p>
 </section>
 <section id="documentation">
 <h2>Documentation<a class="headerlink" href="#documentation" title="Link to this heading"></a></h2>
@@ -160,7 +174,9 @@ acceptable performance tradeoff.</p>
 </pre></div>
 </div>
 <p>Generate the Sphinx manual when its documentation dependencies are installed:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sphinx-build<span class="w"> </span>-b<span class="w"> </span>html<span class="w"> </span>misc/source<span class="w"> </span>misc/_build/html
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>misc/requirements-docs.txt
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s1">'.[torch]'</span>
+sphinx-build<span class="w"> </span>-b<span class="w"> </span>html<span class="w"> </span>misc/source<span class="w"> </span>misc/_build/html
 </pre></div>
 </div>
 <p>Continue with the <a class="reference internal" href="Tutorial.html"><span class="std std-doc">tutorial</span></a> for model construction and solver

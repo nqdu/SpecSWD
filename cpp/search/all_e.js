@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['ncomponent_0',['ncomponent',['../structspecswd_1_1io_1_1ComplexCSR.html#a01724b8e8f5be1673f7ea17a0c68de34',1,'specswd::io::ComplexCSR::ncomponent()'],['../structspecswd_1_1io_1_1RaggedComplexField.html#a5ec4b27520a8e8226efa3ee053c85146',1,'specswd::io::RaggedComplexField::ncomponent()']]],
+  ['ndof_1',['ndof',['../classspecswd_1_1SolverLove.html#a0e5cc461b151a6b2935eef47a58929a5',1,'specswd::SolverLove::ndof'],['../classspecswd_1_1SolverRayl.html#ad94cc68cb4769bf52ea248f82a285857',1,'specswd::SolverRayl::ndof'],['../classspecswd_1_1SolverAniso.html#aada0d010ea449c28a2fa4f89194dae2e',1,'specswd::SolverAniso::ndof']]],
+  ['nentry_2',['nentry',['../structspecswd_1_1io_1_1ComplexCSR.html#adfb2356a999adb69a4cde80a8449c781',1,'specswd::io::ComplexCSR']]],
+  ['nfaces_5fbdry_3',['nfaces_bdry',['../structspecswd_1_1Mesh.html#a7a34c6742a33f5d6003ed4b16bc5bfa8',1,'specswd::Mesh']]],
+  ['ngll_4',['NGLL',['../namespaceGQTable.html#a19ca65c75bbc2ee01bdfa1b8d3bdc9aa',1,'GQTable']]],
+  ['nglob_5',['nglob',['../structspecswd_1_1Mesh.html#ab5aff842625d193e6eea1a3bc2398b6f',1,'specswd::Mesh']]],
+  ['nglob_5fac_6',['nglob_ac',['../structspecswd_1_1Mesh.html#a49e78d68b7c27bb8a676bba2f6aae134',1,'specswd::Mesh']]],
+  ['nglob_5fel_7',['nglob_el',['../structspecswd_1_1Mesh.html#a2bc632fbce2b06bbc0874d2358b4ad8e',1,'specswd::Mesh']]],
+  ['ngrl_8',['NGRL',['../namespaceGQTable.html#a66d1dbef95359ebf0487d2a19fb9334b',1,'GQTable']]],
+  ['nkers_9',['nkers',['../classspecswd_1_1SolverLove.html#aff2ef4f473e36f04bab26bffacfea7cf',1,'specswd::SolverLove']]],
+  ['nkers_5fac_10',['nkers_ac',['../classspecswd_1_1SolverRayl.html#a3c29a27e1679e40b7921ad6d9698b4f4',1,'specswd::SolverRayl::nkers_ac'],['../classspecswd_1_1SolverAniso.html#a78db69ba4606ff1989f229b894146e49',1,'specswd::SolverAniso::nkers_ac']]],
+  ['nkers_5fel_11',['nkers_el',['../classspecswd_1_1SolverRayl.html#ab8d9ffad4079b83dc9c92b637f4e9832',1,'specswd::SolverRayl::nkers_el'],['../classspecswd_1_1SolverAniso.html#ac0710c437aa30959b3129ea3019a9b50',1,'specswd::SolverAniso::nkers_el']]],
+  ['npoint_12',['npoint',['../structspecswd_1_1io_1_1RaggedComplexField.html#aba9e1dff4551fa5f62b52a55548fda2d',1,'specswd::io::RaggedComplexField']]],
+  ['nqani_13',['nQani',['../structspecswd_1_1Mesh.html#aa69cab38f046d4ac8c1edca968b87dae',1,'specswd::Mesh']]],
+  ['nregions_14',['nregions',['../structspecswd_1_1Mesh.html#ab2a3a17e00ee2f22ec6928c56e860de6',1,'specswd::Mesh']]],
+  ['nsolve_15',['nsolve',['../structspecswd_1_1io_1_1DispersionTable.html#adad0ae5e4a966c82f94e875beffbe7ab',1,'specswd::io::DispersionTable']]],
+  ['nspec_16',['nspec',['../structspecswd_1_1Mesh.html#aa9dce71c6b76d5b110a355bd6de53941',1,'specswd::Mesh']]],
+  ['nspec_5fac_17',['nspec_ac',['../structspecswd_1_1Mesh.html#a98cf532603963f901c2149115757e347',1,'specswd::Mesh']]],
+  ['nspec_5fac_5fgrl_18',['nspec_ac_grl',['../structspecswd_1_1Mesh.html#a631d9481ec539974a56d78b4f49bc492',1,'specswd::Mesh']]],
+  ['nspec_5fel_19',['nspec_el',['../structspecswd_1_1Mesh.html#a20b81da408f5dd7ed8acd56260af1508',1,'specswd::Mesh']]],
+  ['nspec_5fel_5fgrl_20',['nspec_el_grl',['../structspecswd_1_1Mesh.html#a777725557f4b6ec54976cad0bffb18ed',1,'specswd::Mesh']]],
+  ['nspec_5fgrl_21',['nspec_grl',['../structspecswd_1_1Mesh.html#af3fa1897e6fcf72a6a632aa85983e1be',1,'specswd::Mesh']]],
+  ['numerical_2ehpp_22',['numerical.hpp',['../numerical_8hpp.html',1,'']]],
+  ['nz_5ftomo_23',['nz_tomo',['../structspecswd_1_1Mesh.html#a7a9c860e1f9cd9035260b3c927005dde',1,'specswd::Mesh']]]
+];

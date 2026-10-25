@@ -1,0 +1,314 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PyTorch backend &mdash; SpecSWD  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="C++ and PyTorch efficiency" href="benchmarks.html" />
+    <link rel="prev" title="Tutorial" href="Tutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SpecSWD
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">SpecSWD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PyTorch backend</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#forward-solve-and-automatic-differentiation">Forward solve and automatic differentiation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model-parameters">Model parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#outputs-and-kernels">Outputs and kernels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#frequency-and-azimuth-sweeps">Frequency and azimuth sweeps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#numerical-scope">Numerical scope</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples-and-validation">Examples and validation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks.html">C++ and PyTorch efficiency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="io.html">NumPy and HDF5 output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Native Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/torch.html">PyTorch API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpecSWD</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">PyTorch backend</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/markdown/pytorch.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="pytorch-backend">
+<h1>PyTorch backend<a class="headerlink" href="#pytorch-backend" title="Link to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">specd.torch</span></code> computes dispersion, eigenfunctions, and model gradients using
+PyTorch tensors and automatic differentiation. It supports Love, VTI
+Rayleigh/Scholte, and fully anisotropic waves, with optional constant-Q
+attenuation. It runs independently of the C++/Fortran extensions.</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<p>From the repository root, use Python 3.10 or newer and install the optional
+dependency:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s1">'.[torch]'</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span></code> installs the base package without requiring PyTorch.
+For a published distribution, use <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">'specd[torch]'</span></code>.
+The provided Conda environment is another option:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>specd/torch/environment.yml
+conda<span class="w"> </span>activate<span class="w"> </span>specswd-torch
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-deps<span class="w"> </span>-e<span class="w"> </span>.
+<span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>specd.torch.example
+</pre></div>
+</div>
+<p>To use both backends, also build and install the native extensions as described
+in the <a class="reference internal" href="readme.html"><span class="std std-doc">build guide</span></a>. Native imports remain <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">specd</span> <span class="pre">import</span> <span class="pre">SpecWorkSpace</span></code>; tensor imports use <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">specd.torch</span> <span class="pre">import</span> <span class="pre">SpecWorkSpace</span></code>.</p>
+</section>
+<section id="forward-solve-and-automatic-differentiation">
+<h2>Forward solve and automatic differentiation<a class="headerlink" href="#forward-solve-and-automatic-differentiation" title="Link to this heading"></a></h2>
+<p>Inputs use km, km/s, g/cm³, and Hz. Depths start at zero; repeated depths mark
+discontinuities. The last row describes the constant half-space and repeats
+the preceding depth.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">specd.torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpecWorkSpace</span>
+
+<span class="n">vsh</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">3.3</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ws</span> <span class="o">=</span> <span class="n">SpecWorkSpace</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">)</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span>
+    <span class="s2">"love"</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">35.</span><span class="p">,</span> <span class="mf">35.</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">2.8</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">],</span>
+    <span class="n">vsh</span><span class="o">=</span><span class="n">vsh</span><span class="p">,</span> <span class="n">vsv</span><span class="o">=</span><span class="p">[</span><span class="mf">3.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">phase</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">compute_egn</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">group</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">group_velocity</span><span class="p">()</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">phase</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">real</span> <span class="o">-</span> <span class="mf">3.5</span><span class="p">)</span><span class="o">.</span><span class="n">square</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">real</span> <span class="o">-</span> <span class="mf">3.3</span><span class="p">)</span><span class="o">.</span><span class="n">square</span><span class="p">()</span>
+<span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">vsh</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Tensor inputs preserve their autograd graphs, including tensors derived from
+trainable parameters. Lists and NumPy arrays become internal trainable tensors
+available through <code class="docutils literal notranslate"><span class="pre">ws.parameters</span></code>. Real inputs use <code class="docutils literal notranslate"><span class="pre">float64</span></code>, complex results
+use <code class="docutils literal notranslate"><span class="pre">complex128</span></code>. CPU is the default; CUDA can be selected through <code class="docutils literal notranslate"><span class="pre">device</span></code>.
+MPS does not support the required double-precision eigensolves.</p>
+<p>After updating parameters or finishing a backward pass, call <code class="docutils literal notranslate"><span class="pre">compute_egn</span></code>
+again to construct the graph for the next optimization step. Keep gradients
+enabled for group velocity and kernel evaluation. For phase-only inference:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">phase_only</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">compute_egn</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">only_phase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">only_phase=True</span></code> omits eigenvectors; recompute with <code class="docutils literal notranslate"><span class="pre">only_phase=False</span></code> before
+requesting group velocity or eigenfunctions.</p>
+</section>
+<section id="model-parameters">
+<h2>Model parameters<a class="headerlink" href="#model-parameters" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">initialize(wavetype,</span> <span class="pre">z,</span> <span class="pre">rho,</span> <span class="pre">**parameters)</span></code> accepts:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">wavetype</span></code></p></th>
+<th class="head"><p>Required elastic parameters</p></th>
+<th class="head"><p>Optional attenuation parameters</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;love&quot;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">vsh</span></code>, <code class="docutils literal notranslate"><span class="pre">vsv</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Qn</span></code>, <code class="docutils literal notranslate"><span class="pre">Ql</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;rayl&quot;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">vph</span></code>, <code class="docutils literal notranslate"><span class="pre">vpv</span></code>, <code class="docutils literal notranslate"><span class="pre">vsv</span></code>, <code class="docutils literal notranslate"><span class="pre">eta</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Qa</span></code>, <code class="docutils literal notranslate"><span class="pre">Qc</span></code>, <code class="docutils literal notranslate"><span class="pre">Ql</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;aniso&quot;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">c21</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Qani</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Arrays have shape <code class="docutils literal notranslate"><span class="pre">(nz,)</span></code>, except <code class="docutils literal notranslate"><span class="pre">c21</span></code> with shape <code class="docutils literal notranslate"><span class="pre">(21,nz)</span></code> and <code class="docutils literal notranslate"><span class="pre">Qani</span></code> with
+shape <code class="docutils literal notranslate"><span class="pre">(2,nz)</span></code>. Stiffness uses the upper triangle of the symmetric Voigt matrix
+in order <code class="docutils literal notranslate"><span class="pre">c11,c12,...,c16,c22,...,c66</span></code>, with Voigt axes <code class="docutils literal notranslate"><span class="pre">xx,yy,zz,yz,xz,xy</span></code>.
+<code class="docutils literal notranslate"><span class="pre">Qani</span></code> contains Qκ then Qμ. Supply all quality-factor arrays for the wave type,
+or omit all for an elastic model. Q values must be positive and finite.
+<code class="docutils literal notranslate"><span class="pre">reference_frequency=1.0</span></code> specifies the storage-modulus reference in Hz.</p>
+<p>For acoustic Rayleigh rows, set <code class="docutils literal notranslate"><span class="pre">vsv=0</span></code>, <code class="docutils literal notranslate"><span class="pre">vph=vpv</span></code>, and <code class="docutils literal notranslate"><span class="pre">Qa=Qc</span></code> when
+attenuating. Anisotropic acoustic rows require an isotropic bulk block with
+zero shear and equal Qκ/Qμ. Solid/fluid transitions require repeated depths.</p>
+<p><code class="docutils literal notranslate"><span class="pre">specd.torch.isotropic_c21(rho,</span> <span class="pre">vp,</span> <span class="pre">vs)</span></code> constructs the stiffness tensor while
+preserving gradients. The tensor backend implements anisotropic attenuation
+model 1; it does not accept the native <code class="docutils literal notranslate"><span class="pre">qfunc_id</span></code> argument.</p>
+</section>
+<section id="outputs-and-kernels">
+<h2>Outputs and kernels<a class="headerlink" href="#outputs-and-kernels" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">compute_egn(freq,</span> <span class="pre">ang_in_deg=0.,</span> <span class="pre">only_phase=False)</span></code> returns complex phase
+velocities of shape <code class="docutils literal notranslate"><span class="pre">(nmode,)</span></code>, sorted by increasing real phase speed.
+<code class="docutils literal notranslate"><span class="pre">group_velocity()</span></code> returns <code class="docutils literal notranslate"><span class="pre">(nmode,)</span></code> for Love/Rayleigh and <code class="docutils literal notranslate"><span class="pre">(2,nmode)</span></code> for
+anisotropy, whose rows are Cartesian x and y components. The azimuth is in
+degrees.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span><span class="o">.</span><span class="n">compute_egn</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">phase_grad</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">kernels</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">observable</span><span class="o">=</span><span class="s2">"phase"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">"real"</span><span class="p">)</span>
+<span class="n">group_grad</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">kernels</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">observable</span><span class="o">=</span><span class="s2">"group"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">"real"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">phase_grad</span><span class="p">[</span><span class="s2">"vsh"</span><span class="p">])</span>  <span class="c1"># original input rows, derivative with respect to vsh</span>
+<span class="n">displacement</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">get_egnfunc</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># (ncomponent, nSEMpoints)</span>
+<span class="n">depth</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">depth</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">kernels</span></code> returns a dictionary matching the parameter names and shapes.
+<code class="docutils literal notranslate"><span class="pre">component</span></code> selects <code class="docutils literal notranslate"><span class="pre">&quot;real&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;imag&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;qinv&quot;</span></code>; the last differentiates
+the wave observable <code class="docutils literal notranslate"><span class="pre">2*Im(value)/Re(value)</span></code>. Q parameter entries differentiate
+with respect to <strong>Q itself</strong>. Set <code class="docutils literal notranslate"><span class="pre">create_graph=True</span></code> to differentiate kernels
+further. Anisotropic group kernels differentiate radial group velocity.</p>
+<p>The compatibility methods <code class="docutils literal notranslate"><span class="pre">get_phase_kl(mode)</span></code> and <code class="docutils literal notranslate"><span class="pre">get_group_kl(mode)</span></code> stack
+rows in <code class="docutils literal notranslate"><span class="pre">get_kernel_names()</span></code> order and convert material-Q derivatives to
+derivatives with respect to <strong>inverse Q</strong>. Elastic models return a tensor;
+attenuating models return <code class="docutils literal notranslate"><span class="pre">(velocity_kernel,</span> <span class="pre">wave_qinv_kernel)</span></code>. Tensor kernels
+combine acoustic and solid contributions on the original model rows; there
+are no separate <code class="docutils literal notranslate"><span class="pre">vp_ac</span></code> or <code class="docutils literal notranslate"><span class="pre">rho_ac</span></code> rows.</p>
+<p>Displacement components are radial/vertical for Rayleigh and
+radial/transverse/vertical for anisotropy. Use
+<code class="docutils literal notranslate"><span class="pre">get_egnfunc(mode,</span> <span class="pre">return_displ=False,</span> <span class="pre">return_left=True)</span></code> for a raw left
+eigenvector, or omit <code class="docutils literal notranslate"><span class="pre">return_left</span></code> for the raw right eigenvector.</p>
+</section>
+<section id="frequency-and-azimuth-sweeps">
+<h2>Frequency and azimuth sweeps<a class="headerlink" href="#frequency-and-azimuth-sweeps" title="Link to this heading"></a></h2>
+<p>Tensor tables retain autograd graphs in variable-length rows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">specd.torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">DispersionTable</span>
+
+<span class="n">table</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">compute_dispersion</span><span class="p">(</span>
+    <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">azimuths_deg</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">30.</span><span class="p">],</span> <span class="n">include_group</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">row</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">table</span><span class="o">.</span><span class="n">azimuth_deg</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">+</span> <span class="mi">0</span>  <span class="c1"># frequency index 1, azimuth index 0</span>
+<span class="n">mode_indices</span><span class="p">,</span> <span class="n">phase_row</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">phase_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+<span class="n">group_modes</span><span class="p">,</span> <span class="n">group_row</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">group_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">to_hdf5</span><span class="p">(</span><span class="s2">"torch-dispersion.h5"</span><span class="p">)</span>
+<span class="n">restored</span> <span class="o">=</span> <span class="n">DispersionTable</span><span class="o">.</span><span class="n">from_hdf5</span><span class="p">(</span><span class="s2">"torch-dispersion.h5"</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Unlike the native table, <code class="docutils literal notranslate"><span class="pre">phase_row</span></code> and <code class="docutils literal notranslate"><span class="pre">group_row</span></code> take a single flattened
+row index, in frequency-major, azimuth-minor order. A group row has shape
+<code class="docutils literal notranslate"><span class="pre">(nmode,ncomponent)</span></code>. Export explicitly detaches tensors and writes the shared
+<a class="reference internal" href="io.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">specswd-dispersion</span></code> v1 HDF5 schema</span></a>, readable by the native
+<code class="docutils literal notranslate"><span class="pre">specd.DispersionTable</span></code>. Loaded tensors have no gradient history. The tensor
+backend exports dispersion tables rather than complete native <code class="docutils literal notranslate"><span class="pre">SolverOutput</span></code>
+files.</p>
+</section>
+<section id="numerical-scope">
+<h2>Numerical scope<a class="headerlink" href="#numerical-scope" title="Link to this heading"></a></h2>
+<p>Defaults are <code class="docutils literal notranslate"><span class="pre">ngll=7</span></code>, <code class="docutils literal notranslate"><span class="pre">ngrl=30</span></code>, and <code class="docutils literal notranslate"><span class="pre">halfspace_wavelengths=50</span></code>, matching the
+native discretization. They are constructor arguments in the tensor backend.
+Increasing the half-space scale requires checking GRL order: a larger scale
+improves slowly decaying tails but spreads nodes farther apart. Phase and,
+especially, group kernels near cutoff require a convergence check in both
+scale and order.</p>
+<p>The general quadratic problem is linearized and reduced with structured
+linear solves before <code class="docutils literal notranslate"><span class="pre">torch.linalg.eig</span></code>. The tensor backend does not perform
+generalized Schur/QZ decomposition. Group velocity uses operator frequency
+and azimuth derivatives from <code class="docutils literal notranslate"><span class="pre">torch.func.jvp</span></code>; model kernels use reverse-mode
+autodiff. Eigenvector derivatives require separated eigenvalues.</p>
+<p>Mesh geometry, interpolation positions, and element counts are fixed during
+differentiation; depth gradients are unsupported. Mode sorting and selection
+are discrete. A gradient follows a selected mode locally, rather than
+differentiating changes in mode count or ordering.</p>
+</section>
+<section id="examples-and-validation">
+<h2>Examples and validation<a class="headerlink" href="#examples-and-validation" title="Link to this heading"></a></h2>
+<p>From the repository root:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>specd/torch/tests<span class="w"> </span>-q
+<span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>example/paper/reproduce_paper_pytorch.py
+<span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>specd.torch.benchmark<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--layers<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">4</span><span class="w"> </span>--frequencies<span class="w"> </span>.05<span class="w"> </span>.2<span class="w"> </span>--repeats<span class="w"> </span><span class="m">5</span><span class="w"> </span>--warmup<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--workloads<span class="w"> </span>phase_kernel<span class="w"> </span>--output<span class="w"> </span>/tmp/specswd-phase-kernel
+</pre></div>
+</div>
+<p>Native comparisons and benchmarks require a current compiled extension;
+the remaining tensor tests run without it. The primary benchmark workload
+<code class="docutils literal notranslate"><span class="pre">phase_kernel</span></code> includes a fresh forward solve and fundamental-mode phase
+kernels. Paper figures are written to <code class="docutils literal notranslate"><span class="pre">example/paper/pytorch</span></code>.</p>
+<p>The <a class="reference internal" href="../python/torch.html"><span class="std std-doc">PyTorch API reference</span></a> lists public signatures.
+See <a class="reference internal" href="benchmarks.html"><span class="std std-doc">C++ and PyTorch efficiency</span></a> for the four comparisons and
+their timing figure.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Tutorial.html" class="btn btn-neutral float-left" title="Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="benchmarks.html" class="btn btn-neutral float-right" title="C++ and PyTorch efficiency" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Nanqiao Du.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

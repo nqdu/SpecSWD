@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>specd.attenuation &mdash; SpecSWD  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
 
   
@@ -43,12 +43,15 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/readme.html">SpecSWD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../markdown/pytorch.html">PyTorch backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../markdown/benchmarks.html">C++ and PyTorch efficiency</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/io.html">NumPy and HDF5 output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../markdown/gallery.html">Gallery</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Native Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/torch.html">PyTorch API reference</a></li>
 </ul>
 
         </div>
@@ -76,37 +79,37 @@
            <div itemprop="articleBody">
              
   <h1>Source code for specd.attenuation</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Causal constant-Q attenuation used by the frequency-domain solver.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Causal constant-Q attenuation used by the frequency-domain solver."""</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 
-<span class="k">def</span> <span class="nf">_validated_inputs</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">quality_factor</span><span class="p">,</span> <span class="n">reference_frequency</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_validated_inputs</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">quality_factor</span><span class="p">,</span> <span class="n">reference_frequency</span><span class="p">):</span>
     <span class="n">freq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="n">quality_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">quality_factor</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="n">reference_frequency</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">reference_frequency</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">freq</span><span class="p">))</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">freq</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;freq must be positive and finite&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"freq must be positive and finite"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">quality_factor</span><span class="p">))</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">quality_factor</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;quality_factor must be positive&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"quality_factor must be positive"</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">reference_frequency</span><span class="p">))</span>
             <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">reference_frequency</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">)):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;reference_frequency must be positive and finite&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"reference_frequency must be positive and finite"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">freq</span><span class="p">,</span> <span class="n">quality_factor</span><span class="p">,</span> <span class="n">reference_frequency</span>
 
 
 <div class="viewcode-block" id="constant_q_response">
-<a class="viewcode-back" href="../../python/specd.html#specd.constant_q_response">[docs]</a>
-<span class="k">def</span> <span class="nf">constant_q_response</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">quality_factor</span><span class="p">,</span> <span class="n">reference_frequency</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return ``M(omega) / M0`` for storage modulus ``M0`` at the reference.</span>
+<a class="viewcode-back" href="../../python/index.html#specd.constant_q_response">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">constant_q_response</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">quality_factor</span><span class="p">,</span> <span class="n">reference_frequency</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Return ``M(omega) / M0`` for storage modulus ``M0`` at the reference.</span>
 
 <span class="sd">    The response uses the positive-frequency convention of SpecSWD:</span>
 
 <span class="sd">    ``s = (1 + i/Q) * (freq/reference_frequency)**alpha``,</span>
 <span class="sd">    ``alpha = 2/pi * atan(1/Q)``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">freq</span><span class="p">,</span> <span class="n">quality_factor</span><span class="p">,</span> <span class="n">reference_frequency</span> <span class="o">=</span> <span class="n">_validated_inputs</span><span class="p">(</span>
         <span class="n">freq</span><span class="p">,</span> <span class="n">quality_factor</span><span class="p">,</span> <span class="n">reference_frequency</span>
     <span class="p">)</span>
@@ -118,10 +121,10 @@
 
 
 <div class="viewcode-block" id="constant_q_response_derivatives">
-<a class="viewcode-back" href="../../python/specd.html#specd.constant_q_response_derivatives">[docs]</a>
-<span class="k">def</span> <span class="nf">constant_q_response_derivatives</span><span class="p">(</span>
+<a class="viewcode-back" href="../../python/index.html#specd.constant_q_response_derivatives">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">constant_q_response_derivatives</span><span class="p">(</span>
         <span class="n">freq</span><span class="p">,</span> <span class="n">quality_factor</span><span class="p">,</span> <span class="n">reference_frequency</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return ``s``, ``ds/domega``, ``ds/d(Q^-1)``, and the mixed derivative.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return ``s``, ``ds/domega``, ``ds/d(Q^-1)``, and the mixed derivative."""</span>
     <span class="n">freq</span><span class="p">,</span> <span class="n">quality_factor</span><span class="p">,</span> <span class="n">reference_frequency</span> <span class="o">=</span> <span class="n">_validated_inputs</span><span class="p">(</span>
         <span class="n">freq</span><span class="p">,</span> <span class="n">quality_factor</span><span class="p">,</span> <span class="n">reference_frequency</span>
     <span class="p">)</span>

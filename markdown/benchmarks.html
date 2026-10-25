@@ -1,0 +1,177 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C++ and PyTorch efficiency &mdash; SpecSWD  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="NumPy and HDF5 output" href="io.html" />
+    <link rel="prev" title="PyTorch backend" href="pytorch.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SpecSWD
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">SpecSWD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pytorch.html">PyTorch backend</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">C++ and PyTorch efficiency</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#measurement-conditions">Measurement conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reproduce">Reproduce</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="io.html">NumPy and HDF5 output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python/index.html">Native Python API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/torch.html">PyTorch API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpecSWD</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">C++ and PyTorch efficiency</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/markdown/benchmarks.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="c-and-pytorch-efficiency">
+<h1>C++ and PyTorch efficiency<a class="headerlink" href="#c-and-pytorch-efficiency" title="Link to this heading"></a></h1>
+<p>The four comparisons cover Love, Rayleigh, Scholte, and fully anisotropic
+waves. The primary workload is <strong>forward plus phase kernels</strong>: a fresh solve
+followed by every fundamental-mode phase-kernel parameter row. Attenuating
+cases also compute the wave inverse-Q kernels.</p>
+<p><img alt="C++ and PyTorch forward plus phase-kernel timings for four wave types" src="../_images/pytorch-benchmarks.svg" /></p>
+<p>Bars show median milliseconds per frequency; lower is faster. Annotations
+give PyTorch time divided by C++ time, so values above one favor C++.
+Each panel compares one and four solid layers, with and without attenuation.
+Scholte models also contain an acoustic surface layer.</p>
+<section id="measurement-conditions">
+<h2>Measurement conditions<a class="headerlink" href="#measurement-conditions" title="Link to this heading"></a></h2>
+<p>These CPU measurements use 7-node GLL elements, 30-node GRL elements, a
+half-space factor of 50, and double precision. The native build uses Apple
+Clang, modern Apple Accelerate, <code class="docutils literal notranslate"><span class="pre">SPECSWD_EGN_DOUBLE=ON</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">SPECSWD_REGULAR_SCHUR=ON</span></code>. Frequencies are 0.05 and 0.2 Hz at 25° azimuth.
+Only <code class="docutils literal notranslate"><span class="pre">OMP_NUM_THREADS=1</span></code> is set; other thread pools use their defaults.
+The saved measurements were collected on 25 October 2026 on macOS/Apple
+Silicon with Python 3.12.15, PyTorch 2.14.1, and NumPy 2.5.4.</p>
+<p>Each backend is warmed up once, followed by five samples with calibrated
+batches and alternating backend order. Timings include mesh construction,
+interpolation, assembly, eigensolving, mode selection, and requested kernels.
+Model initialization, imports, correctness checks, file IO, and plotting are
+excluded. The C++ API is called through the Python bindings.</p>
+<p>Phase, group, and fundamental-mode phase/group kernels are checked between
+backends before timing, including wave inverse-Q kernels when attenuating.
+Agreement between backends is separate from convergence of the shared SEM
+discretization. These timings describe this CPU, library, and model
+configuration; they do not measure GPU performance or exact degeneracy.</p>
+</section>
+<section id="reproduce">
+<h2>Reproduce<a class="headerlink" href="#reproduce" title="Link to this heading"></a></h2>
+<p>Build and install the current native extension, then run from the repository
+root in the PyTorch environment:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span>wave<span class="w"> </span><span class="k">in</span><span class="w"> </span>love<span class="w"> </span>rayl<span class="w"> </span>scholte<span class="w"> </span>aniso<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>specd.torch.benchmark<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>--waves<span class="w"> </span><span class="s2">"</span><span class="nv">$wave</span><span class="s2">"</span><span class="w"> </span>--layers<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">4</span><span class="w"> </span>--frequencies<span class="w"> </span>.05<span class="w"> </span>.2<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>--workloads<span class="w"> </span>forward<span class="w"> </span>phase_kernel<span class="w"> </span>group<span class="w"> </span>group_kernel<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>--repeats<span class="w"> </span><span class="m">5</span><span class="w"> </span>--warmup<span class="w"> </span><span class="m">1</span><span class="w"> </span>--output<span class="w"> </span><span class="s2">"specd/torch/benchmarks/</span><span class="nv">$wave</span><span class="s2">"</span>
+<span class="k">done</span>
+<span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>misc/plot_benchmarks.py
+</pre></div>
+</div>
+<p>Each of the four result directories contains a Markdown report, a runtime
+ratio figure, and JSON with raw samples, model arrays, correctness errors,
+extension identity, compiler settings, and library/thread metadata.
+The reports also retain forward, group-velocity, and group-kernel workloads.
+Their kernel timings already include the forward solve; do not add the
+separate forward time.</p>
+<p>Reports and raw measurements:
+<a class="reference external" href="https://github.com/nqdu/SpecSWD/tree/main/specd/torch/benchmarks/love">Love</a>,
+<a class="reference external" href="https://github.com/nqdu/SpecSWD/tree/main/specd/torch/benchmarks/rayl">Rayleigh</a>,
+<a class="reference external" href="https://github.com/nqdu/SpecSWD/tree/main/specd/torch/benchmarks/scholte">Scholte</a>,
+<a class="reference external" href="https://github.com/nqdu/SpecSWD/tree/main/specd/torch/benchmarks/aniso">anisotropic</a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pytorch.html" class="btn btn-neutral float-left" title="PyTorch backend" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="io.html" class="btn btn-neutral float-right" title="NumPy and HDF5 output" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Nanqiao Du.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
