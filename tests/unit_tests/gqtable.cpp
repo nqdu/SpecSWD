@@ -112,6 +112,35 @@ TEST(LagrangePolyTest, DifferentiatesLinearExactly) {
 
 // ─── GRL ──────────────────────────────────────────────────────────────────────
 
+TEST(LaguerreFunctionTest, LowOrdersMatchKnownPolynomials) {
+    for(double x : {0., 0.25, 1., 3., 10., 100.}) {
+        const double weight = std::exp(-x/2.);
+        EXPECT_NEAR(laguerre_func(0,x), weight, 1.e-14);
+        EXPECT_NEAR(laguerre_func(1,x), (1.-x)*weight, 1.e-14);
+        EXPECT_NEAR(laguerre_func(2,x), (x*x-4.*x+2.)*weight/2., 1.e-14);
+        EXPECT_NEAR(laguerre_func(3,x), (6.-18.*x+9.*x*x-x*x*x)*weight/6., 1.e-14);
+    }
+}
+
+TEST(GRLTest, LaguerreFunctionsAreOrthonormal) {
+    for(int n : {15,20,30}) {
+        std::vector<double> nodes(n),weights(n),basis(n*n);
+        gauss_radau_laguerre(nodes.data(),weights.data(),n);
+        for(int degree=0;degree<n;++degree)
+            for(int node=0;node<n;++node)
+                basis[degree*n+node]=laguerre_func(degree,nodes[node]);
+        for(int i=0;i<n;++i) {
+            for(int j=0;j<=i;++j) {
+                double integral=0.;
+                for(int node=0;node<n;++node)
+                    integral+=weights[node]*basis[i*n+node]*basis[j*n+node];
+                EXPECT_NEAR(integral,i==j ? 1. : 0.,1.e-11)
+                    << "n=" << n << " i=" << i << " j=" << j;
+            }
+        }
+    }
+}
+
 TEST(GRLTest, FirstNodeIsZero) {
     for (int N = 15; N <= 30; N++) {
         std::vector<double> xgrl(N), wgrl(N);

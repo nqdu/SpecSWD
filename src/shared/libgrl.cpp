@@ -42,7 +42,19 @@ golub_welsch(const double *alpha, const double *beta, double *xgl, double *wgl, 
  */
 double
 laguerre_func(size_t n, double x) {
-    return std::laguerre(n,x) * std::exp(-x/2.);
+    // Apply the three-term recurrence to the weighted functions directly.
+    // This avoids std::laguerre, which is unavailable in Apple's libc++.
+    double previous = std::exp(-x/2.);
+    if(n == 0) return previous;
+    double current = (1.-x)*previous;
+    for(size_t k = 2; k <= n; ++k) {
+        const double degree = static_cast<double>(k);
+        const double next = ((2.*degree-1.-x)*current
+                             -(degree-1.)*previous)/degree;
+        previous = current;
+        current = next;
+    }
+    return current;
 }
 
 /**

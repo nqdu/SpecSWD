@@ -68,8 +68,7 @@ include_directories(${EIGEN_INC})
 
 # lapack
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-find_package(LAPACK REQUIRED)
-find_package(LAPACKE REQUIRED)
+include(SpecSWDLapack)
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DEIGEN_USE_LAPACKE")
 
 find_package(HDF5 REQUIRED COMPONENTS C)

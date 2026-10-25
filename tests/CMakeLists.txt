@@ -6,6 +6,7 @@ set(UNIT_TESTS
     att_aniso
     aniso_eigenvalues
     schur
+    lapacke_backend
     gqtable
 )
 
