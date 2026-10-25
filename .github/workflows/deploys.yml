@@ -2,7 +2,7 @@ name: Test and Deploy Docs
 
 on:
   pull_request:
-    branches: [devel]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
