@@ -1,10 +1,8 @@
 name: Test and Deploy Docs
 
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
+    branches: [devel]
   workflow_dispatch:
 
 permissions:
@@ -126,7 +124,7 @@ jobs:
   deploy:
     name: Deploy documentation
     needs: [torch-only, native]
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
