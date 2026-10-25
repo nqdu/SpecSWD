@@ -10,17 +10,25 @@ one-dimensional layered media. It supports:
 - phase velocity, group velocity, eigenfunctions, and Fréchet kernels; and
 - NumPy/CSR storage of variable-mode dispersion results in HDF5.
 
+The optional [`specd.torch` backend](pytorch.md) implements the solver in
+PyTorch with automatic differentiation. It needs no native compilation:
+
+```bash
+python -m pip install -e '.[torch]'
+```
+
 The numerical core uses the spectral-element method in depth. Fully
 anisotropic dispersion is solved as a quadratic eigenvalue problem. Group
 kernels reuse the generalized Schur factors, so each constrained adjoint solve
 after the decomposition costs $O(n^2)$.
 
-## Requirements
+## Native build requirements
 
 - CMake 3.25 or newer;
 - a C++17 compiler and a Fortran compiler;
 - Eigen 5;
-- LAPACK and LAPACKE through MKL, OpenBLAS, FlexiBLAS, or equivalent;
+- LAPACK and LAPACKE through MKL, OpenBLAS, FlexiBLAS, or equivalent
+  (macOS 13.3+ uses Apple Accelerate automatically);
 - Python, NumPy, and pybind11 when `BUILD_LIBS=ON`;
 - the HDF5 C library;
 - h5py for Python HDF5 input and output; and
@@ -37,7 +45,7 @@ cmake -S . -B build \
     -DBUILD_LIBS=ON \
     -DBUILD_TESTS=ON
 cmake --build build -j 8
-ctest --test-dir build --output-on-failure
+OMP_NUM_THREADS=1 ctest --test-dir build --output-on-failure
 ```
 
 Set `CC`, `CXX`, and `FC` in the environment when non-default compilers are
@@ -51,6 +59,7 @@ Install the Python extension into `specd/lib`:
 
 ```bash
 cmake --install build --component python
+python -m pip install -e .
 ```
 
 Run Python from the repository root, or add the repository to `PYTHONPATH`:
@@ -74,6 +83,11 @@ Generalized Schur solves use double precision by default. Configure with
 `-DSPECSWD_EGN_DOUBLE=OFF` only when reduced eigensolver precision is an
 acceptable performance tradeoff.
 
+`SPECSWD_REGULAR_SCHUR=ON` (the default) enables ordinary Schur reduction
+for nonsingular pencils, with QZ fallback. Set it to `OFF` to use the
+generalized Schur/QZ path directly. Both paths retain factors for native
+group and kernel calculations.
+
 ## Documentation
 
 Generate the C++ reference from the repository root:
@@ -85,6 +99,8 @@ doxygen misc/doxygen/doxygen.cfg
 Generate the Sphinx manual when its documentation dependencies are installed:
 
 ```bash
+python -m pip install -r misc/requirements-docs.txt
+python -m pip install -e '.[torch]'
 sphinx-build -b html misc/source misc/_build/html
 ```
 

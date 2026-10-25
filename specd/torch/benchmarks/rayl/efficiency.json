@@ -1,0 +1,1071 @@
+{
+  "metadata": {
+    "measured_at_utc": "2026-10-25T09:26:50.018342+00:00",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "python": "3.12.15",
+    "torch": "2.14.1",
+    "numpy": "2.5.4",
+    "threads": 1,
+    "halfspace_wavelengths": 50,
+    "ngll": 7,
+    "ngrl": 30,
+    "frequencies_hz": [
+      0.05,
+      0.2
+    ],
+    "azimuth_deg": 25.0,
+    "repeats": 5,
+    "warmup": 1,
+    "target_sample_ms": 10.0,
+    "native_extension": "/Users/nqdu/code/c_fortran/SpecSWD/build/src/libswd/libswd.cpython-312-darwin.so",
+    "native_extension_sha256": "652a756f06675b5287cc0b00495b2de1238925637b97b20f48c127f129bd12d7",
+    "native_build": {
+      "CMAKE_BUILD_TYPE": "",
+      "CMAKE_CXX_COMPILER": "/usr/bin/c++",
+      "CMAKE_CXX_FLAGS": "",
+      "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG",
+      "SPECSWD_EGN_DOUBLE": "ON",
+      "SPECSWD_REGULAR_SCHUR": "ON",
+      "SPECSWD_USE_ACCELERATE": "ON",
+      "SPECSWD_LAPACK_BACKEND": "Apple Accelerate (modern, 32-bit LAPACK integers)",
+      "effective_cxx_flags": "-g -Wall -DEIGEN_DONT_PARALLELIZE -DEIGEN_USE_LAPACKE -O3 -DNDEBUG -march=native -std=gnu++17 -fPIC -fvisibility=hidden -flto"
+    },
+    "native_loading": "requested extension preloaded before specd import",
+    "thread_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null,
+      "VECLIB_MAXIMUM_THREADS": null
+    },
+    "torch_num_threads": 1,
+    "torch_num_interop_threads": 12,
+    "torch_parallel_info": "ATen/Parallel:\n\tat::get_num_threads() : 1\n\tat::get_num_interop_threads() : 12\nOpenMP 202011\n\tomp_get_max_threads() : 1\nMKLDNN not found\nstd::thread::hardware_concurrency() : 12\nEnvironment variables:\n\tOMP_NUM_THREADS : 1\nATen parallel backend: OpenMP\n",
+    "torch_build": "PyTorch built with:\n  - GCC 4.2\n  - C++ Version: 202002\n  - clang 21.0.0\n  - OpenMP 202011\n  - LAPACK is enabled (usually provided by MKL)\n  - NNPACK is enabled\n  - CPU capability usage: DEFAULT\n  - Build settings: BLAS_INFO=accelerate, BUILD_TYPE=Release, COMMIT_SHA=5c4886908584029761b579af026dcfb627c84070, CUDA_FLAGS= -DLIBCUDACXX_ENABLE_SIMPLIFIED_COMPLEX_OPERATIONS -Xfatbin -compress-all  -Wno-deprecated-gpu-targets --expt-extended-lambda -DCUB_WRAPPED_NAMESPACE=at_cuda_detail -DDISABLE_CUSPARSE_DEPRECATED -DCUDA_HAS_FP16=1 -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__ -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -DC10_NODEPRECATED, CXX_COMPILER=/usr/bin/c++, CXX_FLAGS= -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -DNDEBUG -DUSE_KINETO -DUSE_PYTORCH_QNNPACK -DAT_BUILD_ARM_VEC256_WITH_SLEEF -DUSE_PYTORCH_METAL_EXPORT -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DUSE_COREML_DELEGATE -O2 -fPIC -DC10_NODEPRECATED -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Werror=braced-scalar-init -Werror=range-loop-construct -Werror=bool-operation -Wnarrowing -Wno-missing-field-initializers -Wno-unknown-pragmas -Wno-unused-parameter -Wno-strict-overflow -Wno-strict-aliasing -Wvla-extension -Wsuggest-override -Wnewline-eof -Winconsistent-missing-override -Winconsistent-missing-destructor-override -Wno-pass-failed -Wno-error=old-style-cast -Wconstant-conversion -Qunused-arguments -faligned-new -fno-math-errno -fno-trapping-math -Werror=format -fclang-abi-compat=17 -DUSE_MPS -Wno-missing-braces, LAPACK_INFO=accelerate, TORCH_VERSION=2.14.1, USE_CUDA=OFF, USE_CUDNN=OFF, USE_CUSPARSELT=OFF, USE_EIGEN_FOR_BLAS=ON, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_GLOO=ON, USE_HIPSPARSELT=OFF, USE_MKL=OFF, USE_MKLDNN=OFF, USE_MPI=OFF, USE_NCCL=OFF, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, USE_ROCM_KERNEL_ASSERT=OFF, USE_XCCL=OFF, USE_XPU=OFF, \n",
+    "command": "python -m specd.torch.benchmark --native-extension build/src/libswd/libswd.cpython-312-darwin.so --layers 1 4 --frequencies .05 .2 --workloads forward phase_kernel group group_kernel --repeats 5 --warmup 1 --output /tmp/specswd-current-benchmarks"
+  },
+  "models": [
+    {
+      "wave": "rayl",
+      "attenuation": false,
+      "solid_layers": 1,
+      "depth": [
+        0.0,
+        35.0,
+        35.0
+      ],
+      "rho": [
+        2.65,
+        2.65,
+        3.2
+      ],
+      "parameters": {
+        "vph": [
+          5.6,
+          5.6,
+          8.0
+        ],
+        "vpv": [
+          5.6,
+          5.6,
+          8.0
+        ],
+        "vsv": [
+          3.1,
+          3.1,
+          5.5
+        ],
+        "eta": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": true,
+      "solid_layers": 1,
+      "depth": [
+        0.0,
+        35.0,
+        35.0
+      ],
+      "rho": [
+        2.65,
+        2.65,
+        3.2
+      ],
+      "parameters": {
+        "vph": [
+          5.6,
+          5.6,
+          8.0
+        ],
+        "vpv": [
+          5.6,
+          5.6,
+          8.0
+        ],
+        "vsv": [
+          3.1,
+          3.1,
+          5.5
+        ],
+        "eta": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "Qa": [
+          300.0,
+          300.0,
+          300.0
+        ],
+        "Qc": [
+          300.0,
+          300.0,
+          300.0
+        ],
+        "Ql": [
+          180.0,
+          180.0,
+          180.0
+        ]
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": false,
+      "solid_layers": 4,
+      "depth": [
+        0.0,
+        8.75,
+        8.75,
+        17.5,
+        17.5,
+        26.25,
+        26.25,
+        35.0,
+        35.0
+      ],
+      "rho": [
+        2.65,
+        2.65,
+        2.716666666666667,
+        2.716666666666667,
+        2.783333333333333,
+        2.783333333333333,
+        2.85,
+        2.85,
+        3.2
+      ],
+      "parameters": {
+        "vph": [
+          5.6,
+          5.6,
+          5.866666666666666,
+          5.866666666666666,
+          6.133333333333333,
+          6.133333333333333,
+          6.3999999999999995,
+          6.3999999999999995,
+          8.0
+        ],
+        "vpv": [
+          5.6,
+          5.6,
+          5.866666666666666,
+          5.866666666666666,
+          6.133333333333333,
+          6.133333333333333,
+          6.3999999999999995,
+          6.3999999999999995,
+          8.0
+        ],
+        "vsv": [
+          3.1,
+          3.1,
+          3.2666666666666666,
+          3.2666666666666666,
+          3.4333333333333336,
+          3.4333333333333336,
+          3.6,
+          3.6,
+          5.5
+        ],
+        "eta": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": true,
+      "solid_layers": 4,
+      "depth": [
+        0.0,
+        8.75,
+        8.75,
+        17.5,
+        17.5,
+        26.25,
+        26.25,
+        35.0,
+        35.0
+      ],
+      "rho": [
+        2.65,
+        2.65,
+        2.716666666666667,
+        2.716666666666667,
+        2.783333333333333,
+        2.783333333333333,
+        2.85,
+        2.85,
+        3.2
+      ],
+      "parameters": {
+        "vph": [
+          5.6,
+          5.6,
+          5.866666666666666,
+          5.866666666666666,
+          6.133333333333333,
+          6.133333333333333,
+          6.3999999999999995,
+          6.3999999999999995,
+          8.0
+        ],
+        "vpv": [
+          5.6,
+          5.6,
+          5.866666666666666,
+          5.866666666666666,
+          6.133333333333333,
+          6.133333333333333,
+          6.3999999999999995,
+          6.3999999999999995,
+          8.0
+        ],
+        "vsv": [
+          3.1,
+          3.1,
+          3.2666666666666666,
+          3.2666666666666666,
+          3.4333333333333336,
+          3.4333333333333336,
+          3.6,
+          3.6,
+          5.5
+        ],
+        "eta": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "Qa": [
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0
+        ],
+        "Qc": [
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0
+        ],
+        "Ql": [
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0
+        ]
+      }
+    }
+  ],
+  "results": [
+    {
+      "wave": "rayl",
+      "attenuation": false,
+      "solid_layers": 1,
+      "workload": "forward",
+      "physical_dof": [
+        72,
+        108
+      ],
+      "modes": [
+        2,
+        5
+      ],
+      "max_absolute_errors": {
+        "phase": 4.4586556668946287e-13,
+        "group": 6.323830348264892e-13,
+        "phase_kernel": 2.801370246885426e-13,
+        "group_kernel": 2.531308496145357e-13
+      },
+      "ratio": 2.557646534421644,
+      "cpp": {
+        "median_ms": 1.79700525,
+        "min_ms": 1.7915625,
+        "max_ms": 1.804546875,
+        "samples_ms": [
+          1.7952865,
+          1.79700525,
+          1.7991926249999999,
+          1.804546875,
+          1.7915625
+        ],
+        "iterations_per_sample": 4
+      },
+      "torch": {
+        "median_ms": 4.59610425,
+        "min_ms": 4.5919792500000005,
+        "max_ms": 4.6549895,
+        "samples_ms": [
+          4.6031145,
+          4.59470825,
+          4.59610425,
+          4.5919792500000005,
+          4.6549895
+        ],
+        "iterations_per_sample": 2
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": false,
+      "solid_layers": 1,
+      "workload": "phase_kernel",
+      "physical_dof": [
+        72,
+        108
+      ],
+      "modes": [
+        2,
+        5
+      ],
+      "max_absolute_errors": {
+        "phase": 4.4586556668946287e-13,
+        "group": 6.323830348264892e-13,
+        "phase_kernel": 2.801370246885426e-13,
+        "group_kernel": 2.531308496145357e-13
+      },
+      "ratio": 3.479504207688398,
+      "cpp": {
+        "median_ms": 1.8140156250000001,
+        "min_ms": 1.813270875,
+        "max_ms": 1.8237240000000001,
+        "samples_ms": [
+          1.8140156250000001,
+          1.81375,
+          1.820520875,
+          1.8237240000000001,
+          1.813270875
+        ],
+        "iterations_per_sample": 4
+      },
+      "torch": {
+        "median_ms": 6.311875,
+        "min_ms": 6.2355,
+        "max_ms": 6.350979,
+        "samples_ms": [
+          6.306,
+          6.2355,
+          6.311875,
+          6.350979,
+          6.350166499999999
+        ],
+        "iterations_per_sample": 1
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": false,
+      "solid_layers": 1,
+      "workload": "group",
+      "physical_dof": [
+        72,
+        108
+      ],
+      "modes": [
+        2,
+        5
+      ],
+      "max_absolute_errors": {
+        "phase": 4.4586556668946287e-13,
+        "group": 6.323830348264892e-13,
+        "phase_kernel": 2.801370246885426e-13,
+        "group_kernel": 2.531308496145357e-13
+      },
+      "ratio": 3.2072254098301802,
+      "cpp": {
+        "median_ms": 1.828020875,
+        "min_ms": 1.81500525,
+        "max_ms": 1.858875,
+        "samples_ms": [
+          1.822802,
+          1.8324687499999999,
+          1.858875,
+          1.828020875,
+          1.81500525
+        ],
+        "iterations_per_sample": 4
+      },
+      "torch": {
+        "median_ms": 5.862875,
+        "min_ms": 5.8151875,
+        "max_ms": 6.4368125,
+        "samples_ms": [
+          5.9200415,
+          5.845625,
+          6.4368125,
+          5.8151875,
+          5.862875
+        ],
+        "iterations_per_sample": 1
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": false,
+      "solid_layers": 1,
+      "workload": "group_kernel",
+      "physical_dof": [
+        72,
+        108
+      ],
+      "modes": [
+        2,
+        5
+      ],
+      "max_absolute_errors": {
+        "phase": 4.4586556668946287e-13,
+        "group": 6.323830348264892e-13,
+        "phase_kernel": 2.801370246885426e-13,
+        "group_kernel": 2.531308496145357e-13
+      },
+      "ratio": 4.181984928015054,
+      "cpp": {
+        "median_ms": 1.9092707500000001,
+        "min_ms": 1.902953125,
+        "max_ms": 1.9360885,
+        "samples_ms": [
+          1.9360885,
+          1.9116145,
+          1.9092707500000001,
+          1.907067625,
+          1.902953125
+        ],
+        "iterations_per_sample": 4
+      },
+      "torch": {
+        "median_ms": 7.984541499999999,
+        "min_ms": 7.862708499999999,
+        "max_ms": 8.0368335,
+        "samples_ms": [
+          8.0140415,
+          7.9550209999999995,
+          7.984541499999999,
+          7.862708499999999,
+          8.0368335
+        ],
+        "iterations_per_sample": 1
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": true,
+      "solid_layers": 1,
+      "workload": "forward",
+      "physical_dof": [
+        72,
+        108
+      ],
+      "modes": [
+        12,
+        13
+      ],
+      "max_absolute_errors": {
+        "phase": 9.560932826350912e-13,
+        "group": 1.8740764891874933e-12,
+        "phase_kernel": 3.582412144709224e-13,
+        "group_kernel": 1.0972889263882735e-12
+      },
+      "ratio": 0.6719831000792184,
+      "cpp": {
+        "median_ms": 7.100625,
+        "min_ms": 7.08475,
+        "max_ms": 7.172458,
+        "samples_ms": [
+          7.172458,
+          7.110396,
+          7.08475,
+          7.100625,
+          7.0858545
+        ],
+        "iterations_per_sample": 1
+      },
+      "torch": {
+        "median_ms": 4.7715,
+        "min_ms": 4.76555225,
+        "max_ms": 4.78020825,
+        "samples_ms": [
+          4.76555225,
+          4.78020825,
+          4.7715,
+          4.7693125,
+          4.7791250000000005
+        ],
+        "iterations_per_sample": 2
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": true,
+      "solid_layers": 1,
+      "workload": "phase_kernel",
+      "physical_dof": [
+        72,
+        108
+      ],
+      "modes": [
+        12,
+        13
+      ],
+      "max_absolute_errors": {
+        "phase": 9.560932826350912e-13,
+        "group": 1.8740764891874933e-12,
+        "phase_kernel": 3.582412144709224e-13,
+        "group_kernel": 1.0972889263882735e-12
+      },
+      "ratio": 1.1664500058949114,
+      "cpp": {
+        "median_ms": 7.133271,
+        "min_ms": 7.0878125,
+        "max_ms": 7.1368955,
+        "samples_ms": [
+          7.0878125,
+          7.133271,
+          7.120458500000001,
+          7.135375,
+          7.1368955
+        ],
+        "iterations_per_sample": 1
+      },
+      "torch": {
+        "median_ms": 8.320604000000001,
+        "min_ms": 8.234874999999999,
+        "max_ms": 8.395332999999999,
+        "samples_ms": [
+          8.395332999999999,
+          8.2426665,
+          8.3637705,
+          8.320604000000001,
+          8.234874999999999
+        ],
+        "iterations_per_sample": 1
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": true,
+      "solid_layers": 1,
+      "workload": "group",
+      "physical_dof": [
+        72,
+        108
+      ],
+      "modes": [
+        12,
+        13
+      ],
+      "max_absolute_errors": {
+        "phase": 9.560932826350912e-13,
+        "group": 1.8740764891874933e-12,
+        "phase_kernel": 3.582412144709224e-13,
+        "group_kernel": 1.0972889263882735e-12
+      },
+      "ratio": 1.7337780575665374,
+      "cpp": {
+        "median_ms": 7.14825,
+        "min_ms": 7.1279165,
+        "max_ms": 7.1740835,
+        "samples_ms": [
+          7.1740835,
+          7.14825,
+          7.1279165,
+          7.164000000000001,
+          7.1396250000000006
+        ],
+        "iterations_per_sample": 1
+      },
+      "torch": {
+        "median_ms": 12.393479000000001,
+        "min_ms": 12.340228999999999,
+        "max_ms": 12.535499999999999,
+        "samples_ms": [
+          12.535499999999999,
+          12.388042,
+          12.340228999999999,
+          12.393479000000001,
+          12.426708
+        ],
+        "iterations_per_sample": 1
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": true,
+      "solid_layers": 1,
+      "workload": "group_kernel",
+      "physical_dof": [
+        72,
+        108
+      ],
+      "modes": [
+        12,
+        13
+      ],
+      "max_absolute_errors": {
+        "phase": 9.560932826350912e-13,
+        "group": 1.8740764891874933e-12,
+        "phase_kernel": 3.582412144709224e-13,
+        "group_kernel": 1.0972889263882735e-12
+      },
+      "ratio": 3.639137145100915,
+      "cpp": {
+        "median_ms": 7.2798335,
+        "min_ms": 7.270604,
+        "max_ms": 7.3180835,
+        "samples_ms": [
+          7.2798335,
+          7.270604,
+          7.3011665,
+          7.3180835,
+          7.277604
+        ],
+        "iterations_per_sample": 1
+      },
+      "torch": {
+        "median_ms": 26.4923125,
+        "min_ms": 26.416021,
+        "max_ms": 26.786250000000003,
+        "samples_ms": [
+          26.436833,
+          26.5086455,
+          26.786250000000003,
+          26.416021,
+          26.4923125
+        ],
+        "iterations_per_sample": 1
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": false,
+      "solid_layers": 4,
+      "workload": "forward",
+      "physical_dof": [
+        108,
+        108
+      ],
+      "modes": [
+        2,
+        4
+      ],
+      "max_absolute_errors": {
+        "phase": 2.9749536167855695e-12,
+        "group": 2.4362734052374435e-12,
+        "phase_kernel": 6.920020112488601e-13,
+        "group_kernel": 7.847056338050606e-13
+      },
+      "ratio": 2.6576801695443812,
+      "cpp": {
+        "median_ms": 2.4551093749999997,
+        "min_ms": 2.45102075,
+        "max_ms": 2.4585417499999997,
+        "samples_ms": [
+          2.4551093749999997,
+          2.4574375,
+          2.4585417499999997,
+          2.4514635,
+          2.45102075
+        ],
+        "iterations_per_sample": 4
+      },
+      "torch": {
+        "median_ms": 6.5248954999999995,
+        "min_ms": 6.5021875,
+        "max_ms": 6.554791499999999,
+        "samples_ms": [
+          6.5350625,
+          6.5021875,
+          6.5121045,
+          6.5248954999999995,
+          6.554791499999999
+        ],
+        "iterations_per_sample": 1
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": false,
+      "solid_layers": 4,
+      "workload": "phase_kernel",
+      "physical_dof": [
+        108,
+        108
+      ],
+      "modes": [
+        2,
+        4
+      ],
+      "max_absolute_errors": {
+        "phase": 2.9749536167855695e-12,
+        "group": 2.4362734052374435e-12,
+        "phase_kernel": 6.920020112488601e-13,
+        "group_kernel": 7.847056338050606e-13
+      },
+      "ratio": 3.416956746283977,
+      "cpp": {
+        "median_ms": 2.492239625,
+        "min_ms": 2.480598875,
+        "max_ms": 2.5072708749999997,
+        "samples_ms": [
+          2.492239625,
+          2.4921875,
+          2.480598875,
+          2.5006718749999997,
+          2.5072708749999997
+        ],
+        "iterations_per_sample": 4
+      },
+      "torch": {
+        "median_ms": 8.515875,
+        "min_ms": 8.402333,
+        "max_ms": 8.600603999999999,
+        "samples_ms": [
+          8.4443955,
+          8.515875,
+          8.559396,
+          8.402333,
+          8.600603999999999
+        ],
+        "iterations_per_sample": 1
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": false,
+      "solid_layers": 4,
+      "workload": "group",
+      "physical_dof": [
+        108,
+        108
+      ],
+      "modes": [
+        2,
+        4
+      ],
+      "max_absolute_errors": {
+        "phase": 2.9749536167855695e-12,
+        "group": 2.4362734052374435e-12,
+        "phase_kernel": 6.920020112488601e-13,
+        "group_kernel": 7.847056338050606e-13
+      },
+      "ratio": 3.115510195382773,
+      "cpp": {
+        "median_ms": 2.4927031250000002,
+        "min_ms": 2.490026,
+        "max_ms": 2.50006775,
+        "samples_ms": [
+          2.498828125,
+          2.4927031250000002,
+          2.50006775,
+          2.4901250000000004,
+          2.490026
+        ],
+        "iterations_per_sample": 4
+      },
+      "torch": {
+        "median_ms": 7.766042,
+        "min_ms": 7.658146,
+        "max_ms": 7.816521,
+        "samples_ms": [
+          7.6941875,
+          7.816521,
+          7.766042,
+          7.658146,
+          7.781375
+        ],
+        "iterations_per_sample": 1
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": false,
+      "solid_layers": 4,
+      "workload": "group_kernel",
+      "physical_dof": [
+        108,
+        108
+      ],
+      "modes": [
+        2,
+        4
+      ],
+      "max_absolute_errors": {
+        "phase": 2.9749536167855695e-12,
+        "group": 2.4362734052374435e-12,
+        "phase_kernel": 6.920020112488601e-13,
+        "group_kernel": 7.847056338050606e-13
+      },
+      "ratio": 3.928415233532934,
+      "cpp": {
+        "median_ms": 2.609375,
+        "min_ms": 2.60259375,
+        "max_ms": 2.6338647500000003,
+        "samples_ms": [
+          2.60858325,
+          2.6338647500000003,
+          2.60967725,
+          2.60259375,
+          2.609375
+        ],
+        "iterations_per_sample": 2
+      },
+      "torch": {
+        "median_ms": 10.2507085,
+        "min_ms": 10.2306875,
+        "max_ms": 10.365604000000001,
+        "samples_ms": [
+          10.31375,
+          10.249729,
+          10.2507085,
+          10.365604000000001,
+          10.2306875
+        ],
+        "iterations_per_sample": 1
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": true,
+      "solid_layers": 4,
+      "workload": "forward",
+      "physical_dof": [
+        108,
+        108
+      ],
+      "modes": [
+        12,
+        12
+      ],
+      "max_absolute_errors": {
+        "phase": 6.415912080602444e-12,
+        "group": 3.859937916523349e-12,
+        "phase_kernel": 6.069145186415881e-12,
+        "group_kernel": 6.730171975277699e-12
+      },
+      "ratio": 0.6721971342839876,
+      "cpp": {
+        "median_ms": 10.1357915,
+        "min_ms": 10.0796455,
+        "max_ms": 10.1493125,
+        "samples_ms": [
+          10.1357915,
+          10.1493125,
+          10.0796455,
+          10.146875,
+          10.093124999999999
+        ],
+        "iterations_per_sample": 1
+      },
+      "torch": {
+        "median_ms": 6.81325,
+        "min_ms": 6.779375,
+        "max_ms": 6.818396,
+        "samples_ms": [
+          6.7883335,
+          6.81325,
+          6.818396,
+          6.779375,
+          6.816771
+        ],
+        "iterations_per_sample": 1
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": true,
+      "solid_layers": 4,
+      "workload": "phase_kernel",
+      "physical_dof": [
+        108,
+        108
+      ],
+      "modes": [
+        12,
+        12
+      ],
+      "max_absolute_errors": {
+        "phase": 6.415912080602444e-12,
+        "group": 3.859937916523349e-12,
+        "phase_kernel": 6.069145186415881e-12,
+        "group_kernel": 6.730171975277699e-12
+      },
+      "ratio": 1.0816692919186028,
+      "cpp": {
+        "median_ms": 10.1815625,
+        "min_ms": 10.15975,
+        "max_ms": 10.2083955,
+        "samples_ms": [
+          10.15975,
+          10.1815625,
+          10.1650835,
+          10.189541499999999,
+          10.2083955
+        ],
+        "iterations_per_sample": 1
+      },
+      "torch": {
+        "median_ms": 11.0130835,
+        "min_ms": 10.934312499999999,
+        "max_ms": 11.221229,
+        "samples_ms": [
+          10.934312499999999,
+          11.0130835,
+          10.956562499999999,
+          11.0424795,
+          11.221229
+        ],
+        "iterations_per_sample": 1
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": true,
+      "solid_layers": 4,
+      "workload": "group",
+      "physical_dof": [
+        108,
+        108
+      ],
+      "modes": [
+        12,
+        12
+      ],
+      "max_absolute_errors": {
+        "phase": 6.415912080602444e-12,
+        "group": 3.859937916523349e-12,
+        "phase_kernel": 6.069145186415881e-12,
+        "group_kernel": 6.730171975277699e-12
+      },
+      "ratio": 1.4130272593385982,
+      "cpp": {
+        "median_ms": 10.2905835,
+        "min_ms": 10.2126875,
+        "max_ms": 10.5750205,
+        "samples_ms": [
+          10.5750205,
+          10.2701875,
+          10.2126875,
+          10.2905835,
+          10.302604
+        ],
+        "iterations_per_sample": 1
+      },
+      "torch": {
+        "median_ms": 14.540875,
+        "min_ms": 14.523479,
+        "max_ms": 14.759896,
+        "samples_ms": [
+          14.540875,
+          14.528042,
+          14.630832999999999,
+          14.523479,
+          14.759896
+        ],
+        "iterations_per_sample": 1
+      }
+    },
+    {
+      "wave": "rayl",
+      "attenuation": true,
+      "solid_layers": 4,
+      "workload": "group_kernel",
+      "physical_dof": [
+        108,
+        108
+      ],
+      "modes": [
+        12,
+        12
+      ],
+      "max_absolute_errors": {
+        "phase": 6.415912080602444e-12,
+        "group": 3.859937916523349e-12,
+        "phase_kernel": 6.069145186415881e-12,
+        "group_kernel": 6.730171975277699e-12
+      },
+      "ratio": 2.8760721320147917,
+      "cpp": {
+        "median_ms": 10.426771,
+        "min_ms": 10.411229500000001,
+        "max_ms": 10.4633125,
+        "samples_ms": [
+          10.415895999999998,
+          10.4633125,
+          10.411229500000001,
+          10.4301045,
+          10.426771
+        ],
+        "iterations_per_sample": 1
+      },
+      "torch": {
+        "median_ms": 29.9881455,
+        "min_ms": 29.675021,
+        "max_ms": 30.0055415,
+        "samples_ms": [
+          29.991646,
+          29.675021,
+          29.8491665,
+          29.9881455,
+          30.0055415
+        ],
+        "iterations_per_sample": 1
+      }
+    }
+  ]
+}

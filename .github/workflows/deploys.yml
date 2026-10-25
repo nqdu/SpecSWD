@@ -1,61 +1,146 @@
-name: Build and Deploy Docs
+name: Test and Deploy Docs
 
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  OMP_NUM_THREADS: "1"
 
 jobs:
-  deploy:
+  torch-only:
+    name: PyTorch without native extensions (Python ${{ matrix.python }})
     runs-on: ubuntu-latest
-
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python: "3.10"
+            torch: "torch==2.6.0"
+          - python: "3.12"
+            torch: "torch>=2.6"
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Build and install the base wheel
+        run: |
+          python -m pip wheel --no-deps . --wheel-dir "$RUNNER_TEMP/wheels"
+          python -m pip install "$RUNNER_TEMP"/wheels/specd-*.whl
+      - name: Check base imports without loading PyTorch
+        working-directory: ${{ runner.temp }}
+        run: |
+          python - <<'PY'
+          import sys
+          import specd
+          from specd import DispersionTable, constant_q_response
+          assert 'torch' not in sys.modules
+          assert 'specd.lib.libswd' not in sys.modules
+          PY
+      - name: Install CPU PyTorch and test dependencies
+        run: |
+          python -m pip install '${{ matrix.torch }}' --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install pytest
+      - name: Check the installed tensor package outside the checkout
+        working-directory: ${{ runner.temp }}
+        run: |
+          python - <<'PY'
+          import importlib.util
+          from specd.torch import SpecWorkSpace
+          assert importlib.util.find_spec('specd.lib.libswd') is None
+          ws = SpecWorkSpace().initialize('love', [0., 35., 35.], [2.8, 2.8, 3.2],
+                                         vsh=[3.3, 3.3, 5.5], vsv=[3., 3., 5.])
+          ws.compute_egn(.1)[0].real.backward()
+          assert ws.parameters['vsh'].grad is not None
+          PY
+      - name: Test tensor solver and optional imports
+        run: python -m pytest specd/torch/tests -q
 
+  native:
+    name: Native and PyTorch (regular Schur ${{ matrix.regular_schur }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        regular_schur: ["ON", "OFF"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            build-essential \
-            cmake \
-            doxygen \
-            gfortran \
-            libhdf5-dev \
-            liblapack-dev \
-            liblapacke-dev
-
+          sudo apt-get install -y build-essential cmake doxygen gfortran \
+            libhdf5-dev liblapack-dev liblapacke-dev
       - name: Install Eigen 5
         run: |
           wget --quiet https://gitlab.com/libeigen/eigen/-/archive/5.0.0/eigen-5.0.0.tar.gz
           tar -xzf eigen-5.0.0.tar.gz
-
       - name: Install Python dependencies
         run: |
-          pip install pybind11-global
-          pip install sphinx myst-parser sphinx_rtd_theme numpy scipy matplotlib numba h5py
-
-      - name: Build libraries
+          python -m pip install 'torch>=2.6' --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -e '.[torch]' pybind11-global pytest
+          python -m pip install -r misc/requirements-docs.txt
+      - name: Build native libraries
         run: |
           cmake -S . -B build \
-            -DCMAKE_CXX_COMPILER=g++ \
-            -DCMAKE_Fortran_COMPILER=gfortran \
+            -DCXX=g++ -DCC=gcc -DFC=gfortran \
             -DEIGEN_INC="$GITHUB_WORKSPACE/eigen-5.0.0" \
-            -DBUILD_LIBS=ON
+            -DPython3_EXECUTABLE="$(command -v python)" \
+            -Dpybind11_DIR="$(python -m pybind11 --cmakedir)" \
+            -DBUILD_LIBS=ON -DBUILD_TESTS=ON \
+            -DSPECSWD_EGN_DOUBLE=ON \
+            -DSPECSWD_REGULAR_SCHUR=${{ matrix.regular_schur }}
           cmake --build build --parallel 4
-          OMP_NUM_THREADS=4 ctest --test-dir build --output-on-failure
           cmake --install build --component python
+      - name: Test native solvers
+        run: ctest --test-dir build --output-on-failure
+      - name: Verify the native reference is available
+        run: python -c "from specd.lib import libswd; from specd import SpecWorkSpace"
+      - name: Test PyTorch against the native solver
+        run: python -m pytest specd/torch/tests -q
+      - name: Build C++ and Python documentation
+        if: matrix.regular_schur == 'ON'
+        run: |
+          doxygen misc/doxygen/doxygen.cfg
+          python misc/plot_benchmarks.py
+          sphinx-build -W --keep-going -b html misc/source docs
+          mkdir -p docs/cpp
+          cp -R misc/doxygen/html/. docs/cpp/
+      - name: Upload documentation
+        if: matrix.regular_schur == 'ON'
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: docs/
+          if-no-files-found: error
 
-      - name: Build Doxygen C++ API Docs
-        run: doxygen misc/doxygen/doxygen.cfg
-
-      - name: Build Python docs (Sphinx)
-        run: sphinx-apidoc -o misc/source/python ./specd
-
-      - name: Build master docs (Sphinx)
-        run: sphinx-build -b html misc/source docs
-
+  deploy:
+    name: Deploy documentation
+    needs: [torch-only, native]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: documentation
+          path: docs
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs

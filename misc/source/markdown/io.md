@@ -1,5 +1,10 @@
 # NumPy and HDF5 output
 
+This page describes the native NumPy containers and shared file format.
+The [PyTorch backend](pytorch.md#frequency-and-azimuth-sweeps) keeps tensor
+rows in memory and detaches them explicitly when exporting the same
+dispersion schema.
+
 ## Ragged dispersion rows
 
 Each frequency and azimuth can produce a different number of valid modes.

@@ -27,6 +27,7 @@ master_doc = "index"
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 myst_enable_extensions = ["amsmath", "dollarmath"]
+myst_heading_anchors = 3
 autodoc_default_options = {
     "members": True,
     "show-inheritance": True,
