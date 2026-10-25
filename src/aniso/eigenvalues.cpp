@@ -2,13 +2,14 @@
 #include "shared/schur.hpp"
 
 #include <algorithm>
-#include <iostream>
+#include <stdexcept>
+#include <string>
 
 namespace specswd
 {
 
 /**
- * @brief compute Love wave dispersion and eigenfunctions
+ * @brief compute anisotropic surface-wave dispersion and eigenfunctions
  * 
  * @param use_qz if true, save QZ matrix
  */
@@ -45,50 +46,12 @@ compute_egn(bool use_qz)
     Eigen::ArrayX<schur_crealw> k_all(ng*2);
     crmat2 vsr,vsl;
     if(!use_qz) {
-        if(mesh_->nglob_ac == 0 && mesh_->HAS_ATT == false) {
-            Eigen::ArrayX<schur_realw> k_real(ng*2);
-            // elastic case, use hegvd
-            LAPACKE_CMPLX(hegvd) (
-                LAPACK_COL_MAJOR,1,'V','U',ng*2,
-                (LCREALW*)A.data(),ng*2,
-                (LCREALW*)B.data(),ng*2,
-                k_real.data()
-            );
-            k_all = k_real.cast<schur_crealw>();
-        }
-        else {
-            // solid + fluid or att case , use ggev
-            Eigen::ArrayX<schur_crealw> alpha(ng*2),beta(ng*2);
-            LAPACKE_CMPLX(ggev) (
-                LAPACK_COL_MAJOR,'N','N',ng*2,
-                (LCREALW*)A.data(),ng*2,
-                (LCREALW*)B.data(),ng*2,
-                (LCREALW*)alpha.data(),(LCREALW*)beta.data(),
-                nullptr,ng*2,nullptr,ng*2
-            );
-            k_all = (alpha / beta);
-        }
+        // The first companion A is generally non-Hermitian, including for
+        // elastic solids. Use the general pencil solver without eigenvectors.
+        schur_eigenvalues(A,B,k_all,mesh_->nglob_el);
     }
     else {
-        vsr = crmat2::Zero(ng*2,ng*2);
-        vsl = crmat2::Zero(ng*2,ng*2);
-        if(mesh_->nglob_ac == 0 && mesh_->HAS_ATT == false) {
-            // only compute right eigen vector, left eigenvector = right 
-            schur_qz<schur_crealw>(
-                A,B,k_all,vsr.data(),nullptr,
-                Qmat,Zmat,Smat,Spmat,
-                true,false
-            );
-            vsl = vsr;
-        }
-        else {
-                // solid + fluid or att case , use ggev
-            schur_qz<schur_crealw>(
-                A,B,k_all,vsr.data(),vsl.data(),
-                Qmat,Zmat,Smat,Spmat,
-                true,true
-            );
-        }
+        schur_decomposition<schur_crealw>(A,B,k_all,Qmat,Zmat,Smat,Spmat,mesh_->nglob_el);
     }
 
 
@@ -108,6 +71,21 @@ compute_egn(bool use_qz)
     for(int i = 0; i < nc_all; i ++) {
         if(mask[i]) {
             idx0.push_back(i);
+        }
+    }
+
+    // Extract only the physical modes. Keep a separate map from original
+    // Schur diagonals to packed eigenvector columns for phase sorting below.
+    Eigen::VectorXi eigenvector_column;
+    if(use_qz) {
+        const Eigen::ArrayX<lapack_logical> selected = mask.cast<lapack_logical>();
+        Eigen::VectorXi selected_index;
+        const bool need_left = mesh_->nglob_ac!=0 || mesh_->HAS_ATT;
+        schur_eigenvectors(A,B,Qmat,Zmat,selected,vsr,vsl,selected_index,true,need_left);
+        if(!need_left) vsl = vsr;
+        eigenvector_column = Eigen::VectorXi::Constant(nc_all,-1);
+        for(int column=0;column<selected_index.size();++column) {
+            eigenvector_column[selected_index[column]] = column;
         }
     }
 
@@ -134,13 +112,14 @@ compute_egn(bool use_qz)
         egn_r.resize(nc * ng);
         for(int ic = 0; ic < nc; ic ++) {
             int id = idx0[idx[ic]];
+            const int column = eigenvector_column[id];
 
             // normalize 
-            Real sr = vsr(seq(0,ng-1),id).norm();
-            Real sl = vsl(seq(ng,2*ng-1),id).norm();
+            Real sr = vsr(seq(0,ng-1),column).norm();
+            Real sl = vsl(seq(ng,2*ng-1),column).norm();
             for(int i = 0; i < ng; i ++) {
-                egn_r[ic * ng + i] = (Complex)vsr(i,id) / sr;
-                egn_l[ic * ng + i] = (Complex)vsl(i+ng,id) / sl;
+                egn_r[ic * ng + i] = (Complex)vsr(i,column) / sr;
+                egn_l[ic * ng + i] = (Complex)vsl(i+ng,column) / sl;
             }
         }
     }

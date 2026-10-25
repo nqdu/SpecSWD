@@ -6,7 +6,7 @@
 namespace GQTable
 {
     
-constexpr int NGLL = 7, NGRL = 20;
+constexpr int NGLL = 7, NGRL = 30;
 extern std::array<double,NGLL> xgll,wgll;
 extern std::array<double,NGRL> xgrl,wgrl;
 extern std::array<double,NGLL*NGLL> hprimeT,hprime; // hprimeT(i,j) = l'_i(xi_j)

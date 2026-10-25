@@ -1,9 +1,12 @@
-Python API reference
-====================
+Native Python API reference
+===========================
 
-The public Python API uses NumPy arrays throughout. Build and install the
+The native Python API uses NumPy arrays throughout. Build and install the
 ``libswd`` extension before running numerical examples. HDF5 support also
 requires ``h5py``.
+
+For differentiable tensor computations without compiled extensions, see the
+:doc:`torch` and :doc:`../markdown/pytorch`.
 
 Solver workspace
 ----------------

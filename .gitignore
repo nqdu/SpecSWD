@@ -65,6 +65,7 @@ theory/spec/
 build/
 example/paper/*.jpg
 example/paper/*.pdf
+/example/paper/pytorch/
 
 # Logs
 *.log

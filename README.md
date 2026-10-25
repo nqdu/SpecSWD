@@ -31,7 +31,8 @@ The numerical core requires:
 - CMake 3.25 or newer;
 - a C++17 compiler and a Fortran compiler;
 - [Eigen 5](https://eigen.tuxfamily.org/);
-- LAPACK and LAPACKE; and
+- Apple Accelerate on macOS (selected automatically), or LAPACK and LAPACKE
+  on other platforms; and
 - the HDF5 C library and development headers.
 
 Building the Python extension also requires Python, NumPy, and pybind11. The
@@ -64,13 +65,67 @@ cmake -S . -B build \
     -DBUILD_LIBS=ON \
     -DBUILD_TESTS=ON
 cmake --build build --parallel 4
-OMP_NUM_THREADS=4 ctest --test-dir build --output-on-failure
+OMP_NUM_THREADS=1 ctest --test-dir build --output-on-failure
 cmake --install build --component python
 ```
 
 The executables are written to `bin/`. The Python extension is installed into
 `specd/lib/` and can be imported when the repository root is on
 `PYTHONPATH`.
+
+On macOS, CMake defaults to `SPECSWD_USE_ACCELERATE=ON`. The existing solver
+and Eigen LAPACKE calls use a local adapter linked to the system Accelerate
+framework; OpenBLAS/MKL and a separate LAPACKE installation are not needed.
+Compiler and Eigen/HDF5 requirements remain the same.
+
+To select an external backend instead, configure a separate build with:
+
+```bash
+cmake -S . -B build-openblas \
+    -DSPECSWD_USE_ACCELERATE=OFF \
+    -DBLA_VENDOR=OpenBLAS \
+    -DLAPACKE_DIR=/path/to/openblas-prefix \
+    -DEIGEN_INC=/path/to/eigen-5.0.0
+```
+
+With Accelerate disabled, the existing LAPACK/LAPACKE discovery also supports
+other vendors such as MKL through `BLA_VENDOR`. Non-Apple platforms retain
+that discovery by default.
+
+The Accelerate adapter always uses the modern LAPACK interface with 32-bit
+integers. CMake supplies Apple's required `ACCELERATE_NEW_LAPACK` definition;
+there is no legacy interface option. Deployment targets below macOS 13.3 use
+external LAPACK/LAPACKE instead.
+The adapter implements the routines used by this solver: column-major
+eigensolvers, unsorted QZ, selected eigenvectors, and row-major eigenvalues
+without vectors for the Christoffel calculation, plus Eigen's pivoted LU.
+New LAPACKE routines require
+extending the adapter. Eigenproblem formulations and kernel algorithms are
+unchanged by backend selection.
+
+Archived comparisons explicitly labeled "legacy Accelerate" were measured
+before this change and retain their original backend metadata.
+
+Both backends use a default half-space scale of 50 nominal wavelengths.
+The default GRL order is 30 to retain resolution of confined modes at this scale.
+Override it with `SPECSWD_MAX_LAMBDA_HALF_SPACE` for the native solver or
+`SpecWorkSpace(halfspace_wavelengths=...)` for `specd.torch`.
+
+To enable ordinary Schur instead of QZ for nonsingular pencils, configure with
+`-DSPECSWD_REGULAR_SCHUR=ON` (the default). This defines
+`SPECSWD_REGULAR_SCHUR` in C++. The solver computes `C` from `B*C=A` using
+diagonal division, sparse triangular substitution for VTI, or node-local
+3×3 solves for anisotropy. Acoustic blocks use scalar divisions independently
+of the solid components. Component ordering stays unchanged. After ordinary
+Schur, QR recovery preserves the existing unitary `Q/Z/S/Sp` factor format,
+selected eigenvectors and adjoint routines. Real 2×2 blocks are canonicalized
+with small QZ solves. Failed reductions/decompositions or excessive original
+pencil residuals fall back to full QZ. The eigenvalues-only path uses the same
+reduction and GEEV with GGEV fallback; elastic Love retains its symmetric
+definite eigensolver.
+
+See the [four C++/PyTorch comparisons](specd/torch/benchmarks/README.md)
+for current timings with only `OMP_NUM_THREADS=1`.
 
 ## Python quick start
 
@@ -125,6 +180,40 @@ The runtime constitutive model is the direct constant-Q power law. Frequency
 and mixed frequency/model derivatives used by group velocities and group
 kernels are evaluated analytically.
 
+## PyTorch automatic differentiation
+
+The optional [`specd.torch`](specd/torch/README.md) implementation includes
+automatic differentiation of phase and group velocities. Choose dependencies
+when installing:
+
+```bash
+pip install .             # Native Python API, using the CMake modules built above
+pip install ".[torch]"    # Also install the optional PyTorch dependency
+```
+
+The two APIs are imported independently:
+
+```python
+from specd import SpecWorkSpace        # Native backend
+from specd.torch import SpecWorkSpace  # PyTorch backend
+```
+
+The PyTorch implementation is in `specd/torch` and works without compiled
+extensions.
+It supports Love, Rayleigh/Scholte, fully anisotropic media and constant-Q
+attenuation without loading the compiled extensions. Set up its environment
+and run the gradient example with:
+
+```bash
+conda env create -f specd/torch/environment.yml
+conda activate specswd-torch
+python -m specd.torch.example
+```
+
+Generate the paper examples with `OMP_NUM_THREADS=1 python
+example/paper/reproduce_paper_pytorch.py`; figures and numerical data are written
+to `example/paper/pytorch/`.
+
 ## Command-line programs
 
 The three solvers accept logarithmic frequency bounds `f1`, `f2`, and a sample
@@ -152,7 +241,7 @@ paper, together with their reproduction script, are in
 Regenerate the numerical figures from the current solver with:
 
 ```bash
-OMP_NUM_THREADS=4 python example/paper/reproduce_figures.py
+OMP_NUM_THREADS=1 python example/paper/reproduce_figures.py
 ```
 
 The script writes both vector PDF and 300-dpi JPEG files into
@@ -173,11 +262,17 @@ documentation is organized as follows:
   conventions, solver calls, attenuation, eigenfunctions, and kernels.
 - [`misc/source/markdown/io.md`](misc/source/markdown/io.md): NumPy CSR
   containers and the cross-language HDF5 schema.
+- [`misc/source/markdown/pytorch.md`](misc/source/markdown/pytorch.md): optional
+  PyTorch installation, tensor API, and automatic differentiation.
+- [`misc/source/markdown/benchmarks.md`](misc/source/markdown/benchmarks.md):
+  four C++/PyTorch comparisons with the forward-plus-phase-kernel figure.
 - [`src/shared/io.hpp`](src/shared/io.hpp): public C++ IO declarations.
 
 Build the local HTML documentation with:
 
 ```bash
+python -m pip install -r misc/requirements-docs.txt
+python -m pip install -e '.[torch]'
 doxygen misc/doxygen/doxygen.cfg
 sphinx-build -b html misc/source docs
 ```

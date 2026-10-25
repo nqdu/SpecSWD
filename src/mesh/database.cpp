@@ -158,7 +158,7 @@ create_database(Real freq0,Real phi0)
 
     // half space skeleton
     nspec_el_grl = 0; nspec_ac_grl = 0;
-    Real max_lambda_in_bottom = 20;
+    Real max_lambda_in_bottom = 50;
     if(const char *value = std::getenv("SPECSWD_MAX_LAMBDA_HALF_SPACE")) {
         try {
             max_lambda_in_bottom = std::stod(value);

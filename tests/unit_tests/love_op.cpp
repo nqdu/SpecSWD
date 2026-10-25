@@ -45,6 +45,61 @@ std::unique_ptr<specswd::SolverLove> solver_;
     }
 };
 
+TEST_F(LoveOperatorTest, SELECTED_EIGENVECTORS_MATCH_PHASE_ONLY_AND_OPERATOR)
+{
+#ifdef SPECSWD_EGN_DOUBLE
+    const Real tolerance = 1.e-8;
+#else
+    const Real tolerance = 2.e-3;
+#endif
+    for(const bool attenuation : {false,true}) {
+        mesh_->HAS_ATT = attenuation;
+        specswd::SolverLove solver;
+        solver.build(mesh_.get());
+        for(const Real frequency : {0.07,0.2}) {
+            SCOPED_TRACE(::testing::Message()
+                << "attenuation=" << attenuation << ", frequency=" << frequency);
+            mesh_->create_database(frequency,0.);
+            solver.prepare_matrices();
+            solver.compute_egn(false);
+            const auto phase_only = solver.c_phase;
+            solver.compute_egn(true);
+            ASSERT_FALSE(solver.c_phase.empty());
+            ASSERT_EQ(solver.c_phase.size(),phase_only.size());
+            const int n = solver.ndof;
+            ASSERT_EQ(solver.egn.size(),solver.c_phase.size()*n);
+            const Eigen::Map<const Eigen::Matrix<Complex,-1,-1,Eigen::RowMajor>>
+                e(solver.Emat.data(),n,n);
+            const Real omega = 2.*M_PI*mesh_->freq;
+            for(size_t mode=0;mode<solver.c_phase.size();++mode) {
+                const Complex phase = solver.c_phase[mode];
+                EXPECT_NEAR(std::abs(phase-phase_only[mode]),0.,tolerance*std::abs(phase));
+                const Complex k = omega/phase;
+                Eigen::MatrixX<Complex> p = e;
+                for(int i=0;i<n;++i) {
+                    p(i,i) += k*k*solver.Kmat[i]-omega*omega*solver.Mmat[i];
+                }
+                const Eigen::Map<const Eigen::VectorX<Complex>> x(solver.egn.data()+mode*n,n);
+                EXPECT_LT((p*x).norm()/std::max(Real{1.},p.norm()*x.norm()),tolerance)
+                    << "mode=" << mode;
+            }
+            solver.compute_group_vel();
+            ASSERT_EQ(solver.c_group.size(),solver.c_phase.size());
+            for(const auto group : solver.c_group) {
+                EXPECT_TRUE(std::isfinite(group.real()) && std::isfinite(group.imag()));
+            }
+        }
+        // Reuse a populated solver with an empty physical-mode selection.
+        mesh_->PHASE_VELOC_MIN = 1.e6;
+        mesh_->PHASE_VELOC_MAX = 2.e6;
+        solver.compute_egn(true);
+        EXPECT_TRUE(solver.c_phase.empty());
+        EXPECT_TRUE(solver.egn.empty());
+        solver.compute_group_vel();
+        EXPECT_TRUE(solver.c_group.empty());
+    }
+}
+
 static Complex
 compute_results(
     const specswd::SolverLove &solver,
@@ -125,25 +180,34 @@ TEST_F(LoveOperatorTest, CHECK_OP_CORRECTNESS) {
             break;
         }
 
-        std::vector<Complex> N1,N2;
         for(size_t i = 0; i < size; i++) {
             Real orig = param[i];
             Real h = std::abs(orig) * 1e-3;
             if(h == 0.) h = 1e-6;
             param[i] = orig + h;
             solver_->prepare_matrices();
-            N1 = solver_->Kmat;
-            Complex plus = compute_results(
-                *solver_, c_M, c_K, c_E, y, x, c_dwdK, c_dwdE
-            );
+            const auto plus_M = solver_->Mmat;
+            const auto plus_K = solver_->Kmat;
+            const auto plus_E = solver_->Emat;
+            const auto plus_dK = solver_->dwdKmat;
+            const auto plus_dE = solver_->dwdEmat;
             param[i] = orig - h;
             solver_->prepare_matrices();
-            N2 = solver_->Kmat;
-            Complex minus = compute_results(
-                *solver_, c_M, c_K, c_E, y, x, c_dwdK, c_dwdE
-            );
             param[i] = orig;
-            Complex derive = (plus - minus) / (2. * h);
+            // Difference the operators before contracting. Subtracting two
+            // large global contractions loses weak pointwise Q responses.
+            for(size_t j=0;j<plus_M.size();++j) {
+                solver_->Mmat[j] = plus_M[j]-solver_->Mmat[j];
+                solver_->Kmat[j] = plus_K[j]-solver_->Kmat[j];
+                solver_->dwdKmat[j] = plus_dK[j]-solver_->dwdKmat[j];
+            }
+            for(size_t j=0;j<plus_E.size();++j) {
+                solver_->Emat[j] = plus_E[j]-solver_->Emat[j];
+                solver_->dwdEmat[j] = plus_dE[j]-solver_->dwdEmat[j];
+            }
+            Complex derive = compute_results(
+                *solver_, c_M, c_K, c_E, y, x, c_dwdK, c_dwdE
+            ) / (2. * h);
 
             // special consideration for Q
             Complex factor = 1.;
@@ -158,6 +222,7 @@ TEST_F(LoveOperatorTest, CHECK_OP_CORRECTNESS) {
         param = nullptr;
     }
 
+    solver_->prepare_matrices();
     f1_r.setZero(); f1_i.setZero();
     solver_->frechet_op(
         c_M, c_K, c_E,
