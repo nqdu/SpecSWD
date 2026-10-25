@@ -14,7 +14,29 @@ import numpy as np
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPOSITORY_ROOT))
 
-from specd import SpecWorkSpace, THSolver
+def SpecWorkSpace():
+    """Load the native workspace only when a native figure is requested."""
+    from specd import SpecWorkSpace as NativeWorkspace
+    return NativeWorkspace()
+
+
+def THSolver(*args, **kwargs):
+    from specd import THSolver as NativeReference
+    return NativeReference(*args, **kwargs)
+
+
+KERNEL_LABEL = "adjoint"
+SOLVER_LABEL = "SEM"
+REFERENCE_LABEL = "Thomson-Haskell"
+SCHOLTE_P_ROWS = (0, 1, 5)
+LOVE_FREQUENCY_COUNT = 500
+SCHOLTE_FREQUENCY_COUNT = 100
+ANISO_FREQUENCY_COUNT = 50
+ANISO_AZIMUTH_COUNT = 73
+
+
+def record_results(name: str, **arrays: np.ndarray) -> None:
+    """Optional data/validation hook used by the PyTorch reproduction."""
 
 
 OUT = Path(__file__).resolve().parent
@@ -252,6 +274,28 @@ def select_love_modes(model: dict[str, np.ndarray], frequency: float,
     return phase[indices], group[indices], errors[indices], indices
 
 
+def love_mode_numbers(model: dict[str, np.ndarray], frequency: float,
+                      phase: np.ndarray) -> np.ndarray:
+    """Recover the two-layer Love branch index without packing rejected roots.
+
+    The dispersion equation gives theta = n*pi + atan(L2*r/(L1*p)).
+    Its integer n is preserved even when another branch fails the residual
+    filter at this frequency.
+    """
+    def factor(q):
+        return (1.+1j/q)*frequency**(2./np.pi*np.arctan(1./q))
+
+    rho1, rho2 = model['rho'][[0, 2]]
+    n1 = rho1*model['vsh'][0]**2*factor(model['Qn'][0])
+    n2 = rho2*model['vsh'][2]**2*factor(model['Qn'][2])
+    l1 = rho1*model['vsv'][0]**2*factor(model['Ql'][0])
+    l2 = rho2*model['vsv'][2]**2*factor(model['Ql'][2])
+    p = np.sqrt((rho1*phase**2-n1)/l1)
+    r = np.sqrt((n2-rho2*phase**2)/l2)
+    theta = 2.*np.pi*frequency*35.*p/phase
+    return np.rint(((theta-np.arctan(l2*r/(l1*p)))/np.pi).real).astype(int)
+
+
 def exact_love_group(c: complex, frequency: float,
                      model: dict[str, np.ndarray]) -> complex:
     if not (np.isfinite(c.real) and np.isfinite(c.imag)):
@@ -266,7 +310,7 @@ def exact_love_group(c: complex, frequency: float,
 def love_figures() -> None:
     model = love_model()
     # example/love/run.sh: model.txt 0.01 1 500, with 19 plotted modes.
-    frequencies = logarithmic_frequencies(0.01, 1.0, 500)
+    frequencies = logarithmic_frequencies(0.01, 1.0, LOVE_FREQUENCY_COUNT)
     nmode = 19
     shape = (nmode, frequencies.size)
     phase = np.full(shape, np.nan+1j*np.nan)
@@ -287,12 +331,16 @@ def love_figures() -> None:
         current_phase, current_group, current_error, raw_indices = (
             select_love_modes(model, frequency, raw_phase, raw_group)
         )
-        count = min(nmode, current_phase.size)
-        phase[:count, jf] = current_phase[:count]
-        group[:count, jf] = current_group[:count]
-        phase_error[:count, jf] = current_error[:count]
-        for mode in range(count):
-            raw_mode = int(raw_indices[mode])
+        mode_numbers = love_mode_numbers(model, frequency, current_phase)
+        for position, mode in enumerate(mode_numbers):
+            if mode < 0 or mode >= nmode:
+                continue
+            if np.isfinite(phase_error[mode, jf]) and phase_error[mode, jf] <= current_error[position]:
+                continue
+            phase[mode, jf] = current_phase[position]
+            group[mode, jf] = current_group[position]
+            phase_error[mode, jf] = current_error[position]
+            raw_mode = int(raw_indices[position])
             phase_kernel, _ = ws.get_phase_kl(raw_mode)
             group_kernel, _ = ws.get_group_kl(raw_mode)
             for parameter, (_, row) in enumerate(parameter_rows):
@@ -304,32 +352,37 @@ def love_figures() -> None:
                         group_kernel[row, list(nodes)]
                     )
             analytical_group[mode, jf] = exact_love_group(
-                current_phase[mode], frequency, model
+                current_phase[position], frequency, model
             )
             for parameter, (name, _) in enumerate(parameter_rows):
                 for layer in range(2):
                     dc_dm, du_dm = analytical_love_derivatives(
-                        current_phase[mode], frequency, model, name, layer
+                        current_phase[position], frequency, model, name, layer
                     )
                     analytical_phase_derivative[parameter, layer, mode, jf] = dc_dm
                     analytical_group_derivative[parameter, layer, mode, jf] = du_dm
 
+    record_results("love", frequencies=frequencies, phase=phase, group=group,
+                   phase_error=phase_error, analytical_group=analytical_group,
+                   phase_kernels=adj_phase, group_kernels=adj_group,
+                   analytical_phase_kernels=analytical_phase_derivative,
+                   analytical_group_kernels=analytical_group_derivative)
     cmap = plt.get_cmap("viridis", nmode)
     fig, axes = plt.subplots(2, 2, figsize=(9.0, 7.0), sharex=True,
                              constrained_layout=True)
     for mode in range(nmode):
         color = cmap(mode)
         valid = np.isfinite(phase[mode].real)
-        axes[0, 0].plot(frequencies[valid], phase[mode, valid].real, color=color)
+        axes[0, 0].plot(frequencies, phase[mode].real, color=color)
         axes[0, 1].scatter(frequencies[valid], phase_error[mode, valid],
                            color=color, s=6)
-        axes[1, 0].plot(frequencies[valid], group[mode, valid].real, color=color)
+        axes[1, 0].plot(frequencies, group[mode].real, color=color)
         valid_group = valid & np.isfinite(analytical_group[mode].real)
         axes[1, 0].scatter(frequencies[valid_group],
                            analytical_group[mode, valid_group].real,
                            color="k", s=5)
-        axes[1, 1].plot(frequencies[valid_group],
-                        1.0/propagation_inverse_q(group[mode, valid_group]), color=color)
+        axes[1, 1].plot(frequencies,
+                        1.0/propagation_inverse_q(group[mode]), color=color)
         axes[1, 1].scatter(frequencies[valid_group],
                            (1.0/propagation_inverse_q(
                                analytical_group[mode, valid_group])),
@@ -377,7 +430,7 @@ def love_figures() -> None:
                 ax.set_ylabel(rf"$\partial {quantity}/\partial {symbol}$")
                 ax.set_title(f"({chr(97+panel)})", loc="left")
             fig.supxlabel("Frequency (Hz)")
-            axes[0, 0].plot([], [], color="0.35", label="adjoint")
+            axes[0, 0].plot([], [], color="0.35", label=KERNEL_LABEL)
             axes[0, 0].scatter([], [], color="k", s=8,
                                label="analytical")
             axes[0, 0].legend()
@@ -419,7 +472,7 @@ def make_scholte(model: dict[str, np.ndarray]) -> SpecWorkSpace:
 def scholte_figures() -> None:
     model = scholte_model()
     # example/scholte/step0_database.py uses this 100-point grid.
-    frequencies = logarithmic_frequencies(0.01, 0.5, 100)
+    frequencies = logarithmic_frequencies(0.01, 0.5, SCHOLTE_FREQUENCY_COUNT)
     periods = 1.0/frequencies
     nmode = 6
     sem_phase = np.full((nmode, frequencies.size), np.nan)
@@ -452,10 +505,10 @@ def scholte_figures() -> None:
             group_kernel = ws.get_group_kl(0)
             for layer, nodes in enumerate(layer_nodes):
                 sem_derivative[0, 0, layer, jf] = np.sum(
-                    phase_kernel[[0, 1, 5]][:, list(nodes)]
+                    phase_kernel[list(SCHOLTE_P_ROWS)][:, list(nodes)]
                 )
                 sem_derivative[1, 0, layer, jf] = np.sum(
-                    group_kernel[[0, 1, 5]][:, list(nodes)]
+                    group_kernel[list(SCHOLTE_P_ROWS)][:, list(nodes)]
                 )
                 sem_derivative[0, 1, layer, jf] = np.sum(
                     phase_kernel[2, list(nodes)]
@@ -496,6 +549,9 @@ def scholte_figures() -> None:
                 output[0][1]-output[1][1]
             )/(2*epsilon*value)
 
+    record_results("scholte", frequencies=frequencies, phase=sem_phase,
+                   group=sem_group, reference_phase=th_phase, reference_group=th_group,
+                   kernels=sem_derivative, reference_kernels=fd_derivative)
     cmap = plt.get_cmap("viridis", nmode)
     fig, axes = plt.subplots(1, 2, figsize=(9.2, 4.0), sharex=True,
                              constrained_layout=True)
@@ -514,8 +570,9 @@ def scholte_figures() -> None:
         ax.set_ylabel(ylabel)
         ax.set_title(f"({chr(97+panel)})", loc="left")
     fig.supxlabel("Frequency (Hz)")
-    axes[0].plot([], [], color="0.35", label="SEM")
-    axes[0].scatter([], [], color="k", s=8, label="Thomson-Haskell")
+    axes[0].plot([], [], color="0.35", label=SOLVER_LABEL)
+    if REFERENCE_LABEL:
+        axes[0].scatter([], [], color="k", s=8, label=REFERENCE_LABEL)
     axes[0].legend()
     scalar = plt.cm.ScalarMappable(norm=plt.Normalize(0, nmode-1), cmap=cmap)
     fig.colorbar(scalar, ax=axes, label="mode", shrink=0.7)
@@ -584,12 +641,12 @@ def scholte_figures() -> None:
                 sem_values = normalize_layer(sem_values)
                 fd_values = normalize_layer(fd_values)
                 ax.plot(frequencies, sem_values + layer, color="m",
-                        label="SEM" if layer == 3 else None)
+                        label=SOLVER_LABEL if layer == 3 else None)
                 valid = np.isfinite(fd_values)
                 sample = np.flatnonzero(valid)[::3]
                 ax.scatter(frequencies[sample], fd_values[sample] + layer,
                            color="k", s=5,
-                           label="centered difference" if layer == 3 else None)
+                           label="centered difference" if layer == 3 and REFERENCE_LABEL else None)
             ax.set_title(f"({chr(97+parameter)})", loc="left")
             ax.set_yticks(np.arange(4))
             ax.set_yticklabels([
@@ -722,7 +779,7 @@ def stepped_profile(values: np.ndarray,
 
 def orthorhombic_figures() -> np.ndarray:
     model = orthorhombic_model()
-    frequencies = np.linspace(0.01, 0.5, 50)
+    frequencies = np.linspace(0.01, 0.5, ANISO_FREQUENCY_COUNT)
     elastic = make_aniso(model, False)
     elastic_spectrum = collect_aniso_spectrum(elastic, frequencies, 0.0)
     body = body_velocities(model, 0.0)
@@ -765,7 +822,7 @@ def orthorhombic_figures() -> np.ndarray:
     fig.supylabel("Velocity (km/s)")
     save_figure(fig, "ortho_egn_4direc")
 
-    azimuths = np.linspace(0.0, 360.0, 73)
+    azimuths = np.linspace(0.0, 360.0, ANISO_AZIMUTH_COUNT)
     selected_frequencies = (0.05, 0.1, 0.2)
     phase_az = np.zeros((3, azimuths.size))
     radial_az = np.zeros_like(phase_az)
