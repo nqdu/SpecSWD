@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <utility>
 
 namespace specswd {
 
@@ -35,8 +36,8 @@ compute_egn(bool use_qz)
     Eigen::ArrayX<schur_crealw> k_all(ng);
 
     // eigenfunctions
-    crmat2 vsr_c;
-    rmat2 vsr_r;
+    crmat2 vsr_c,S_c,Sp_c;
+    rmat2 vsr_r,S_r,Sp_r;
 
     // handle each case
     if(! mesh_->HAS_ATT) {
@@ -57,12 +58,10 @@ compute_egn(bool use_qz)
             );
         }
         else {
-            vsr_r = rmat2::Zero(ng,ng);
-            schur_qz<schur_realw>(
-                A,B,k2_all,vsr_r.data(),nullptr,
-                Qmat,Zmat,Smat,Spmat,
-                true,false
-            );  
+            schur_decomposition<schur_realw>(
+                A,B,k2_all,Qmat,Zmat,Smat,Spmat
+            );
+            S_r = std::move(A); Sp_r = std::move(B);
         }
         k_all = k2_all.sqrt();
     }
@@ -84,12 +83,10 @@ compute_egn(bool use_qz)
         }
         else {
             crmat2 B = crmat2(K.cast<schur_crealw>().asDiagonal());
-            vsr_c = crmat2::Zero(ng,ng);
-            schur_qz<schur_crealw>(
-                A,B,k_all,vsr_c.data(),nullptr,
-                Qmat,Zmat,Smat,Spmat,
-                true,false
+            schur_decomposition<schur_crealw>(
+                A,B,k_all,Qmat,Zmat,Smat,Spmat
             );
+            S_c = std::move(A); Sp_c = std::move(B);
         }
         k_all = k_all.sqrt();
     }
@@ -111,6 +108,26 @@ compute_egn(bool use_qz)
         }
     }
     int nc = idx0.size();
+
+    Eigen::VectorXi eigenvector_column;
+    if(use_qz) {
+        const Eigen::ArrayX<lapack_logical> selected = mask.cast<lapack_logical>();
+        Eigen::VectorXi selected_index;
+        if(mesh_->HAS_ATT) {
+            crmat2 unused_left;
+            schur_eigenvectors(S_c,Sp_c,Qmat,Zmat,selected,
+                               vsr_c,unused_left,selected_index,true,false);
+        }
+        else {
+            rmat2 unused_left;
+            schur_eigenvectors(S_r,Sp_r,Qmat,Zmat,selected,
+                               vsr_r,unused_left,selected_index,true,false);
+        }
+        eigenvector_column = Eigen::VectorXi::Constant(ng,-1);
+        for(int column=0;column<selected_index.size();++column) {
+            eigenvector_column[selected_index[column]] = column;
+        }
+    }
 
     // sort to ascending order
     std::vector<int> idx(nc);
@@ -135,8 +152,9 @@ compute_egn(bool use_qz)
         egn.resize(nc*ng);
         for(int ic = 0; ic < nc; ic ++) {
             int id = idx0[idx[ic]];
+            const int column = eigenvector_column[id];
             for(int i = 0; i < ng; i ++) {
-                Complex val = mesh_->HAS_ATT ? vsr_c(i,id) : vsr_r(i,id);
+                Complex val = mesh_->HAS_ATT ? vsr_c(i,column) : vsr_r(i,column);
                 egn[ic * ng + i] = val;
             }
         }
@@ -188,8 +206,8 @@ compute_egn(
     // eigenvalues computed
     Eigen::ArrayX<schur_crealw> c_all;
     Eigen::ArrayX<schur_crealw> k_all(ng);
-    crmat2 vsr_c,vsl_c;
-    rmat2 vsr_r,vsl_r;
+    crmat2 vsr_c,vsl_c,S_c,Sp_c;
+    rmat2 vsr_r,vsl_r,S_r,Sp_r;
 
     if(! mesh_->HAS_ATT) {
         // solve this system
@@ -199,23 +217,13 @@ compute_egn(
 
         // compute eigenvalues/vectors
         if(!use_qz) { // only compute phase velocities
-            Eigen::ArrayX<schur_realw> ki(ng),beta(ng);
-            LAPACKE_REAL(ggev)(
-                LAPACK_COL_MAJOR,'N','N',ng,A.data(),ng,B.data(),ng,
-                k2_all.data(),ki.data(),beta.data(),nullptr,ng,
-                nullptr,ng
-            );
-            
-            k2_all = k2_all / beta;
+            schur_eigenvalues(A,B,k2_all);
         }
         else {
-            vsr_r = rmat2::Zero(ng,ng);
-            vsl_r = rmat2::Zero(ng,ng);
-            schur_qz<schur_realw> (
-                A,B,k2_all,vsr_r.data(),vsl_r.data(),
-                Qmat,Zmat,Smat,Spmat,
-                true,true
+            schur_decomposition<schur_realw> (
+                A,B,k2_all,Qmat,Zmat,Smat,Spmat
             );
+            S_r = std::move(A); Sp_r = std::move(B);
         }
         //eigenvalue
         k_all = k2_all.cast<schur_crealw>().sqrt();
@@ -227,23 +235,13 @@ compute_egn(
 
         // compute eigenvalues/vectors
         if(!use_qz) { // only compute phase velocities
-            Eigen::ArrayX<schur_crealw> beta(ng);
-            LAPACKE_CMPLX(ggev)(
-                LAPACK_COL_MAJOR,'N','N',ng,(LCREALW*)A.data(),
-                ng,(LCREALW*)B.data(),ng,
-                (LCREALW*)k_all.data(),(LCREALW*)beta.data(),
-                nullptr,ng,nullptr,ng
-            );
-            k_all = k_all / beta;
+            schur_eigenvalues(A,B,k_all);
         }
         else {
-            vsr_c = crmat2::Zero(ng,ng);
-            vsl_c = crmat2::Zero(ng,ng);
-            schur_qz<schur_crealw> (
-                A,B,k_all,vsr_c.data(),vsl_c.data(),
-                Qmat,Zmat,Smat,Spmat,
-                true,true
+            schur_decomposition<schur_crealw> (
+                A,B,k_all,Qmat,Zmat,Smat,Spmat
             );
+            S_c = std::move(A); Sp_c = std::move(B);
         }
         k_all = k_all.sqrt();
     }
@@ -262,6 +260,24 @@ compute_egn(
     for(int i = 0; i < nc_all; i ++) {
         if(mask[i]) {
             idx0.push_back(i);
+        }
+    }
+
+    Eigen::VectorXi eigenvector_column;
+    if(use_qz) {
+        const Eigen::ArrayX<lapack_logical> selected = mask.cast<lapack_logical>();
+        Eigen::VectorXi selected_index;
+        if(mesh_->HAS_ATT) {
+            schur_eigenvectors(S_c,Sp_c,Qmat,Zmat,selected,
+                               vsr_c,vsl_c,selected_index,true,true);
+        }
+        else {
+            schur_eigenvectors(S_r,Sp_r,Qmat,Zmat,selected,
+                               vsr_r,vsl_r,selected_index,true,true);
+        }
+        eigenvector_column = Eigen::VectorXi::Constant(ng,-1);
+        for(int column=0;column<selected_index.size();++column) {
+            eigenvector_column[selected_index[column]] = column;
         }
     }
 
@@ -289,10 +305,11 @@ compute_egn(
         egn_l.resize(nc * ng); egn_r.resize(nc*ng);
         for(int ic = 0; ic < nc; ic ++) {
             int id = idx0[idx[ic]];
+            const int column = eigenvector_column[id];
             Complex val_r , val_l;
             for(int i = 0; i < ng; i ++) {
-                val_r = mesh_->HAS_ATT ? vsr_c(i,id) : vsr_r(i,id);
-                val_l = mesh_->HAS_ATT ? vsl_c(i,id) : vsl_r(i,id);
+                val_r = mesh_->HAS_ATT ? vsr_c(i,column) : vsr_r(i,column);
+                val_l = mesh_->HAS_ATT ? vsl_c(i,column) : vsl_r(i,column);
                 egn_r[ic*ng+i] = val_r;
                 egn_l[ic*ng+i] = val_l;
             }

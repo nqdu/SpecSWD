@@ -534,13 +534,13 @@ TEST_F(AnisoOperatorTest, COUPLED_ACOUSTIC_GROUP_KERNEL_MATCHES_DIFFERENCE)
             const size_t local = ispec*GQTable::NGLL+igll;
             const size_t output = iel*GQTable::NGLL+igll;
             const Real qinv = 1./original_quality[local];
-            analytic_q_velocity -= ar[2*mesh_->ibool.size()+output]*qinv;
-            analytic_q_attenuation -= aq[2*mesh_->ibool.size()+output]*qinv;
+            analytic_q_velocity += ar[2*mesh_->ibool.size()+output]*qinv;
+            analytic_q_attenuation += aq[2*mesh_->ibool.size()+output]*qinv;
         }
     }
     auto group_at_quality_scale = [&](Real scale) {
         for(size_t i = 0; i < original_quality.size(); ++i) {
-            mesh_->xQk_ac[i] = original_quality[i]*scale;
+            mesh_->xQk_ac[i] = original_quality[i]/scale;
         }
         solver_->prepare_matrices();
         solver_->compute_egn(true);
@@ -556,13 +556,17 @@ TEST_F(AnisoOperatorTest, COUPLED_ACOUSTIC_GROUP_KERNEL_MATCHES_DIFFERENCE)
                 +std::sin(phi)*solver_->c_group_y[mode])
             *mesh_->SCALE_VELOCITY;
     };
-    const Complex quality_plus = group_at_quality_scale(1.+hk);
-    const Complex quality_minus = group_at_quality_scale(1.-hk);
+    // Perturb the kernel's natural inverse-Q parameter. Its weak effect on
+    // real velocity needs a larger step to avoid eigenvector roundoff; unlike
+    // Q scaling, this does not add reciprocal-parameter truncation error.
+    const Real hq = 0.1;
+    const Complex quality_plus = group_at_quality_scale(1.+hq);
+    const Complex quality_minus = group_at_quality_scale(1.-hq);
     mesh_->xQk_ac = original_quality;
-    const Complex finite_quality = (quality_plus-quality_minus)/(2.*hk);
+    const Complex finite_quality = (quality_plus-quality_minus)/(2.*hq);
     const Real finite_quality_attenuation =
         (propagation_qinv(quality_plus)-propagation_qinv(quality_minus))
-        /(2.*hk);
+        /(2.*hq);
     EXPECT_NEAR(
         analytic_q_velocity,finite_quality.real(),
         derivative_tolerance

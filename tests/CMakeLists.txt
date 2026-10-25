@@ -1,7 +1,11 @@
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
 set(UNIT_TESTS
     love_op
     rayl_op
     att_aniso
+    aniso_eigenvalues
+    schur
     gqtable
 )
 

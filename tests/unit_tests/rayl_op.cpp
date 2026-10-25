@@ -118,6 +118,63 @@ TEST(RayleighAssemblyTest, HOMOGENEOUS_HALFSPACE_MATCHES_RAYLEIGH_ROOT) {
     EXPECT_EQ(computed_imag,0.);
 }
 
+TEST_F(RayleighOperatorTest, SELECTED_EIGENVECTORS_MATCH_PHASE_ONLY_AND_OPERATOR)
+{
+#ifdef SPECSWD_EGN_DOUBLE
+    const Real tolerance = 1.e-8;
+#else
+    const Real tolerance = 2.e-3;
+#endif
+    for(const bool attenuation : {false,true}) {
+        mesh_->HAS_ATT = attenuation;
+        specswd::SolverRayl solver;
+        solver.build(mesh_.get());
+        for(const Real frequency : {0.07,0.2}) {
+            SCOPED_TRACE(::testing::Message()
+                << "attenuation=" << attenuation << ", frequency=" << frequency);
+            mesh_->create_database(frequency,0.);
+            solver.prepare_matrices();
+            solver.compute_egn(false);
+            const auto phase_only = solver.c_phase;
+            solver.compute_egn(true);
+            ASSERT_FALSE(solver.c_phase.empty());
+            ASSERT_EQ(solver.c_phase.size(),phase_only.size());
+            const int n = solver.ndof;
+            ASSERT_EQ(solver.egn_r.size(),solver.c_phase.size()*n);
+            ASSERT_EQ(solver.egn_l.size(),solver.c_phase.size()*n);
+            const Eigen::Map<const Eigen::Matrix<Complex,-1,-1,Eigen::RowMajor>>
+                e(solver.Emat.data(),n,n),stiffness(solver.Kmat.data(),n,n);
+            const Real omega = 2.*M_PI*mesh_->freq;
+            for(size_t mode=0;mode<solver.c_phase.size();++mode) {
+                const Complex phase = solver.c_phase[mode];
+                EXPECT_NEAR(std::abs(phase-phase_only[mode]),0.,tolerance*std::abs(phase));
+                const Complex k = omega/phase;
+                Eigen::MatrixX<Complex> p = e+k*k*stiffness;
+                for(int i=0;i<n;++i) p(i,i) -= omega*omega*solver.Mmat[i];
+                const Eigen::Map<const Eigen::VectorX<Complex>>
+                    x(solver.egn_r.data()+mode*n,n),y(solver.egn_l.data()+mode*n,n);
+                EXPECT_LT((p*x).norm()/std::max(Real{1.},p.norm()*x.norm()),tolerance)
+                    << "right mode=" << mode;
+                EXPECT_LT((p.adjoint()*y).norm()/std::max(Real{1.},p.norm()*y.norm()),tolerance)
+                    << "left mode=" << mode;
+            }
+            solver.compute_group_vel();
+            ASSERT_EQ(solver.c_group.size(),solver.c_phase.size());
+            for(const auto group : solver.c_group) {
+                EXPECT_TRUE(std::isfinite(group.real()) && std::isfinite(group.imag()));
+            }
+        }
+        mesh_->PHASE_VELOC_MIN = 1.e6;
+        mesh_->PHASE_VELOC_MAX = 2.e6;
+        solver.compute_egn(true);
+        EXPECT_TRUE(solver.c_phase.empty());
+        EXPECT_TRUE(solver.egn_r.empty());
+        EXPECT_TRUE(solver.egn_l.empty());
+        solver.compute_group_vel();
+        EXPECT_TRUE(solver.c_group.empty());
+    }
+}
+
 static Complex
 compute_results(
     const specswd::SolverRayl &solver,
@@ -608,15 +665,19 @@ TEST_F(RayleighOperatorTest, ATTENUATING_GROUP_KERNELS_MATCH_MODEL_PERTURBATIONS
             analytic_attenuation +=
                 elastic_quality[row*all_points+i]*log_tangent[i];
         }
-        set_scale(1.+epsilon);
+        // Uniform density scaling multiplies every solid operator equally,
+        // so its exact derivative is zero. A larger step reduces amplified
+        // eigensolver roundoff in this null direction, with no truncation cost.
+        const Real step = row==3 ? 1.e-2 : epsilon;
+        set_scale(1.+step);
         const Complex plus = selected_group();
-        set_scale(1.-epsilon);
+        set_scale(1.-step);
         const Complex minus = selected_group();
         set_scale(1.);
         const Real finite_velocity = (plus.real()-minus.real())
-            /(2.*epsilon)*solid_mesh.SCALE_VELOCITY;
+            /(2.*step)*solid_mesh.SCALE_VELOCITY;
         const Real finite_attenuation =
-            (propagation_qinv(plus)-propagation_qinv(minus))/(2.*epsilon);
+            (propagation_qinv(plus)-propagation_qinv(minus))/(2.*step);
         EXPECT_NEAR(
             analytic_velocity,finite_velocity,
             std::max(

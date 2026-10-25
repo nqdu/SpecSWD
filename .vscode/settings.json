@@ -1,6 +1,7 @@
 {
     "C_Cpp.default.defines": [
-        "EIGEN_USE_LAPACKE"
+        "EIGEN_USE_LAPACKE",
+        "SPECSWD_REGULAR_SCHUR"
     ],
     "files.associations": {
         "core": "cpp",

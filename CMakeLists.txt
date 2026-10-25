@@ -18,9 +18,13 @@ set(EIGEN_INC                 ${EIGEN_INC})
 option(BUILD_LIBS "BUILD_LIBS" OFF)
 option(BUILD_TESTS "BUILD_TESTS" ON)
 option(SPECSWD_EGN_DOUBLE "Use double precision for generalized Schur solves" ON)
+option(SPECSWD_REGULAR_SCHUR "Reduce nonsingular pencils to ordinary Schur, with QZ fallback" ON)
 
 if(SPECSWD_EGN_DOUBLE)
   add_compile_definitions(SPECSWD_EGN_DOUBLE)
+endif()
+if(SPECSWD_REGULAR_SCHUR)
+  add_compile_definitions(SPECSWD_REGULAR_SCHUR)
 endif()
 
 # set default values
